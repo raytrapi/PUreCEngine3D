@@ -1,9 +1,9 @@
-= Código de buenas prácticas
+# Código de buenas prácticas
 
 Existen tantas formas de programar como desarrolladores o personas, y aunque todas son válidas cuando nos enfrentamos a un desarrollo con un grupo de personas es recomendable definir la reglas que deberán respetarse para que el trabajo se ejecute de la mejor forma posible.
 Estas pautas que deberán ser consensuadas por todos, tienen como objetivo dos cuestiones importantes, la buena relación dentro del grupo y el desarrollo de un código limpio.
 
-== Convivencia
+## Convivencia
 
 Este apartado viene a completar el “Código de Conducta convenido para Contribuyentes” en el que se indican las pautas generales en relación al trato con terceras personas y el cómo se deberá relacionar el equipo integrante en el proyecto cuando lo haga en nombre de este.
 
@@ -14,24 +14,24 @@ L@s integrantes con mayor capacidad deberán respetar y comprender el trabajo de
 
 Tod@s l@s integrantes tendrán la capacidad de aportar mejoras o críticas constructivas ante el desarrollo o ideas de l@s demás. L@s integrantes a l@s que se le han realizado dichas mejoras o críticas deberán tomarlas como algo positivo, debiendo analizarlas y responderlas, bien con las correcciones o adaptaciones sugeridas o bien con una justificación razonada al respecto. El resto de integrantes podrán ayudar en la resolución de estas situaciones.
 
-== Desarrollo del código
+## Desarrollo del código
 
 A continuación se definirán una serie de reglas y convenciones que pretenden unificar el código desarrollado por el equipo. Estas reglas han sido tomadas en base a la experiencia y algunas no tienen una justificación más allá de una mejor comprensión del código.
 
-=== Reglas
+### Reglas
 
 Deberemos tener presente que el desarrollo de nuestro proyecto podrá sufrir modificaciones tanto a nivel de funcionamiento como a nivel de requerimientos del sistema en el que se encuentre instalado. Todo esto implica que nuestro proyecto deberá disponer de un mantenimiento que le dé continuidad en el tiempo.
 
 Teniendo en cuenta lo anterior, deberemos anticiparnos a estos cambios revisando y analizando todos los métodos que utilicemos para intentar mejorarlo tanto en el funcionamiento del mismo como en su documentación . 
 La regla de oro es que nada es de nadie y todo es de todos, por lo que si se encuentra algo dentro del proyecto que está mal, o que se puede mejorar, no debemos dudar en realizar la mejora. Esta situación será reportada al autor o autora para que pueda tomar consciencia del cambio.
 
-=== Convenciones
+### Convenciones
 
 Cada lenguaje de programación puede disponer de convenios propios que de alguna manera redefinen los aquí indicados. En ese caso se decidirá entre todos los y las componentes del equipo el convenio a seguir.
 
 A continuación se definen los convenios generales que regirán el desarrollo del código.
 
-==== Indentación
+#### Indentación
 
 Por norma general se utilizarán 3 espacios como elemento de indentación. En la mayoría de los lenguajes, excluyendo a Python y Cobol, la indentación es simplemente un mecanismo de mejora visual por lo que no afecta al resultado final del código.
 
@@ -39,7 +39,7 @@ Existe un debate relacionado en el uso de tabuladores o espacios, sin embargo lo
 
 Las publicaciones en producción deberán tener los códigos minimizados para evitar una sobrecarga en los clientes.
 
-==== Llaves
+#### Llaves
 
 Las llaves se colocarán en la misma línea de cada instrucción. De igual forma, las sentencias que pertenecen a la misma instrucción deberán colocarse en la misma línea que el cierre de la sentencia (por ejemplo en la palabra clave “else”).
 Toda secuencia condicional deberá estar encerrada entre llaves.
@@ -58,33 +58,33 @@ if (condicion){
    sentencia;
 }
 
-==== Ámbito de las variables
+#### Ámbito de las variables
 
 Se deberá huir de utilizar variables globales. En el caso de que se requiera el uso de este tipo de variables se deberá crear un único objeto estático que almacene estos valores.
 
-==== Formato de nombres de variables y métodos
+#### Formato de nombres de variables y métodos
 
 Se utilizará camelCase para el nombre de variables y métodos.
 Se utilizará PascalCase pare el nombre de clases.
 Se utilizará MAYÚSCULAS para las constantes.
 Se utilizará snake_case para los nombre de tablas de base de datos.
 
-===== Variable
+##### Variable
 
 Aunque en términos generales la recomendación es utilizar el inglés para definir el nombre de las variables, para este proyecto utilizaremos variables en español. 
 
 Como regla general el nombre de cada variable deberá identificar claramente su objetivo y evitando utilizar nombre cortos. Se permite el uso de nombres cortos para variables de propósito general como “i”, “j”, “k” utilizados para iteraciones o “x”, y”, “z” para almacenar coordenadas.
 
-===== Métodos (funciones y procedimientos)
+##### Métodos (funciones y procedimientos)
 
 Al igual que las variables, las funciones tendrán nombres que informen de la acción que realizarán.
 Al representar acciones seguramente contendrán un verbo. Este deberá escribirse en infinitivo. (leer, escribir, guardar, ….)
 
-===== Clases
+##### Clases
 
 Las propiedades de las clases deberán ser privadas o protegidas (dependiendo de la necesidad) en ningún caso se deberán utilizar variables públicas.
 
-====== Observadores y modificadores
+###### Observadores y modificadores
 
 Siguiendo el convenio de utilizar nombre de variables y métodos en español, se mantendrá la misma norma para los observadores (getter) y los modificadores (setter). Estos métodos serán los únicos puntos de acceso a los valores de las propiedades de la clase.
 
@@ -127,65 +127,65 @@ class Persona{
    public bool esCasado(); //get casado
    public void ponerCasado(bool casado); //poner casado
 }
-==== Condicionales
+#### Condicionales
 
-===== Minimizar condiciones
+##### Minimizar condiciones
 
-Se deberán realizar condicionales con el menor coste posible, por ello es preferible utilizar el operador igual “=” al operador distinto “!=”. Lo anterior implica que el nombre de las variables deberán ser adecuadas para facilitar la comprensión del código.
+Se deberán realizar condicionales con el menor coste posible, por ello es preferible utilizar el operador igual “#” al operador distinto “!#”. Lo anterior implica que el nombre de las variables deberán ser adecuadas para facilitar la comprensión del código.
 
 **Correcto**
 
-bool pendiente=true;
+bool pendiente#true;
 while (pendiente){
    // Hacer algo
 }
 
 **Mejorable**
 
-bool terminado=false;
+bool terminado#false;
 while (!teminado){ // Aquí hacemos una operación de negado adicional.
    // Hacer algo
 }
 
-===== Paréntesis
+##### Paréntesis
 
 Todas las condiciones deberán estar encerradas entre paréntesis.
 
 **Correcto**
 
-bool pendiente=true;
+bool pendiente#true;
 if (pendiente){
    // Hacer algo
 }
 
 **Incorrecto**
 
-bool pendiente=true;
+bool pendiente#true;
 if pendiente{
    // Hacer algo
 }
 
-===== Operador ternario
+##### Operador ternario
 
 El operador ternario se deberá dividir en varias líneas.
 
 **Correcto** 
 
-var valor = (a === b)
+var valor # (a ### b)
    ? 1
    : 2;
 
 **Incorrecto**
 
-var valor = (a === b) ? 1 : 2;
+var valor # (a ### b) ? 1 : 2;
 
-===== Utilizar condiciones descriptivas
+##### Utilizar condiciones descriptivas
 
 Cualquier condición no trivial debe asignarse a una variable o función con nombre descriptivo.
 
 **Correcto**
 
-bool claveValida = (clave.length >= 4 && clave==”yo”);
+bool claveValida # (clave.length ># 4 && clave##”yo”);
 
 if (claveValida) {
    // Procesar
@@ -193,34 +193,34 @@ if (claveValida) {
 
 **Incorrecto**
 
-if (clave.length >= 4 && clave==”yo”) {
+if (clave.length ># 4 && clave##”yo”) {
    // Procesar
 }
 
-==== Comentarios
+#### Comentarios
 
 Para una buena comprensión futura del código se deberán realizar aquellos comentarios necesarios. No se deberá abusar de estos comentarios por lo que solo se indicará aquella información o lógica que no se extraiga propiamente de la lectura del código.
 Si hemos escogido nombres adecuados y auto-descriptivos, no será necesario añadir un comentario adicional si este no aporta algún matiz que no se pueda extraer del propio nombre.
 
-===== Comentarios de documentación
+##### Comentarios de documentación
 
 Existen herramientas que extraen información del código y son capaces de generar una documentación adecuada. Aunque estas herramientas suelen tener una sintaxis concreta la mayoría siguen estos principios básicos. 
 Los comentarios para documentación empiezan con «/**»
 
-====== Clases
+###### Clases
 
 /**
 *  Descripción de la clase
 *  @author Nombre del autor de la clase
 */
 
-====== Variable
+###### Variable
 
 /**
 * Descripción de la variable
 */
 
-====== Método
+###### Método
 
 /**
 * Descripción del método
@@ -247,7 +247,7 @@ Los comentarios para documentación empiezan con «/**»
 * @deprecated Esto marca que el método ya está depreciado.
 */
 
-====== Tareas
+###### Tareas
 
 Se podrán definir tareas para realizar en el futuro, para esto se usarán marcas especiales que la mayoría de los IDE interpretan y muestran en una zona concreta del editor.
 
@@ -260,7 +260,7 @@ Se podrán crear nuevas etiquetas pero por defecto se usarán la habituales:
 
 /*TODO Comentario que aparecerá marcada como algo para hacer */
 
-=== Sentido común
+### Sentido común
 
 Sigue el sentido común y no hagas dos veces lo mismo. Esta norma se puede aplicar tanto a nivel de reutilización de código como a nivel de integración.
 
@@ -268,15 +268,15 @@ Si se encuentra o se desarrolla código que puede ser potencialmente reutilizabl
 
 El uso de módulos o funcionalidades externas está permitido, pero se deberá documentar la idoneidad del mismo justificando el beneficio de su utilización.
 
-=== Códigos pequeños
+### Códigos pequeños
 
 Los métodos o algoritmos deberán estar bien modularizados para permitir su mantenimiento. Un buen método no debería tener más de 60 líneas de código sin contar comentarios ni líneas vacías.
 
-== Control del código
+## Control del código
 
 El control de código es una cuestión vital para el correcto desarrollo del proyecto. En equipos de desarrollo con muchas personas trabajando en paralelo, el control de versiones permite sincronizarse para que todos l@s integrantes trabajen con la misma versión.
 
-=== Commit (Confirmar)
+### Commit (Confirmar)
 
 Intenta hacer ciclos de trabajo cortos. Es preferible hacer muchos commit pequeños que uno con muchos cambios.
 
@@ -284,25 +284,25 @@ Poner un comentario adecuado a una confirmación facilita el entendimiento por l
 
 No mantengas muchas confirmaciones sin la correspondiente subida o inserción en el repositorio.
 
-=== Push (Subir o insertar)
+### Push (Subir o insertar)
 
 Solo se deberán subir códigos funcionales. No tiene porqué corregir el problema para el que hizo el cambio, pero al menos deberá compilar o ejecutar sin errores.
 
 RECUERDA: El control de versiones no es un mecanismo de copia de seguridad. NUNCA subas nada que no esté terminado.
 
-=== Fetch y Pull (Buscar e Incorporar cambios)
+### Fetch y Pull (Buscar e Incorporar cambios)
 
 Antes de modificar un fichero se deberá comprobar si no existe una versión más reciente del mismo. Esto evitará la necesidada de incorporar cambios.
 
 Si nuestra versión modificada difiere de la versión disponible en el repositorio deberemos realizar un trabajo de incorporación de cambios. En la medida de lo posible deberemos mantener los cambios subidos previamente y analizar si nuestros cambios afecta o son afectados por dichos cambios. En caso de duda se deberá comunicar al autor o autora del último cambio para intentar minimizar el impacto de la mezcla.
 
-=== Branches y Tag (Ramas y etiquetas)
+### Branches y Tag (Ramas y etiquetas)
 
 Existirá una rama de desarrolla en la que realizarán todos los trabajos. Habrá un encargado o una encargada (a definir por el grupo) que será el o la responsable de refundir esa rama en la rama principal.
 
 Solo se podrán crear nuevas ramas para realizar trabajos paralelos y consensuado por la mayoría de l@s integrantes del grupo.
 
-== Test
+## Test
 
 Los pruebas o test tiene como objetivo anticiparse a los fallos de nuestros desarrollos. Aunque no siempre es fácil su realización, deberemos intentar generar al menos test unitarios para nuestros métodos. 
 
