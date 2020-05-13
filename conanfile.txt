@@ -1,0 +1,7 @@
+[requires]
+#glfw/3.3@bincrafters/stable
+#glad/0.1.33
+[options]
+[imports]
+[generators]
+cmake
