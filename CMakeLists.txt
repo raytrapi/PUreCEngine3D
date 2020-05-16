@@ -12,12 +12,16 @@ include_directories(
    src
 	${CONAN_INCLUDE}
 ) 
-file(GLOB CODIGO src/*.cpp)
+file(GLOB CODIGO src/*/*.cpp src/*.cpp)
+file(GLOB MOTOR src/Motor/*/*.cpp src/Motor/*.cpp)
+
+file(GLOB MOTORGL src/terceros/*/*.cpp)
+
 if(WIN32)
-	file(GLOB CODIGOWIN src/windows/*.cpp)
-	add_executable(2dMotorGame WIN32 ${CODIGO} ${CODIGOWIN} )
+	file(GLOB CODIGOWIN src/windows/*/*.cpp src/windows/*.cpp)
+	add_executable(2dMotorGame WIN32 ${CODIGO} ${CODIGOWIN} ${MOTOR} ${MOTORGL})
 else()
-	add_executable(2dMotorGame ${CODIGO})
+	add_executable(2dMotorGame ${CODIGO} ${MOTOR} ${MOTORGL})
 endif()
 
 
@@ -26,7 +30,7 @@ if(WIN32)
 	add_definitions(-D_AFXDLL)
 	set(CMAKE_MFC_FLAG 2)
 
-	target_link_libraries( 2dMotorGame OpenGL32.lib)
+	target_link_libraries( 2dMotorGame OpenGL32.lib Glu32.lib)
 elseif(UNIX)
 	
 endif()

@@ -1,5 +1,6 @@
 #include "ventana.h"
-
+#include "terceros/opengl/opengl.h"
+MotorGrafico * Ventana::motorGrafico;
 Ventana::Ventana(const char* ventana, HINSTANCE hInstance, int nComando){
 	nombreVentana = ventana;
     comandoVentana = nComando;
@@ -28,20 +29,33 @@ Ventana::Ventana(const char* ventana, HINSTANCE hInstance, int nComando){
 }
 
 LRESULT Ventana::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
+    LONG    lRet = 1;
+    PAINTSTRUCT    ps;
+    RECT rect;
+    //HDC   ghDC;
+    HGLRC ghRC;
+
     switch (uMsg){
+        case WM_CREATE:
+            //d::cout << "hola" << std::endl;
+            GetClientRect(hwnd, &rect);
+            motorGrafico = new MotorGL();
+            motorGrafico->inicializar(hwnd, rect.right, rect.bottom);
+            
+            OutputDebugStringA("Hemos creado");
+            break;
         case WM_DESTROY:
             PostQuitMessage(0);
             return 0;
 
         case WM_PAINT:{
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hwnd, &ps);
+            //PAINTSTRUCT ps;
+            //HDC hdc = BeginPaint(hwnd, &ps);
+               
 
+            //FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
 
-
-            FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
-
-            EndPaint(hwnd, &ps);
+            //EndPaint(hwnd, &ps);
         }
         return 0;
 
@@ -56,10 +70,15 @@ int Ventana::abrirVentana() {
         return 0;
     }
     ShowWindow(hwnd, comandoVentana);
+    
     MSG msg = { };
     while (GetMessage(&msg, NULL, 0, 0)) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
+
+        motorGrafico->renderizar();
     }
     return 0;
 }
+
+
