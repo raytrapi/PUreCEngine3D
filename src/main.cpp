@@ -11,6 +11,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
     LPSTR     lpCmdLine,
     int       nShowCmd){
     
+   
     Ventana ventana("Prueba", hInstance, nShowCmd);
 
     ventana.abrirVentana();

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+﻿cmake_minimum_required(VERSION 3.0.0)
 
 project(2dMotorGame)
 find_program(conan conan)
@@ -8,29 +8,25 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 
 conan_basic_setup()
 
+add_subdirectory("Motor gráfico")
+
 include_directories(
    src
-	${CONAN_INCLUDE}
-) 
-file(GLOB CODIGO src/*/*.cpp src/*.cpp)
-file(GLOB MOTOR src/Motor/*/*.cpp src/Motor/*.cpp)
+	
 
-file(GLOB MOTORGL src/terceros/*/*.cpp)
+) 
+
+file(GLOB CODIGO src/*/*.cpp src/*.cpp)
+#file(GLOB MOTOR src/Motor/*/*.cpp src/Motor/*.cpp)
+
+#file(GLOB MOTORGL src/terceros/*/*.cpp)
 
 if(WIN32)
 	file(GLOB CODIGOWIN src/windows/*/*.cpp src/windows/*.cpp)
-	add_executable(2dMotorGame WIN32 ${CODIGO} ${CODIGOWIN} ${MOTOR} ${MOTORGL})
+	add_executable(2dMotorGame WIN32 ${CODIGO} ${CODIGOWIN})
 else()
-	add_executable(2dMotorGame ${CODIGO} ${MOTOR} ${MOTORGL})
+	add_executable(2dMotorGame ${CODIGO})
 endif()
 
 
-target_link_libraries( 2dMotorGame  ${CONAN_LIBS})
-if(WIN32)
-	add_definitions(-D_AFXDLL)
-	set(CMAKE_MFC_FLAG 2)
-
-	target_link_libraries( 2dMotorGame OpenGL32.lib Glu32.lib)
-elseif(UNIX)
-	
-endif()
+target_link_libraries( 2dMotorGame  motor_grafico_gl)

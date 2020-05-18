@@ -1,5 +1,5 @@
 #include "ventana.h"
-#include "terceros/opengl/opengl.h"
+
 MotorGrafico * Ventana::motorGrafico;
 Ventana::Ventana(const char* ventana, HINSTANCE hInstance, int nComando){
 	nombreVentana = ventana;
@@ -30,15 +30,19 @@ Ventana::Ventana(const char* ventana, HINSTANCE hInstance, int nComando){
 
 LRESULT Ventana::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
     LONG    lRet = 1;
-    PAINTSTRUCT    ps;
+    //PAINTSTRUCT    ps;
     RECT rect;
     //HDC   ghDC;
-    HGLRC ghRC;
+    //HGLRC ghRC;
 
     switch (uMsg){
         case WM_CREATE:
             //d::cout << "hola" << std::endl;
-            GetClientRect(hwnd, &rect);
+            /*/GetClientRect(hwnd, &rect);
+            utilidades::DLL<MotorGrafico> dllMotorGrafico;
+
+            puntero = dllMotorGrafico.cargarDLL("motor_grafico_gl.dll");
+            motorGrafico = dllMotorGrafico.cargarClase(puntero, "MotorGL");*/
             motorGrafico = new MotorGL();
             motorGrafico->inicializar(hwnd, rect.right, rect.bottom);
             
