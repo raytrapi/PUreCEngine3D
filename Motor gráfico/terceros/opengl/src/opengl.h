@@ -6,10 +6,12 @@
 #include <gl\gl.h>
 #include <gl\glu.h> 
 
-#include "../../../src/Motor.h"
+#include "../../../src/motor.h"
 #include "../../imagenes/imagen.h"
 #include "../../imagenes/png.h"
-class EXPORTAR_MOTOR MotorGL :public MotorGrafico {
+//#include <utilidades.h>
+#include <log.h>
+class  MotorGL:public modulos::graficos::Grafico {
 	private:
 		
 		HDC ghDC;

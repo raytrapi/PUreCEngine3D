@@ -4,7 +4,7 @@ namespace imagenes {
 	Imagen::~Imagen() {
 		if (datos != NULL) { 
 			free(datos);
-		} 
+		}  
 	}
 	int Imagen::cogerLongitud() {
 		return longitud;

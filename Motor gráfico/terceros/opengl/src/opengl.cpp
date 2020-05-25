@@ -4,7 +4,6 @@
 MotorGL::MotorGL() {
     ghDC = NULL;
     ghRC = NULL;
-
     imagen = imagenes::PNG::cargar("h:/desarrollo/motor_videojuegos_2D/recursos/prueba.png");
     
 }
@@ -17,10 +16,11 @@ MotorGL::~MotorGL() {
 
 
 void MotorGL::renderizar() {
+    
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-    glColor3f(0.0f, 0.0f, 1.0f);
-    glRasterPos2d(100,100);
+    glColor3f(0.0f, 1.0f, 0.0f);
+    glRasterPos2d(100,150);
     //glPixelZoom(0.25f, 0.25f);
     //glPixelTransferi(GL_UNPACK_ALIGNMENT, 4);
     /*int ancho = 10;
@@ -103,3 +103,4 @@ BOOL MotorGL::bSetupPixelFormat(HDC hdc) {
     return TRUE;
 }
 //template inline void EXPORTAR_MOTOR MotorGL::inicializar(HWND, double, double);
+REGISTRAR_MOTOR_GRAFICO(MotorGL);

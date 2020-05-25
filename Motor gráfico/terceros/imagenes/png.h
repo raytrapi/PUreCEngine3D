@@ -4,9 +4,9 @@
 #include<png.h>
 #include<malloc.h>
 #include"imagen.h"
-#include"..\..\src\Motor.h"
+#include"../../src/motor.h"
 namespace imagenes {
-	class EXPORTAR_MOTOR PNG {
+	class EXPORTAR_MODULO_GRAFICO PNG {
 		
 		public:
 			static   Imagen * cargar(const char* nombreFichero);

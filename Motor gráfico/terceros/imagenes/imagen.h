@@ -1,9 +1,9 @@
 #ifndef __IMAGEN
 #define __IMAGEN
 #include <malloc.h>
-#include "..\..\src\Motor.h"
+#include "../../src/motor.h"
 namespace imagenes {
-	class EXPORTAR_MOTOR Imagen {
+	class EXPORTAR_MODULO_GRAFICO Imagen {
 		int longitud = 0;
 		int ancho = 0;
 		int alto = 0;

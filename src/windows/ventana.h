@@ -5,9 +5,10 @@
 
 #include <iostream>
 #include <Windows.h>
-#include "..\Motor gráfico\src\Motor.h"
-#include "dll/dll.h"
-#include "..\Motor gráfico\terceros\opengl\src\opengl.h"
+#include "../Motor gráfico/src/motor.h"
+#include "../utilidades/librerias/dll.h"
+//#include "..\Motor gráfico\terceros\opengl\src\opengl.h"
+
 
 
 class Ventana {
@@ -15,8 +16,8 @@ class Ventana {
 		const char* nombreVentana;
 		int comandoVentana;
 		HWND hwnd;
-		static MotorGrafico* motorGrafico;
-		static void* puntero;
+		static modulos::graficos::Grafico* motorGrafico;
+		
 	public: 
 		static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 		//static HDC ghDC;

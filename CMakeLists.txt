@@ -9,14 +9,15 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
 add_subdirectory("Motor gráfico")
+add_subdirectory("utilidades")
 
 include_directories(
    src
-	
-
+   utilidades/librerias
+	utilidades/log
 ) 
 
-file(GLOB CODIGO src/*/*.cpp src/*.cpp)
+file(GLOB CODIGO src/*.cpp )
 #file(GLOB MOTOR src/Motor/*/*.cpp src/Motor/*.cpp)
 
 #file(GLOB MOTORGL src/terceros/*/*.cpp)
@@ -29,4 +30,5 @@ else()
 endif()
 
 
-target_link_libraries( 2dMotorGame  motor_grafico_gl)
+target_link_libraries( 2dMotorGame  motor_grafico utilidades)
+

@@ -1,6 +1,6 @@
 #include "ventana.h"
 
-MotorGrafico * Ventana::motorGrafico;
+modulos::graficos::Grafico * Ventana::motorGrafico;
 Ventana::Ventana(const char* ventana, HINSTANCE hInstance, int nComando){
 	nombreVentana = ventana;
     comandoVentana = nComando;
@@ -34,17 +34,22 @@ LRESULT Ventana::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
     RECT rect;
     //HDC   ghDC;
     //HGLRC ghRC;
-
+    
+    utilidades::Libreria<modulos::graficos::Grafico> dll;
     switch (uMsg){
         case WM_CREATE:
             //d::cout << "hola" << std::endl;
-            /*/GetClientRect(hwnd, &rect);
-            utilidades::DLL<MotorGrafico> dllMotorGrafico;
-
-            puntero = dllMotorGrafico.cargarDLL("motor_grafico_gl.dll");
-            motorGrafico = dllMotorGrafico.cargarClase(puntero, "MotorGL");*/
-            motorGrafico = new MotorGL();
-            motorGrafico->inicializar(hwnd, rect.right, rect.bottom);
+            GetClientRect(hwnd, &rect);
+            //utilidades::DLL<modulos::graficos::Grafico> dllMotorGrafico;
+            //utilidades::DLL<modulos::graficos::Grafico>::cargarDLL("motor_grafico_gl.dll");
+            motorGrafico=(modulos::graficos::Grafico *)dll.crearInstancia("motor_grafico_gl.dll");
+            //utilidades::DLL<int>::cargarDLL("motor_grafico_gl.dll");
+            //motorGrafico = dll->crearInstancia("motor_grafico_gl.dll");
+            ////motorGrafico = dllMotorGrafico.crearInstancia(puntero);/**/
+            ////motorGrafico = new MotorGL();
+            if (motorGrafico) {
+                motorGrafico->inicializar(hwnd, rect.right, rect.bottom);
+            }
             
             OutputDebugStringA("Hemos creado");
             break;
@@ -68,7 +73,7 @@ LRESULT Ventana::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
 }
 
 
-
+ 
 int Ventana::abrirVentana() {
     if (hwnd == NULL) {
         return 0;
@@ -79,8 +84,9 @@ int Ventana::abrirVentana() {
     while (GetMessage(&msg, NULL, 0, 0)) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
-
-        motorGrafico->renderizar();
+        if (motorGrafico) {
+            motorGrafico->renderizar();
+        }
     }
     return 0;
 }
