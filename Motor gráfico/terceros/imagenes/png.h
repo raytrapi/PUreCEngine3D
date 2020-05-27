@@ -4,6 +4,7 @@
 #include<png.h>
 #include<malloc.h>
 #include"imagen.h"
+//#include"../../../src/modulos.h"
 #include"../../src/motor.h"
 namespace imagenes {
 	class EXPORTAR_MODULO_GRAFICO PNG {

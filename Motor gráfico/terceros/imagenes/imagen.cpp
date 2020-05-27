@@ -30,5 +30,5 @@ namespace imagenes {
 	int Imagen::cogerAlto() {
 		return alto;
 	}
-
+	 
 }

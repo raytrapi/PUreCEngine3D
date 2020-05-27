@@ -7,6 +7,7 @@
 #include <Windows.h>
 #include "../Motor gráfico/src/motor.h"
 #include "../utilidades/librerias/dll.h"
+#include "../utilidades/log/log.h"
 //#include "..\Motor gráfico\terceros\opengl\src\opengl.h"
 
 

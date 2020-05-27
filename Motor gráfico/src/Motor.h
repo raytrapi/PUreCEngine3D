@@ -13,28 +13,22 @@
 #endif // WIN32
 
 
+
+#include <modulos.h>
+
 namespace modulos {
 	namespace graficos {
-		class EXPORTAR_MODULO_GRAFICO Grafico {
+		class EXPORTAR_MODULO_GRAFICO Grafico:public Modulo {
 		public:
 			virtual void renderizar() = 0;
-			virtual void inicializar(HWND, double, double) = 0;
-
+			virtual void inicializar(void*, double, double) = 0;
+			Modulo::TIPOS_MODULOS tipo() { return Modulo::GRAFICO; };
+			
 		};
 
 	}
 }
-//template void EXPORTAR_MOTOR MotorGrafico::inicializar(HWND, double, double);
-#define REGISTRAR_MOTOR_GRAFICO(classname) \
-	extern "C" modulos::graficos::Grafico * crearInstancia() {\
-			return (modulos::graficos::Grafico *) new classname();\
-	}\
-	extern "C" void destroy(modulos::graficos::Grafico* p) {\
-	    delete p;\
-	}
-#ifdef _WIN32
-extern "C" __declspec(dllexport) modulos::graficos::Grafico * crearInstancia();
-extern "C" __declspec(dllexport) void destroy(modulos::graficos::Grafico*); 
-#endif
+
+
 
 #endif // 

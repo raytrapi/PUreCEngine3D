@@ -15,7 +15,7 @@ MotorGL::~MotorGL() {
 }
 
 
-void MotorGL::renderizar() {
+void MotorGL::renderizar() { 
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
@@ -43,8 +43,8 @@ void MotorGL::renderizar() {
     SwapBuffers(ghDC);
 }
 
-void MotorGL::inicializar(HWND hwnd, double ancho, double alto) {
-    ghDC = GetDC(hwnd);
+void MotorGL::inicializar(void * hwnd, double ancho, double alto) {
+    ghDC = GetDC((HWND)hwnd);
     if (!bSetupPixelFormat(ghDC))
         PostQuitMessage(0);
 
@@ -87,7 +87,7 @@ BOOL MotorGL::bSetupPixelFormat(HDC hdc) {
     ppfd->cDepthBits = 16; 
     ppfd->cAccumBits = 0;
     ppfd->cStencilBits = 0;
-
+    
     pixelformat = ChoosePixelFormat(hdc, ppfd);
 
     if ((pixelformat = ChoosePixelFormat(hdc, ppfd)) == 0) {
@@ -103,4 +103,4 @@ BOOL MotorGL::bSetupPixelFormat(HDC hdc) {
     return TRUE;
 }
 //template inline void EXPORTAR_MOTOR MotorGL::inicializar(HWND, double, double);
-REGISTRAR_MOTOR_GRAFICO(MotorGL);
+REGISTRAR_MODULO(MotorGL); 

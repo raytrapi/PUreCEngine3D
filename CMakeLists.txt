@@ -8,6 +8,12 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 
 conan_basic_setup()
 
+
+add_library(modulos SHARED src/modulos.cpp)
+set_target_properties(modulos PROPERTIES
+	COMPILE_DEFINITIONS EXPORTAR_MODULO
+    PUBLIC_HEADER src/modulos.h )
+
 add_subdirectory("Motor gráfico")
 add_subdirectory("utilidades")
 

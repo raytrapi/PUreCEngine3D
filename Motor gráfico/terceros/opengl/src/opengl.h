@@ -9,8 +9,10 @@
 #include "../../../src/motor.h"
 #include "../../imagenes/imagen.h"
 #include "../../imagenes/png.h"
+#include "../../src/modulos.h"
 //#include <utilidades.h>
 #include <log.h>
+#include <modulos.h>
 class  MotorGL:public modulos::graficos::Grafico {
 	private:
 		
@@ -22,6 +24,8 @@ class  MotorGL:public modulos::graficos::Grafico {
 		MotorGL();
 		~MotorGL();
 		void renderizar();
-		void inicializar(HWND contexto, double ancho, double alto);
+		void inicializar(void * contexto, double ancho, double alto);
+		char* nombre() { return (char*)"OPEN GL"; };
+		
 };
 #endif // !__MOTORGL

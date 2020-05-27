@@ -35,18 +35,21 @@ LRESULT Ventana::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
     //HDC   ghDC;
     //HGLRC ghRC;
     
-    utilidades::Libreria<modulos::graficos::Grafico> dll;
+    utilidades::Libreria<Modulo> dll;
+    Modulo* m;
     switch (uMsg){
         case WM_CREATE:
             //d::cout << "hola" << std::endl;
             GetClientRect(hwnd, &rect);
-            //utilidades::DLL<modulos::graficos::Grafico> dllMotorGrafico;
-            //utilidades::DLL<modulos::graficos::Grafico>::cargarDLL("motor_grafico_gl.dll");
-            motorGrafico=(modulos::graficos::Grafico *)dll.crearInstancia("motor_grafico_gl.dll");
-            //utilidades::DLL<int>::cargarDLL("motor_grafico_gl.dll");
-            //motorGrafico = dll->crearInstancia("motor_grafico_gl.dll");
-            ////motorGrafico = dllMotorGrafico.crearInstancia(puntero);/**/
-            ////motorGrafico = new MotorGL();
+            //motorGrafico=(modulos::graficos::Grafico *)dll.crearInstancia("motor_grafico_gl.dll");
+            m = dll.crearInstancia("motor_grafico_gl.dll");
+            utiles::Log::escribir(std::to_string(m->tipo()));
+            utiles::Log::escribir(std::string(m->nombre()));
+            if (m->tipo() == Modulo::GRAFICO) {
+                motorGrafico = (modulos::graficos::Grafico *)m;
+            }else {
+                delete m;
+            }
             if (motorGrafico) {
                 motorGrafico->inicializar(hwnd, rect.right, rect.bottom);
             }
