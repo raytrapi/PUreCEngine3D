@@ -11,7 +11,10 @@ int WINAPI WinMain(HINSTANCE hInstance,
     LPSTR     lpCmdLine,
     int       nShowCmd){
     
-    Ventana ventana("Prueba", hInstance, nShowCmd);
+    //CargaDLL librerias = CargaDLL();
+    //CargaDLL::cargar("./modulos", ".");/**/
+
+    Ventana ventana("Prueba", hInstance, nShowCmd, 800,600,100,100);
 
     ventana.abrirVentana();
 

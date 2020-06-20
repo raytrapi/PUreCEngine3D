@@ -5,10 +5,16 @@
 
 #include <iostream>
 #include <Windows.h>
-#include "../Motor gráfico/src/motor.h"
+#include "../graphics/src/motor.h"
+#include "../cartucho/src/cartucho.h"
+#include "../utilidades/timer/timer.h"
 #include "../utilidades/librerias/dll.h"
 #include "../utilidades/log/log.h"
+#include "../cargaDLLs.h"
 //#include "..\Motor gráfico\terceros\opengl\src\opengl.h"
+#include "../utilidades/nucleo/screen.h"
+#include "../graphics/src/renderable/renderable.h"
+#include <vector>
 
 
 
@@ -24,7 +30,7 @@ class Ventana {
 		//static HDC ghDC;
 
 	public: 
-		Ventana(const char*, HINSTANCE, int);
+		Ventana(const char* ventana, HINSTANCE hInstance, int nComando, int ancho, int alto, int x, int y);
 		int abrirVentana();
 		//static BOOL bSetupPixelFormat(HDC);
 

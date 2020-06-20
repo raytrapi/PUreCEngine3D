@@ -7,21 +7,34 @@
 #include <stdlib.h>
 #include <dlfcn.h>
 #endif
+#include <map>
+#include <string>
 namespace utilidades {
+	struct cmp_str {
+		bool operator()(char const* a, char const* b) const {
+			return std::strcmp(a, b) < 0;
+		}
+	};
+
 	template<class T>
 	class Libreria {
 	#ifdef _WIN32
 		typedef T* (WINAPI* PCTOR) ();
 	#endif
+		static std::map<std::string, void*> libreriasCargadas;
+		void* cookieRaiz = NULL;
 	public:
 		Libreria() {};
+		Libreria(char *);
 		~Libreria();
-		 void* cargarDLL(const char* fichero);
+		 void* cargar(const char* fichero);
+		 bool descargar(const char* fichero);
 		 T* cargarClase(void*& hDLL, const char* clase);
 		 T* crearInstancia(const char* fichero);
+		 static T* cogerModulo(Modulo::TIPOS_MODULOS);
 	};
-
 }
+
 #include <dll.cpp>
 
 

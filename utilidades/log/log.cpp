@@ -2,6 +2,16 @@
 #include "log.h"
 
 namespace utiles {
+	Log::Log(){
+		fichero.open(nombreFichero, std::ios::app | std::ios::out);
+		salida=new std::ostream(&fichero);
+	}
+	Log::~Log() {
+		delete salida;
+		if (fichero.is_open()) {
+			fichero.close();
+		}
+	}
 	void Log::escribir(std::string &s) {
 		escribir(s, utiles::Log::NIVEL::INF);
 	} 
@@ -27,6 +37,25 @@ namespace utiles {
 
 		os << std::put_time(std::localtime(&ahora), "%F %R%z") << "\t" << __TIME__ << "\t" << s << std::endl;
 		fb.close();
+	}
+	Log& Log::escribir() {
+		if (instancia == NULL) {
+			instancia = new Log();
+		}
+		return (*instancia);
+	}
+	/**/
+	/*template<class T>
+	std::ostream& Log::operator<<(T const& texto) {
+		*(instancia->salida) << texto << std::endl;
+		return instancia->salida;
 	}/**/
-	std::string Log::nombreFichero = "log.log";
+	template<class T>
+	Log&  operator<<(Log& h,T const& texto) {
+		h.salida << texto<<std::endl;
+		return *this;
+	}
+ 	std::string Log::nombreFichero = "log.log";
+	Log* Log::instancia=NULL;
+	
 } /* namespace utiles */
