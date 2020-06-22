@@ -1,6 +1,7 @@
 #include "ventana.h"
 
-modulos::graficos::Grafico * Ventana::motorGrafico;
+modulos::graficos::Grafico * Ventana::motorGrafico=NULL;
+modulos::Cartucho* Ventana::cartucho=NULL;
 Ventana::Ventana(const char* ventana, HINSTANCE hInstance, int nComando,int ancho, int alto, int x, int y){
 	nombreVentana = ventana;
     comandoVentana = nComando;
@@ -56,18 +57,22 @@ LRESULT Ventana::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
                 delete m;
             }/**/
             if (CargaDLL::hayModulos(Modulo::GRAFICO)>0) {
-                CargaDLL::cogerModulo<modulos::graficos::Grafico>(Modulo::GRAFICO)->inicializar(hwnd, rect.right, rect.bottom);
+                motorGrafico = CargaDLL::cogerModulo<modulos::graficos::Grafico>(Modulo::GRAFICO);
+                motorGrafico->inicializar(hwnd, rect.right, rect.bottom);
             }/**/
             if (CargaDLL::hayModulos(Modulo::CARTUCHO) > 0) {
-                CargaDLL::cogerModulo<modulos::Cartucho>(Modulo::CARTUCHO)->start();
+                cartucho =CargaDLL::cogerModulo<modulos::Cartucho>(Modulo::CARTUCHO, "MINECRAFT");
+                cartucho->start();
             }/**/
-            if (motorGrafico) {
+            /*if (motorGrafico) {
                 motorGrafico->inicializar(hwnd, rect.right, rect.bottom);
             }/**/
             
             OutputDebugStringA("Hemos creado");
             break;
         case WM_DESTROY:
+            cartucho = NULL;
+            motorGrafico = NULL;
             CargaDLL::descargar();
             PostQuitMessage(0);
             return 0;
@@ -82,6 +87,15 @@ LRESULT Ventana::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
             //EndPaint(hwnd, &ps);
         }
         return 0;
+        break;
+        case WM_KEYDOWN: 
+            switch (wParam) {
+                case 0x41:
+                    Modulo::setInputKeyDown(Key::A);
+            }
+
+            break;
+        
 
     }
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -102,19 +116,21 @@ int Ventana::abrirVentana() {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
         std::vector<void*> *renderizables=NULL;
-        if (CargaDLL::hayModulos(Modulo::CARTUCHO) > 0) {
-            modulos::Cartucho* juego = CargaDLL::cogerModulo<modulos::Cartucho>(Modulo::CARTUCHO);
-            juego->update();
+        if (cartucho) {
+            
+            cartucho->update();
         }
-        if (CargaDLL::hayModulos(Modulo::GRAFICO) > 0) {
-            CargaDLL::cogerModulo<modulos::graficos::Grafico>(Modulo::GRAFICO)->renderizar(Renderable::getRenderable());
+        if (motorGrafico) {
+            motorGrafico->renderizar(Renderable::getRenderable());
         }/**/
         /*if (motorGrafico) {
             motorGrafico->renderizar();
         }/**/
         
     }
-    
+    if (CargaDLL::hayModulos(Modulo::CARTUCHO) > 0) {
+        CargaDLL::cogerModulo<modulos::Cartucho>(Modulo::CARTUCHO)->destroy();
+    }
     return 0;
 }
 

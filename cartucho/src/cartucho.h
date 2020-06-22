@@ -26,6 +26,7 @@ namespace modulos {
 	public:
 		virtual void update() {};
 		virtual void start() {};
+		virtual void destroy() {};
 		~Cartucho() {
 			
 			for (int i = 0; i < renders.size();i++) {

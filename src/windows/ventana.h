@@ -24,6 +24,7 @@ class Ventana {
 		int comandoVentana;
 		HWND hwnd;
 		static modulos::graficos::Grafico* motorGrafico;
+		static modulos::Cartucho* cartucho;
 		
 	public: 
 		static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

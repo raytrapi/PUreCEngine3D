@@ -7,7 +7,7 @@ include_directories(
 
 
 file(GLOB GRAFICO src/motor.cpp terceros/imagenes/*.cpp)
-file(GLOB RENDERIZABLES src/renderable/object.cpp src/renderable/pixel.cpp src/renderable/img.cpp src/renderable/renderable.cpp )
+file(GLOB RENDERIZABLES src/renderable/object.cpp src/renderable/pixel.cpp src/renderable/img.cpp src/renderable/renderable.cpp src/renderable/cube.cpp )
 # terceros/*/*.cpp
 add_library(motor_grafico SHARED  ${RENDERIZABLES} ${GRAFICO})
 target_link_libraries( motor_grafico  ${CONAN_LIBS} utilidades modulos)

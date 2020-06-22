@@ -91,8 +91,10 @@ int CargaDLL::hayModulos(Modulo::TIPOS_MODULOS tipo){
 
 
 Libreria::Libreria(const char* fichero, const char* nombre, std::filesystem::file_time_type ftime) {
-	this->fichero = fichero;
-	this->nombre = nombre;
+	this->fichero = new char[strlen(fichero)+1];
+	strcpy(this->fichero, fichero);
+	this->nombre = new char[strlen(nombre) + 1];
+	strcpy(this->nombre, nombre);;
 	this->ultimaActualizacion = ftime;
 }
 Libreria::~Libreria() {
@@ -101,6 +103,8 @@ Libreria::~Libreria() {
 		dll.descargar(fichero);
 		activo = false;
 	}
+	delete[]this->fichero;
+	delete[]this->nombre;
 }
 
 bool Libreria::esActivo() {
@@ -143,6 +147,10 @@ void* Libreria::cogerInstancia(char*raiz) {
 }
 const char* Libreria::cogerNombreFichero() {
 	return fichero;
+}
+
+const char* Libreria::cogerNombre() {
+	return nombre;
 }
 
 std::map<Modulo::TIPOS_MODULOS, std::vector<Libreria*>*> CargaDLL::libreriasDisponibles;

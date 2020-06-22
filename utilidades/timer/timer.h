@@ -5,6 +5,7 @@
 #include "../utiles/utilidades.h"
  class EXPORTAR_UTILIDADES Time {
 	static std::chrono::system_clock::time_point anterior;
+	
 	static double delta;
 	
 public:

@@ -2,7 +2,8 @@
 
 void Time::update(){
 	std::chrono::system_clock::time_point actual = std::chrono::system_clock::now();
-	delta = std::chrono::duration_cast<std::chrono::milliseconds>(actual - anterior).count();
+	double milisegundos = std::chrono::duration_cast<std::chrono::milliseconds>(actual - anterior).count();
+	delta = milisegundos>0?milisegundos/1000:0;
 	anterior = actual;
 }
 void Time::reset() {

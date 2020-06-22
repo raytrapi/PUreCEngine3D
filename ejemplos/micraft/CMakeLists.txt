@@ -7,22 +7,22 @@ include_directories(
 ) 
 file(GLOB CODIGO src/*.cpp src/*/*.cpp)
 # terceros/*/*.cpp
-add_library(hormiguero SHARED ${CODIGO})
-target_link_libraries(hormiguero cartucho modulos motor_grafico)
+add_library(minecraft SHARED ${CODIGO})
+target_link_libraries(minecraft cartucho modulos motor_grafico)
 
 if(WIN32)
 	
 	add_custom_command(
-    TARGET hormiguero POST_BUILD
+    TARGET minecraft POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${CMAKE_BINARY_DIR}/bin/hormiguero.dll
+        ${CMAKE_BINARY_DIR}/bin/minecraft.dll
         ${CMAKE_BINARY_DIR}/bin/modulos
    )
 elseif(UNIX)
 	add_custom_command(
-    TARGET hormiguero POST_BUILD
+    TARGET minecraft POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${CMAKE_BINARY_DIR}/bin/hormiguero.so
+        ${CMAKE_BINARY_DIR}/bin/minecraft.so
         ${CMAKE_BINARY_DIR}/bin/modulos
     )
 endif()

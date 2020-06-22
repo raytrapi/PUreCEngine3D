@@ -13,6 +13,7 @@
 #include "../../src/modulos.h"
 #include "../src/renderable/object.h"
 #include "../src/renderable/pixel.h"
+#include "../src/renderable/cube.h"
 #include "../src/renderable/img.h"
 //#include <utilidades.h>
 #include <log.h>
@@ -36,6 +37,7 @@ class  MotorGL:public modulos::graficos::Grafico {
 		void renderizar(void *);
 		void inicializar(void * contexto, double ancho, double alto);
 		char* nombre() { return (char*)"OPEN GL"; };
+		void renderizarCubo(renderable::Cube *);
 		
 };
 #endif // !__MOTORGL

@@ -48,16 +48,16 @@ namespace renderable{
 	}
 	float* Img::getData(){
 		if (data == 0) {
-			data = new float[(alto * ancho * bPixel)];
-			int pos = 0;
+			long tamaño = (alto * ancho * bPixel);
+			data = new float[tamaño];
+			long pos = 0;
 			for (int y = 0; y < alto; y++) {
-				for (int x = 0; x < alto; x++) {
+				for (int x = 0; x < ancho; x++) {
 					Pixel *p = imagen[x][y];
-					data[pos] = p->R();
-					data[pos+1] = p->G();
-					data[pos+2] = p->B();
-					data[pos+3] = p->A();
-					pos += 4;
+					data[pos++] = p->R();
+					data[pos++] = p->G();
+					data[pos++] = p->B();
+					data[pos++] = p->A();
 				}
 			}
 		}

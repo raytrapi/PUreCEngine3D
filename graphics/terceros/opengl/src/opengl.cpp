@@ -19,16 +19,102 @@ void MotorGL::renderizar(void* rederizables) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
     renderable::Img* img;
     for (int i = 0; i < objetos.size(); i++) {
-        switch (objetos[i]->getType()){
+        switch (objetos[i]->getType()) {
         case renderable::Object::TYPE::IMG:
             img = (renderable::Img*)objetos[i];
-            glDrawPixels(img->getWidth(), img->getHeight(), GL_RGBA, GL_FLOAT, img->getData());
+            glEnable(GL_TEXTURE_2D);
+            //glDrawPixels(img->getWidth(), img->getHeight(), GL_RGBA, GL_FLOAT, img->getData());
+            GLuint imgTextura;
+            glGenTextures(1, &imgTextura);
+            glBindTexture(GL_TEXTURE_2D, imgTextura);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);//Probar con GL_LINEAR
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);//Probar con GL_LINEAR
+            /*if (repetir) {
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            }/**/
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->getWidth(), img->getHeight(), 0, GL_RGBA, GL_FLOAT, img->getData());
+            glBegin(GL_QUADS);
+            glTexCoord2f(0, 1);//Arriba - Izquierda
+            glVertex2f(0, alto);
+            glTexCoord2f(1, 1);//Arriba - Derecha
+            glVertex2f(img->getWidth(), img->getHeight());
+            glTexCoord2f(1, 0);//Abajo - Derecha
+            glVertex2f(img->getWidth(), 0);
+            glTexCoord2f(0, 0);//Abajo - Izquierda
+            glVertex2f(0, 0);
+
+            glEnd();
+            glDisable(GL_TEXTURE_2D);
+            break;
+        case renderable::Object::TYPE::CUBE:
+            renderizarCubo((renderable::Cube *)objetos[i]);
+            
             break;
         default:
             break;
         }
     }
     SwapBuffers(ghDC);
+}
+void MotorGL::renderizarCubo(renderable::Cube * cubo) {
+    float mitadLado = cubo->l * 0.5;
+    float cX = cubo->pX * 0.5;
+    float cY = cubo->pY * 0.5;
+    float cZ = cubo->pZ;
+
+    glPushMatrix();
+    glTranslatef(cX, cY, 0.0f);
+    glRotatef(cubo->rX, 1, 0, 0);
+    glTranslatef(-cX , -cY, 0.0f);
+    glTranslatef(cX, cY, 0.0f);
+    glRotatef(cubo->rY, 0, 1, 0);
+    glTranslatef(-cX, -cY, 0.0f);
+    glTranslatef(cX, cY, 0.0f);
+    glRotatef(cubo->rZ, 0, 0, 1);
+    glTranslatef(-cX, -cY, 0.0f);
+
+    glColor3f(0.0f, 0.0f, 1.0f);
+    //float ancho = 200;
+    static const GLfloat vertices[] = {
+        //Frente
+        cX - mitadLado,cY + mitadLado,cZ + mitadLado,
+        cX + mitadLado,cY + mitadLado,cZ + mitadLado,
+        cX + mitadLado,cY - mitadLado,cZ + mitadLado,
+        cX - mitadLado,cY - mitadLado,cZ + mitadLado,
+        //Trasera
+        cX - mitadLado,cY + mitadLado,cZ - mitadLado,
+        cX + mitadLado,cY + mitadLado,cZ - mitadLado,
+        cX + mitadLado,cY - mitadLado,cZ - mitadLado,
+        cX + mitadLado,cY - mitadLado,cZ - mitadLado,
+        //Izquierda
+        cX - mitadLado,cY + mitadLado,cZ + mitadLado,
+        cX - mitadLado,cY + mitadLado,cZ - mitadLado,
+        cX - mitadLado,cY - mitadLado,cZ - mitadLado,
+        cX - mitadLado,cY - mitadLado,cZ + mitadLado,
+        //Derecha
+        cX + mitadLado,cY + mitadLado,cZ + mitadLado,
+        cX + mitadLado,cY + mitadLado,cZ - mitadLado,
+        cX + mitadLado,cY - mitadLado,cZ - mitadLado,
+        cX + mitadLado,cY - mitadLado,cZ + mitadLado,
+        //Arriba
+        cX - mitadLado,cY + mitadLado,cZ + mitadLado,
+        cX - mitadLado,cY + mitadLado,cZ - mitadLado,
+        cX + mitadLado,cY + mitadLado,cZ - mitadLado,
+        cX + mitadLado,cY + mitadLado,cZ + mitadLado,
+        //Abajo
+        cX - mitadLado,cY - mitadLado,cZ + mitadLado,
+        cX - mitadLado,cY - mitadLado,cZ - mitadLado,
+        cX + mitadLado,cY - mitadLado,cZ - mitadLado,
+        cX + mitadLado,cY - mitadLado,cZ + mitadLado,
+
+    };
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, vertices);
+    glDrawArrays(GL_QUADS, 0, 24);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glPopMatrix();
 }
 void MotorGL::renderizar() { 
     
@@ -296,17 +382,18 @@ void MotorGL::inicializar(void * hwnd, double ancho, double alto) {
     //gluOrtho2D(0, ancho, alto, 0);
     //glMatrixMode(GL_PROJECTION);
     //glLoadIdentity(); 
-    glOrtho(0, ancho, alto,0 , 0,500);
+    glOrtho(0, ancho, alto,0, -1000,1000);
     //gluPerspective(60.f, fAspecto, 0, 1000);
     //glFrustum(0, ancho, alto, 0, 0, 1000);
-    
+    //gluLookAt(ancho*0.5f, alto*.5f, 0, ancho * 0.5f, alto * .5f, 0, 0, 0,1.0f);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();/**/
-    //gluLookAt(0, 0, 0, 0, 0, 100.0f, 0, 1.0f, 0);
+    //
     //glTranslatef(0.0f, 0.0f, 0.0f);
     //glEnable(GL_TEXTURE_2D);
     /*glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
+    
 }
 BOOL MotorGL::bSetupPixelFormat(HDC hdc) {
     PIXELFORMATDESCRIPTOR pfd, * ppfd;
