@@ -31,7 +31,7 @@ namespace utilidades {
 		 bool descargar(const char* fichero);
 		 T* cargarClase(void*& hDLL, const char* clase);
 		 T* crearInstancia(const char* fichero);
-		 static T* cogerModulo(Modulo::TIPOS_MODULOS);
+		 static T* cogerModulo(Module::MODULES_TYPE);
 	};
 }
 

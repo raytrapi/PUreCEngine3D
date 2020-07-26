@@ -16,3 +16,4 @@ void Renderable::clearRenderable(){
 }
 
 std::vector<renderable::Object*> Renderable::renderizables;
+modules::graphics::Graphic* Renderable::motorGrafico=0;

@@ -5,14 +5,17 @@
 
 #include <iostream>
 #include <Windows.h>
-#include "../graphics/src/motor.h"
-#include "../cartucho/src/cartucho.h"
+#include <Windowsx.h>
+#include "../modules/graphic/motor.h"
+#include "../modules/tape/tape.h"
 #include "../utilidades/timer/timer.h"
 #include "../utilidades/librerias/dll.h"
 #include "../utilidades/log/log.h"
 #include "../cargaDLLs.h"
 //#include "..\Motor gráfico\terceros\opengl\src\opengl.h"
-#include "../utilidades/nucleo/screen.h"
+#include "../utilidades/global/screen.h"
+#include "../utilidades/global/input.h"
+#include "../utilidades/global/mouse.h"
 #include "../graphics/src/renderable/renderable.h"
 #include <vector>
 
@@ -23,8 +26,10 @@ class Ventana {
 		const char* nombreVentana;
 		int comandoVentana;
 		HWND hwnd;
-		static modulos::graficos::Grafico* motorGrafico;
-		static modulos::Cartucho* cartucho;
+		static modules::graphics::Graphic* motorGrafico;
+		static modules::Tape* cartucho;
+		static Input input;
+		static Mouse mouse;
 		
 	public: 
 		static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);

@@ -4,7 +4,7 @@
 MotorGL::MotorGL() { 
     ghDC = NULL;
     ghRC = NULL;
-    imagen = imagenes::PNG::cargar("h:/desarrollo/motor_videojuegos_2D/recursos/prueba.png");
+    //imagen = imagenes::PNG::cargar("h:/desarrollo/motor_videojuegos_2D/recursos/prueba.png");
     
 }
 
@@ -16,36 +16,32 @@ MotorGL::~MotorGL() {
 
 void MotorGL::renderizar(void* rederizables) {
     std::vector<renderable::Object*> objetos = (std::vector<renderable::Object*>) (*(std::vector<renderable::Object*>*)rederizables);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    // save the initial ModelView matrix before modifying ModelView matrix
+    glPushMatrix();
+
+    // tramsform camera
+    //glTranslatef(0, 0, -1.5f);
+    /*float xRaton = 0;
+    float yRaton = 0;
+    Mouse::getPosition(xRaton, yRaton);
+    anguloX += (xMouse-xRaton);
+    anguloY += (yMouse - yRaton);
+    glRotatef(anguloX, 0, 1, 0);   // heading
+    glRotatef(anguloY, 1, 0, 0);   // pitch
+    //xMouse = xRaton;
+    //yMouse = yRaton;
+    /**/
+
+
     renderable::Img* img;
     for (int i = 0; i < objetos.size(); i++) {
         switch (objetos[i]->getType()) {
         case renderable::Object::TYPE::IMG:
-            img = (renderable::Img*)objetos[i];
-            glEnable(GL_TEXTURE_2D);
-            //glDrawPixels(img->getWidth(), img->getHeight(), GL_RGBA, GL_FLOAT, img->getData());
-            GLuint imgTextura;
-            glGenTextures(1, &imgTextura);
-            glBindTexture(GL_TEXTURE_2D, imgTextura);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);//Probar con GL_LINEAR
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);//Probar con GL_LINEAR
-            /*if (repetir) {
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            }/**/
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->getWidth(), img->getHeight(), 0, GL_RGBA, GL_FLOAT, img->getData());
-            glBegin(GL_QUADS);
-            glTexCoord2f(0, 1);//Arriba - Izquierda
-            glVertex2f(0, alto);
-            glTexCoord2f(1, 1);//Arriba - Derecha
-            glVertex2f(img->getWidth(), img->getHeight());
-            glTexCoord2f(1, 0);//Abajo - Derecha
-            glVertex2f(img->getWidth(), 0);
-            glTexCoord2f(0, 0);//Abajo - Izquierda
-            glVertex2f(0, 0);
-
-            glEnd();
-            glDisable(GL_TEXTURE_2D);
+            renderizarImagen((renderable::Img*)objetos[i]);
+            
+            //glPopMatrix();
             break;
         case renderable::Object::TYPE::CUBE:
             renderizarCubo((renderable::Cube *)objetos[i]);
@@ -55,29 +51,109 @@ void MotorGL::renderizar(void* rederizables) {
             break;
         }
     }
+    glPopMatrix();
     SwapBuffers(ghDC);
 }
-void MotorGL::renderizarCubo(renderable::Cube * cubo) {
-    float mitadLado = cubo->l * 0.5;
-    float cX = cubo->pX * 0.5;
-    float cY = cubo->pY * 0.5;
-    float cZ = cubo->pZ;
-
+void MotorGL::renderizarImagen(renderable::Img* img) {
+    glEnable(GL_TEXTURE_2D);
+    //glDrawPixels(img->getWidth(), img->getHeight(), GL_RGBA, GL_FLOAT, img->getData());
+    GLuint imgTextura;
+    imgTextura = img->getId();
+    if (imgTextura == 0) {
+        glGenTextures(1, &imgTextura);
+        img->setId(imgTextura);
+    }
+    glBindTexture(GL_TEXTURE_2D, imgTextura);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);//Probar con GL_LINEAR
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);//Probar con GL_LINEAR
+    /*if (repetir) {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    }/**/
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->getWidth(), img->getHeight(), 0, GL_RGBA, GL_FLOAT, img->getData());
     glPushMatrix();
-    glTranslatef(cX, cY, 0.0f);
-    glRotatef(cubo->rX, 1, 0, 0);
-    glTranslatef(-cX , -cY, 0.0f);
-    glTranslatef(cX, cY, 0.0f);
-    glRotatef(cubo->rY, 0, 1, 0);
-    glTranslatef(-cX, -cY, 0.0f);
-    glTranslatef(cX, cY, 0.0f);
-    glRotatef(cubo->rZ, 0, 0, 1);
-    glTranslatef(-cX, -cY, 0.0f);
+    glTranslatef(img->getX(), img->getY(), img->getZ());
+    glRotatef(img->getRX(), 1.f, 0, 0);
+    glRotatef(img->getRY(), 0, 1.f, 0);
+    glRotatef(img->getRZ(), 0, 0, 1.f);
 
-    glColor3f(0.0f, 0.0f, 1.0f);
+    glBegin(GL_QUADS);
+
+    glVertex2f(0, 0);//coordenada u-v 
+    //glTexCoord2f(img->getLeft(), img->getBottom());//Abajo - Izquierda
+    glTexCoord2f(0,0);//Abajo - Izquierda
+
+    glVertex2f(img->getWidth(), 0);//coordenada u-v
+    //glTexCoord2f(img->getRight(), img->getBottom());//Abajo - Derecha
+    glTexCoord2f(1,0);//Abajo - Derecha
+
+    glVertex2f(img->getWidth(), img->getHeight());//coordenada u-v
+    //glTexCoord2f(img->getRight(), img->getTop());//Arriba - Derecha
+    glTexCoord2f(1, 1);//Arriba - Derecha
+
+    glVertex2f(0, img->getHeight());//coordenada u-v
+    //glTexCoord2f(img->getLeft(), img->getTop()); //Arriba - Izquierda //Representa la posición en pantalla
+    glTexCoord2f(0, 1); //Arriba - Izquierda //Representa la posición en pantalla
+
+    glEnd();
+    glPopMatrix();
+    glDisable(GL_TEXTURE_2D);
+
+}
+
+void MotorGL::renderizarCubo(renderable::Cube * cubo) {
+    float mitadLado = cubo->getSize();
+    float cX = cubo->getX();
+    float cX_2 = cX * 0.5f;
+    float cY = cubo->getY();
+    float cY_2 = cY * 0.5f;
+    float cZ = cubo->getZ();
+    float cZ_2 = cZ * 0.5f;
+
+    
+    
+
+    glColor3f(cubo->r, cubo->g,  cubo->b);
     //float ancho = 200;
-    static const GLfloat vertices[] = {
+    GLfloat vertices[] = {
+        /*1, 1, 1,  -1, 1, 1,  -1,-1, 1,   1,-1, 1,   // v0,v1,v2,v3 (front)
+        1, 1, 1,   1,-1, 1,   1,-1,-1,   1, 1,-1,   // v0,v3,v4,v5 (right)
+        1, 1, 1,   1, 1,-1,  -1, 1,-1,  -1, 1, 1,   // v0,v5,v6,v1 (top)
+        -1, 1, 1,  -1, 1,-1,  -1,-1,-1,  -1,-1, 1,   // v1,v6,v7,v2 (left)
+        -1,-1,-1,   1,-1,-1,   1,-1, 1,  -1,-1, 1,   // v7,v4,v3,v2 (bottom)
+        1,-1,-1,  -1,-1,-1,  -1, 1,-1,   1, 1,-1/**/
         //Frente
+        + mitadLado,+ mitadLado,+ mitadLado,
+        - mitadLado,+ mitadLado,+ mitadLado,
+        - mitadLado,- mitadLado,+ mitadLado,
+        + mitadLado,- mitadLado,+ mitadLado,
+        //Derecha
+        + mitadLado,+ mitadLado,+ mitadLado,
+        + mitadLado,- mitadLado,+ mitadLado,
+        + mitadLado,- mitadLado,- mitadLado,
+        + mitadLado,+ mitadLado,- mitadLado,
+        //Arriba
+        + mitadLado,+ mitadLado,+ mitadLado,
+        + mitadLado,+ mitadLado,- mitadLado,
+        - mitadLado,+ mitadLado,- mitadLado,
+        - mitadLado,+ mitadLado,+ mitadLado,
+        //Izquierda
+        - mitadLado,+ mitadLado,+ mitadLado,
+        - mitadLado,+ mitadLado,- mitadLado,
+        - mitadLado,- mitadLado,- mitadLado,
+        - mitadLado,- mitadLado,+ mitadLado,
+        //Abajo
+        - mitadLado,- mitadLado,- mitadLado,
+        + mitadLado,- mitadLado,- mitadLado,
+        + mitadLado,- mitadLado,+ mitadLado,
+        - mitadLado,- mitadLado,+ mitadLado,
+        //Trasera
+        + mitadLado,- mitadLado,- mitadLado,
+        - mitadLado,- mitadLado,- mitadLado,
+        - mitadLado,+ mitadLado,- mitadLado,
+        + mitadLado,+ mitadLado,- mitadLado,
+        /**/
+        /*//Frente
         cX - mitadLado,cY + mitadLado,cZ + mitadLado,
         cX + mitadLado,cY + mitadLado,cZ + mitadLado,
         cX + mitadLado,cY - mitadLado,cZ + mitadLado,
@@ -106,15 +182,45 @@ void MotorGL::renderizarCubo(renderable::Cube * cubo) {
         cX - mitadLado,cY - mitadLado,cZ + mitadLado,
         cX - mitadLado,cY - mitadLado,cZ - mitadLado,
         cX + mitadLado,cY - mitadLado,cZ - mitadLado,
-        cX + mitadLado,cY - mitadLado,cZ + mitadLado,
+        cX + mitadLado,cY - mitadLado,cZ + mitadLado,/**/
 
     };
+    GLfloat normales[] = { 
+        0, 0, 1,   0, 0, 1,   0, 0, 1,   0, 0, 1,   // v0,v1,v2,v3 (front)
+        1, 0, 0,   1, 0, 0,   1, 0, 0,   1, 0, 0,   // v0,v3,v4,v5 (right)
+        0, 1, 0,   0, 1, 0,   0, 1, 0,   0, 1, 0,   // v0,v5,v6,v1 (top)
+        -1, 0, 0,  -1, 0, 0,  -1, 0, 0,  -1, 0, 0,   // v1,v6,v7,v2 (left)
+        0,-1, 0,   0,-1, 0,   0,-1, 0,   0,-1, 0,   // v7,v4,v3,v2 (bottom)
+        0, 0,-1,   0, 0,-1,   0, 0,-1,   0, 0,-1 }; // v4,v7,v6,v5 (back)
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glEnableClientState(GL_NORMAL_ARRAY);
     glEnableClientState(GL_VERTEX_ARRAY);
+    glNormalPointer(GL_FLOAT, 0, normales);
     glVertexPointer(3, GL_FLOAT, 0, vertices);
+
+    glPushMatrix();
+    glTranslatef(cX, cY, cZ);
+    glRotatef(cubo->getRX(), 0,1.f, 0);
+    glRotatef(cubo->getRY(), 1.f, 0, 0);
+    glRotatef(cubo->getRZ(), 0, 0, 1.f);
+    //glTranslatef(-cX, -cY, -cZ );/**/
+    //glTranslatef(-cX, -cY, 0);
+    //glTranslatef(cX, cY, cZ);
+    
+    //
+    
+    //glTranslatef(-cX_2, -cY_2, 0.0f);
+    /*glTranslatef(cX_2, cY_2, 0.0f);
+    glRotatef(cubo->rY, 0, 1, 0);
+    glTranslatef(-cX_2, -cY_2, 0.0f);
+    glTranslatef(cX_2, cY_2, 0.0f);
+    glRotatef(cubo->rZ, 0, 0, 1);
+    glTranslatef(-cX_2, -cY_2, 0.0f);/**/
     glDrawArrays(GL_QUADS, 0, 24);
-    glDisableClientState(GL_VERTEX_ARRAY);
+    //glDrawArrays(GL_TRIANGLES, 0, 36);
     glPopMatrix();
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);
 }
 void MotorGL::renderizar() { 
     
@@ -347,7 +453,7 @@ void MotorGL::renderizar() {
     SwapBuffers(ghDC);
 }
 
-void MotorGL::inicializar(void * hwnd, double ancho, double alto) {
+bool MotorGL::inicializar(void * hwnd, double ancho, double alto) {
     this->ancho = ancho;
     this->alto = alto;
     ghDC = GetDC((HWND)hwnd);
@@ -365,7 +471,29 @@ void MotorGL::inicializar(void * hwnd, double ancho, double alto) {
     glClearIndex((GLfloat)0);
     glClearDepth(1.0);
 
+    glShadeModel(GL_SMOOTH);                    // shading mathod: GL_SMOOTH or GL_FLAT
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);      // 4-byte pixel alignment
+
+    // enable /disable features
+    //glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+    ////glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    ////glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
     glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_LIGHTING);
+    glEnable(GL_TEXTURE_2D);
+    //glEnable(GL_CULL_FACE);
+
+    // track material ambient and diffuse from surface color, call it before glEnable(GL_COLOR_MATERIAL)
+    //glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+    //glEnable(GL_COLOR_MATERIAL);
+
+    glClearColor(0, 0, 0, 0);                   // background color
+    glClearStencil(0);                          // clear stencil buffer
+    glClearDepth(1.0f);                         // 0 is near, 1 is far
+    glDepthFunc(GL_LEQUAL);
+    inicializarLuz();/**/
+
+    //glEnable(GL_DEPTH_TEST);
 
 
     glClearColor(0, 0, 0, 0);
@@ -382,18 +510,43 @@ void MotorGL::inicializar(void * hwnd, double ancho, double alto) {
     //gluOrtho2D(0, ancho, alto, 0);
     //glMatrixMode(GL_PROJECTION);
     //glLoadIdentity(); 
-    glOrtho(0, ancho, alto,0, -1000,1000);
-    //gluPerspective(60.f, fAspecto, 0, 1000);
-    //glFrustum(0, ancho, alto, 0, 0, 1000);
+    //glOrtho(0, ancho, alto,0, 0,1000);
+    gluPerspective(60.f, fAspecto, 0.f, 1000.f);
+    //glFrustum(0, ancho, alto, 0, -1000, 1000);
     //gluLookAt(ancho*0.5f, alto*.5f, 0, ancho * 0.5f, alto * .5f, 0, 0, 0,1.0f);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();/**/
+
+
+    Mouse::getPosition(xMouse, yMouse);
+
     //
     //glTranslatef(0.0f, 0.0f, 0.0f);
     //glEnable(GL_TEXTURE_2D);
     /*glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);*/
+    return true; 
+}
+void MotorGL::inicializarLuz() {
+    float ambiente = 0.2f;
+    float difusa = 0.7f;
+    float especular = 1.f;
+    GLfloat luzAmbiente[] = { ambiente, ambiente, ambiente, 1.0f };
+    GLfloat luzDifusa[] = { difusa, difusa, difusa, 1.0f };
+    GLfloat luzEspecular[] = { especular, especular, especular, 1 };
+    glLightfv(GL_LIGHT0, GL_AMBIENT, luzAmbiente);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, luzDifusa);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, luzEspecular);
+
     
+    float puntoLuz[4] = { 0, 0, 20, 1 }; 
+    glLightfv(GL_LIGHT0, GL_POSITION, puntoLuz);
+    glEnable(GL_LIGHT0);/**/
+}
+void MotorGL::ponerCamara(float posX, float posY, float posZ, float targetX, float targetY, float targetZ) {
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    gluLookAt(posX, posY, posZ, targetX, targetY, targetZ, 0, 1, 0); // eye(x,y,z), focal(x,y,z), up(x,y,z)
 }
 BOOL MotorGL::bSetupPixelFormat(HDC hdc) {
     PIXELFORMATDESCRIPTOR pfd, * ppfd;
@@ -407,10 +560,10 @@ BOOL MotorGL::bSetupPixelFormat(HDC hdc) {
     //ppfd->dwLayerMask = PFD_MAIN_PLANE;
     ppfd->iPixelType = PFD_TYPE_RGBA;
     ppfd->cColorBits = 24;
-    ppfd->cDepthBits = 16; 
+    ppfd->cDepthBits = 16;
     //ppfd->cAccumBits = 0;
     ppfd->cStencilBits = 8;
-    
+
     pixelformat = ChoosePixelFormat(hdc, ppfd);
 
     if ((pixelformat = ChoosePixelFormat(hdc, ppfd)) == 0) {

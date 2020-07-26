@@ -13,7 +13,7 @@ bool CargaDLL::cargar(char* carpeta, char * raiz) {
 	}
 	int longitudCarpeta = strlen(carpeta);
 	//CargaDLL::raiz = raiz;
-	utilidades::Libreria<Modulo> dll(raiz);
+	utilidades::Libreria<Module> dll(raiz);
 	for (auto& p : std::filesystem::directory_iterator(carpeta)) {
 	#ifdef _WIN32
 		std::regex expresionDLL(".*\\\.dll$");
@@ -39,7 +39,7 @@ bool CargaDLL::cargar(char* carpeta, char * raiz) {
 			}
 			ficheroDLL[ruta.length()] = '\0';
 			nombreFichero[j] = '\0';
-			Modulo* libreria = dll.crearInstancia(ficheroDLL);
+			Module* libreria = dll.crearInstancia(ficheroDLL);
 			if (libreria != NULL) {
 				utiles::Log::escribir(std::string("Hemos encontrado esta librería ")+p.path().string()+std::string(" de tipo ")+std::to_string(libreria->tipo()));
 				if (!libreriasDisponibles.contains(libreria->tipo())) {
@@ -74,8 +74,8 @@ bool CargaDLL::cargar(char* carpeta, char * raiz) {
 	return false;
 }
 void CargaDLL::descargar() {
-	utilidades::Libreria<Modulo> dll(".");
-	for (std::map<Modulo::TIPOS_MODULOS, std::vector<Libreria*>*>::iterator it = libreriasDisponibles.begin(); it != libreriasDisponibles.end(); ++it) {
+	utilidades::Libreria<Module> dll(".");
+	for (std::map<Module::MODULES_TYPE, std::vector<Libreria*>*>::iterator it = libreriasDisponibles.begin(); it != libreriasDisponibles.end(); ++it) {
 		for (std::vector<Libreria*>::iterator itV = it->second->begin(); itV != it->second->end(); ++itV) {
 			(*itV)->descargar(dll);
 		}
@@ -83,7 +83,7 @@ void CargaDLL::descargar() {
 	}
 }
 
-int CargaDLL::hayModulos(Modulo::TIPOS_MODULOS tipo){
+int CargaDLL::hayModulos(Module::MODULES_TYPE tipo){
 	
 	
 	return libreriasDisponibles.contains(tipo)?libreriasDisponibles[tipo]->size():0;
@@ -98,7 +98,7 @@ Libreria::Libreria(const char* fichero, const char* nombre, std::filesystem::fil
 	this->ultimaActualizacion = ftime;
 }
 Libreria::~Libreria() {
-	utilidades::Libreria<Modulo> dll(".");
+	utilidades::Libreria<Module> dll(".");
 	if (activo) {
 		dll.descargar(fichero);
 		activo = false;
@@ -114,16 +114,16 @@ void Libreria::ponerActivo(bool activo) {
 	this->activo = activo;
 }
 bool Libreria::cargar(char *raiz) {
-	utilidades::Libreria<Modulo> dll(raiz);
+	utilidades::Libreria<Module> dll(raiz);
 	return dll.cargar(fichero);
 }
 
 bool Libreria::descargar(char *raiz) {
-	utilidades::Libreria<Modulo> dll(raiz);
+	utilidades::Libreria<Module> dll(raiz);
 
 	return dll.descargar(fichero);
 }
-bool Libreria::descargar(utilidades::Libreria<Modulo>& dll) {
+bool Libreria::descargar(utilidades::Libreria<Module>& dll) {
 	descargando = true;
 	bool descargado = dll.descargar(fichero);
 	if (descargado) {
@@ -136,7 +136,7 @@ void* Libreria::cogerInstancia(char*raiz) {
 		return NULL;
 	}
 	if (!instancia) {
-		utilidades::Libreria<Modulo> dll(raiz);
+		utilidades::Libreria<Module> dll(raiz);
 		instancia = dll.crearInstancia(fichero);
 	}
 	
@@ -153,5 +153,5 @@ const char* Libreria::cogerNombre() {
 	return nombre;
 }
 
-std::map<Modulo::TIPOS_MODULOS, std::vector<Libreria*>*> CargaDLL::libreriasDisponibles;
+std::map<Module::MODULES_TYPE, std::vector<Libreria*>*> CargaDLL::libreriasDisponibles;
 //char* raiz=".";

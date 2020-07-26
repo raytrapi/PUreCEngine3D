@@ -1,6 +1,6 @@
 
 include_directories(
-	../../cartucho/src
+	../../modules/tape
    ../../utilidades/
    ../../graphics/src/renderable
    src
@@ -8,7 +8,7 @@ include_directories(
 file(GLOB CODIGO src/*.cpp src/*/*.cpp)
 # terceros/*/*.cpp
 add_library(hormiguero SHARED ${CODIGO})
-target_link_libraries(hormiguero cartucho modulos motor_grafico)
+target_link_libraries(hormiguero modules motor_grafico)
 
 if(WIN32)
 	

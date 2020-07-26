@@ -1,14 +1,15 @@
 
 include_directories(
-	../../cartucho/src
+	../../modules/tape
    ../../utilidades/
    ../../graphics/src/renderable
+   ../../components/src
    src
 ) 
 file(GLOB CODIGO src/*.cpp src/*/*.cpp)
 # terceros/*/*.cpp
 add_library(minecraft SHARED ${CODIGO})
-target_link_libraries(minecraft cartucho modulos motor_grafico)
+target_link_libraries(minecraft modules motor_grafico components)
 
 if(WIN32)
 	

@@ -1,0 +1,15 @@
+
+include_directories(
+   ../utilidades/log
+) 
+
+file(GLOB CODIGO graphic/*.cpp tape/*.cpp)
+
+add_library(modules SHARED src/module.cpp ${CODIGO})
+target_link_libraries( modules  ${CONAN_LIBS} utils)
+set_target_properties(modules PROPERTIES
+	COMPILE_DEFINITIONS EXPORTAR_MODULO
+    PUBLIC_HEADER src/modules.h )
+
+make_directory(${CMAKE_BINARY_DIR}/bin/modulos)
+#add_subdirectory("terceros/opengl")

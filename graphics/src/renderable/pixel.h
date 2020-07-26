@@ -1,6 +1,6 @@
 #ifndef _PIXEL
 #define _PIXEL
-#include "../motor.h"
+#include "../motorExport.h"
 namespace renderable {
 	class EXPORTAR_MODULO_GRAFICO Pixel {
 		int nPixel=4;

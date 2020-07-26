@@ -10,12 +10,9 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
 
-add_library(modulos SHARED src/modulos.cpp)
-set_target_properties(modulos PROPERTIES
-	COMPILE_DEFINITIONS EXPORTAR_MODULO
-    PUBLIC_HEADER src/modulos.h )
-
-make_directory(${CMAKE_BINARY_DIR}/bin/modulos)
+add_subdirectory("utilidades")
+add_subdirectory("components")
+add_subdirectory("modules")
 #[[if(WIN32)
 	add_custom_command(
     TARGET modulos POST_BUILD
@@ -31,14 +28,15 @@ elseif(UNIX)
         ${CMAKE_BINARY_DIR}/bin/modulos
     )
 endif()]]
-add_subdirectory("utilidades")
+
 add_subdirectory("graphics")
-add_subdirectory("cartucho")
+
 
 include_directories(
    src
    utilidades/librerias
 	utilidades/log
+   modules/src
 ) 
 
 file(GLOB CODIGO src/*.cpp )# graphics/src/renderable/renderable.h
@@ -52,9 +50,19 @@ if(WIN32)
 else()
 	add_executable(2dMotorGame ${CODIGO})
 endif()
+
+
 set_property(TARGET 2dMotorGame PROPERTY CXX_STANDARD 20)
 
-target_link_libraries( 2dMotorGame  motor_grafico utilidades cartucho)
+target_link_libraries( 2dMotorGame  motor_grafico utils components modules )
 
 
 add_subdirectory("ejemplos")
+
+set(GUI_ONLY_BINARIES 2dMotorGame)
+
+if (MSVC)
+    # Tell MSVC to use main instead of WinMain for Windows subsystem executables
+    set_target_properties(${GUI_ONLY_BINARIES} PROPERTIES
+                         LINK_FLAGS "/ENTRY:mainCRTStartup")
+endif()

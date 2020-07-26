@@ -2,12 +2,12 @@ include_directories(
    log
 ) 
 
-add_library(utilidades "SHARED"  log/log.cpp  nucleo/screen.cpp timer/timer.cpp)
-set_target_properties(utilidades PROPERTIES
+add_library(utils "SHARED"  log/log.cpp  global/screen.cpp timer/timer.cpp global/input.cpp global/mouse.cpp)
+set_target_properties(utils PROPERTIES
 	COMPILE_DEFINITIONS EXPORTAR_UTILIDADES
-   PUBLIC_HEADER utiles/utilidades.h )
+   PUBLIC_HEADER utils/utils.h )
 #target_link_libraries( utilidades  ${Boost_LIBRARIES})
-target_link_libraries( utilidades  ${CONAN_LIBS})
+target_link_libraries( utils  ${CONAN_LIBS})
 
 #[[if(WIN32)
 	add_custom_command(

@@ -1,6 +1,6 @@
 #ifndef __CARGA_DLL
 #define __CARGA_DLL
-#include <modulos.h>
+#include <module.h>
 #include <dll.h>
 #include <map>
 #include <vector>
@@ -28,26 +28,26 @@ public:
 	void ponerActivo(bool);
 	bool cargar(char*);
 	bool descargar(char*);
-	bool descargar(utilidades::Libreria<Modulo>&);
+	bool descargar(utilidades::Libreria<Module>&);
 	void* cogerInstancia(char *raiz);
 	const char* cogerNombreFichero();
 	const char* cogerNombre();
 	
 };
 class CargaDLL {
-	static std::map<Modulo::TIPOS_MODULOS, std::vector<Libreria*>*> libreriasDisponibles;
+	static std::map<Module::MODULES_TYPE, std::vector<Libreria*>*> libreriasDisponibles;
 	//static char* raiz;
 public:
 	static bool cargar(char *, char *);
 	template <class T>
-	static T* cogerModulo(Modulo::TIPOS_MODULOS tipo);
+	static T* cogerModulo(Module::MODULES_TYPE tipo);
 	template <class T>
-	static T* cogerModulo(Modulo::TIPOS_MODULOS tipo, const char* nombre);
+	static T* cogerModulo(Module::MODULES_TYPE tipo, const char* nombre);
 	static void descargar();
-	static int hayModulos(Modulo::TIPOS_MODULOS);
+	static int hayModulos(Module::MODULES_TYPE);
 };
 template<class T>
-static inline T* CargaDLL::cogerModulo(Modulo::TIPOS_MODULOS tipo) {
+static inline T* CargaDLL::cogerModulo(Module::MODULES_TYPE tipo) {
 	if (libreriasDisponibles.contains(tipo) && libreriasDisponibles[tipo]->size() > 0) {
 
 		void* ins = (*(libreriasDisponibles[tipo]))[0]->cogerInstancia(".");
@@ -59,7 +59,7 @@ static inline T* CargaDLL::cogerModulo(Modulo::TIPOS_MODULOS tipo) {
 	return NULL;
 }
 template<class T>
-static inline T* CargaDLL::cogerModulo(Modulo::TIPOS_MODULOS tipo, const char* nombre) {
+static inline T* CargaDLL::cogerModulo(Module::MODULES_TYPE tipo, const char* nombre) {
 	if (libreriasDisponibles.contains(tipo) && libreriasDisponibles[tipo]->size() > 0) {
 		for (int i = 0; i < (*(libreriasDisponibles[tipo])).size(); i++) {
 			if (strcmp(nombre, (*(libreriasDisponibles[tipo]))[i]->cogerNombre()) == 0) {

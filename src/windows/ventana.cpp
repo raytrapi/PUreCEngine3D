@@ -1,7 +1,9 @@
 #include "ventana.h"
 
-modulos::graficos::Grafico * Ventana::motorGrafico=NULL;
-modulos::Cartucho* Ventana::cartucho=NULL;
+modules::graphics::Graphic * Ventana::motorGrafico=NULL;
+modules::Tape* Ventana::cartucho=NULL;
+Input Ventana::input;
+Mouse Ventana::mouse;
 Ventana::Ventana(const char* ventana, HINSTANCE hInstance, int nComando,int ancho, int alto, int x, int y){
 	nombreVentana = ventana;
     comandoVentana = nComando;
@@ -12,7 +14,7 @@ Ventana::Ventana(const char* ventana, HINSTANCE hInstance, int nComando,int anch
     RegisterClass(&wc);
     CargaDLL::cargar("./modulos", ".");
     // Create the window.
-    Screen::setDimension(ancho, alto);
+    
     hwnd = CreateWindowEx(
         0,                              // Optional window styles.
         nombreVentana,                  // Window class
@@ -56,12 +58,16 @@ LRESULT Ventana::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
             }else {
                 delete m;
             }/**/
-            if (CargaDLL::hayModulos(Modulo::GRAFICO)>0) {
-                motorGrafico = CargaDLL::cogerModulo<modulos::graficos::Grafico>(Modulo::GRAFICO);
-                motorGrafico->inicializar(hwnd, rect.right, rect.bottom);
+            Screen::setDimension(rect.right, rect.bottom);
+            if (CargaDLL::hayModulos(Module::GRAPHIC)>0) {
+                motorGrafico = CargaDLL::cogerModulo<modules::graphics::Graphic>(Module::GRAPHIC, "OPENGL 4");
+                if (!motorGrafico->inicializar(hwnd, rect.right, rect.bottom)) {
+
+                };
             }/**/
-            if (CargaDLL::hayModulos(Modulo::CARTUCHO) > 0) {
-                cartucho =CargaDLL::cogerModulo<modulos::Cartucho>(Modulo::CARTUCHO, "MINECRAFT");
+            if (CargaDLL::hayModulos(Module::TAPE) > 0) {
+                cartucho =CargaDLL::cogerModulo<modules::Tape>(Module::TAPE, "MINECRAFT");
+                //cartucho = CargaDLL::cogerModulo<modulos::Cartucho>(Modulo::CARTUCHO, "HORMIGUERO: Hormigas buscando alimento");
                 cartucho->start();
             }/**/
             /*if (motorGrafico) {
@@ -89,13 +95,23 @@ LRESULT Ventana::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
         return 0;
         break;
         case WM_KEYDOWN: 
-            switch (wParam) {
-                case 0x41:
-                    Modulo::setInputKeyDown(Key::A);
-            }
-
+            input.setKeyDown(wParam, lParam);
+            break;
+        case WM_KEYUP:
+            input.setKeyUp(wParam, lParam);
+            break;
+        case WM_MOUSEMOVE:
+            mouse.setPosition(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam),wParam);
             break;
         
+        case WM_MBUTTONDOWN:
+            //Capturamos el raton;
+            //SetCapture(hwnd);
+            break;
+        case WM_MBUTTONUP:
+            //ReleaseCapture();
+            break;
+
 
     }
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
@@ -113,6 +129,7 @@ int Ventana::abrirVentana() {
     Time::reset();
     while (GetMessage(&msg, NULL, 0, 0)) {
         Time::update();
+        input.resetKeyPress();
         TranslateMessage(&msg);
         DispatchMessage(&msg);
         std::vector<void*> *renderizables=NULL;
@@ -128,8 +145,8 @@ int Ventana::abrirVentana() {
         }/**/
         
     }
-    if (CargaDLL::hayModulos(Modulo::CARTUCHO) > 0) {
-        CargaDLL::cogerModulo<modulos::Cartucho>(Modulo::CARTUCHO)->destroy();
+    if (CargaDLL::hayModulos(Module::TAPE) > 0) {
+        CargaDLL::cogerModulo<modules::Tape>(Module::TAPE)->destroy();
     }
     return 0;
 }
