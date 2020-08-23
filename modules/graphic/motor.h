@@ -3,7 +3,6 @@
 
 
 #include "../src/module.h"
-#include "../../components/modulos/shader/types.h"
 //#include "../../components/src/entity.h"
 #include <list>
 #include <vector>
@@ -21,16 +20,13 @@ namespace modules {
 		protected:
 			void setEnd() { end = true; };
 			std::vector<void*> entities;
-			static bool open;
 		public:
-			static std::vector<void(*)(bool)> onFocus;
-			static std::vector<Tape*> onFocusTapes;
 			enum TYPE_ENTITY {
 				NONE,
 				IMG,
 				MESH
 			};
-			
+
 			/*~Grafico() {
 				//Renderable::clearRenderable();
 			};/**/
@@ -45,25 +41,15 @@ namespace modules {
 			virtual void addEntity(void* entity);
 			virtual void removeEntity(void* entity);
 
-			/*virtual void newEntity(TYPE_ENTITY type, renderable::Object * object) {};*/
+			/*virtual void newEntity(TYPE_ENTITY type, renderable::Object * object) {};
 			virtual const byte* loadShader(const char* path) { return 0; };
-			virtual int loadShader(const char* path, Graphics::Shader::TYPE_SHADER type) { return 0; };
-			virtual void reloadShader(const char* path, Graphics::Shader::TYPE_SHADER type,int idShader, int idProgram) { };
-			virtual int compileShader(std::vector<short>*) { return 0; };
-			virtual int compileShader(int ps) { return 0; };
-			virtual int compileShader(std::vector<short>*, void* entity) { return 0; }; 
-			virtual int compileShader(int ps, void* entity) { return 0; };
-
-			void addOnFocus(void(*callback)(bool));
-			void addOnFocus(Tape * juego);
-
-			virtual bool isOpen() { return open;};
-			//virtual void* 
+			virtual int loadShader(const char* path,Shader::TYPE type, renderable::Object*object) { return 0; };
+			virtual int compileShader(renderable::Object* object) { return 0; };
+			virtual int compileShader(renderable::Object* object, int ps) { return 0; };*/
 		};
 
 	}
 }
-
 /*inline virtual modulos::graficos::Grafico::~Grafico() {
 	Renderable::clearRenderable();
 }

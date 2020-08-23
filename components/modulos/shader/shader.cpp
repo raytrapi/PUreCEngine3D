@@ -17,65 +17,41 @@ const Shader* Shader::getShader(int id) {
 	return shadersData[id];
 }
 
-int Shader::loadShader(const char* path, Graphics::Shader::TYPE_SHADER type) {
-	int id = Module::get<modules::graphics::Graphic>()->loadShader(path, type);
-	addShader(id, type);
-	return id;
-}
-void Shader::reloadShader(const char* path, Graphics::Shader::TYPE_SHADER type, int idShader, int idProgram) {
-	Module::get<modules::graphics::Graphic>()->reloadShader(path, type,idShader, idProgram);
+int Shader::loadShader(const char* path, Shader::TYPE type) {
+	//return Module::getModule<modules::graphics::Graphic>()->loadShader(path, type, this);
+	return 0;
 }
 
-int Shader::compileShader() {
-	modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
-	int id = g->compileShader(getShadersId(),entidad);
-	shadersCompiled.push_back(id); //Guardamos el id ¿Es realemente necesario?
-	//Le indicamos al componente gráfico que tenemos una nueva compilación de shaders
-	//g.getEntity(this)
-	return id;
-}
-int Shader::compileShader(int id) {
-	modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
-	g->compileShader(id,entidad);
-	return id;
-}
-int Shader::addShader(unsigned int id, Graphics::Shader::TYPE_SHADER type) {
-	shadersId.push_back(id);
-	return shadersId.size();
+void Shader::compileShader() {
+	//Module::getModule<modules::graphics::Graphic>()->compileShader(this);
 }
 
-int Shader::addShader(unsigned int id, Graphics::Shader::TYPE_SHADER type, const byte* data, int count) {
-	if (type != Graphics::Shader::TYPE_SHADER::COMPILE) {
+int Shader::addShader(unsigned int id, Shader::TYPE type) {
+	shadersCompiled.push_back(id);
+	return shadersCompiled.size();
+}
+
+int Shader::addShader(unsigned int id, Shader::TYPE type, const byte* data, int count) {
+	if (type != Shader::TYPE::COMPILE) {
 		shadersData.push_back(new Shader(id, type, data, count));
-		shadersId.push_back(id);
-
-
-
-		return shadersData.size(); 
+		return shadersData.size();
 	}
 	return 0;
 }
 
-int Shader::addShader(unsigned int id, Graphics::Shader::TYPE_SHADER type, const char* data, int count) {
+int Shader::addShader(unsigned int id, Shader::TYPE type, const char* data, int count) {
 	return addShader(id, type, (const byte*)data, count);
-}/**/
+}
 
 std::vector<Shader *>* Shader::getShaders() {
 	return &shadersData;
 }
-std::vector<short>* Shader::getShadersId() {
-	return &shadersId;
-}
+
 std::vector<short int>* Shader::getShadersCompiled() {
 	return &shadersCompiled;
 }
-Shader::Shader() {
-	idS = -1;
-	tipo = Graphics::Shader::NONE;
-	codigo = NULL;
-	longitudCodigo = 0;
-}
-Shader::Shader(short int id, Graphics::Shader::TYPE_SHADER type, const byte*& data, int count) {
+
+Shader::Shader(short int id, Shader::TYPE type, const byte*& data, int count) {
 	idS = id;
 	tipo = type;
 	codigo = new byte[count];
@@ -86,9 +62,9 @@ Shader::Shader(short int id, Graphics::Shader::TYPE_SHADER type, const byte*& da
 }
 
 
-Graphics::Shader::TYPE_SHADER Shader::getType() {
+Shader::TYPE Shader::getType() {
 	return tipo;
-}/**/
+}
 
 short int Shader::getId() {
 	return idS;

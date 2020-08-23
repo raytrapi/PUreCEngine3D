@@ -23,8 +23,6 @@ namespace modules {
 		virtual void start() {};
 		virtual void destroy() {};
 		
-		virtual void onFocus(bool) {};
-
 		short int getScreenWidth() { return ancho; };
 		short int getScreenHeight() { return alto; };
 		void setEnd() { ejecutando = false; };

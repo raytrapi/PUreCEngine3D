@@ -55,39 +55,47 @@ void main(int numeroArgumentos, char** argumentos) {
             //cartucho->setGraphic(motorGrafico);
             correcto=motorGrafico->inicializar(0, cartucho->getScreenWidth(), cartucho->getScreenHeight());
             cartucho->start();
-        } else {
-           correcto = motorGrafico->inicializar(0, 800, 600);
         };
     }/**/
 
-    while(motorGrafico && motorGrafico->isOpen()){
-       Time::update();
-       input.resetKeyPress();
-       if (cartucho && cartucho->isRunning()) {
-          //std::vector<void*>* renderizables = NULL;
-          if (cartucho) {
+    
+    while(cartucho && cartucho->isRunning()){
+        Time::update();
+        input.resetKeyPress();
+        std::vector<void*>* renderizables = NULL;
+        if (cartucho) {
 
-             cartucho->update();
-          }
-       }
-       if (motorGrafico) {
-          motorGrafico->renderizar(Renderable::getRenderable());
-          if (motorGrafico->isEnd()) {
-             if (cartucho) {
-               cartucho->setEnd();
-             }
-          }
-       }
+            cartucho->update();
+        }
+        if (motorGrafico) {
+            motorGrafico->renderizar(Renderable::getRenderable());
+            if (motorGrafico->isEnd()) {
+                cartucho->setEnd();
+            }
+        }
+        /*
+        t = glfwGetTime();
+        dt = t - t_old;
+        t_old = t;
+
+        display();
+
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+
+        if (glfwWindowShouldClose(window))
+            break;
+        /**/
+
     }
-
     if (cartucho) {
         cartucho->destroy();
         delete cartucho;
     }
-    Entity::destroy();
     if (motorGrafico) {
         motorGrafico->destroy();
         delete motorGrafico;
     }
+    Entity::destroy();
 }/**/
 #endif

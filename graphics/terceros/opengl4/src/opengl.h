@@ -23,29 +23,20 @@
 
 
 #include <entity.h>
-#include "entitygl4.h"
 //#include <utilidades.h>
 #include <log.h>
 #include <module.h>
 #include <motor.h>
-#include "../../modules/tape/tape.h"
 #include <vector>
 #include <string>
 #include <fstream>
-#include <type_traits>
-#include <log.h>
-
-#include <map>
 class  MotorGL:public modules::graphics::Graphic {
 private:
 		double ancho;
 		double alto;
 		GLFWwindow* window;
-
-		//TODO: Posible fallo si necesitamos representar los elementos en orde
-		std::map<Entity*, EntityGL4*> misEntidades;
-
-		//std::vector<GLuint> shaders;
+		
+		std::vector<GLuint> shaders;
 		static Input input;
 		void inicializarLuz();
 		void renderizarCubo(renderable::Cube *);
@@ -53,7 +44,6 @@ private:
 
 		
 		static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-		static void focus(GLFWwindow* window, int focused);
 protected:
 	float* points;
 	bool derecha = true;
@@ -69,18 +59,10 @@ public:
 		
 	void ponerCamara(float posX, float posY, float posZ, float targetX, float targetY, float targetZ);
 
-	void updateEntity(void* entity);
-	/*void newEntity(TYPE_ENTITY type, renderable::Object* object);*/
-
-	//TODO: Optimizar la carga de Shader para que no se dupliquen
+	/*void newEntity(TYPE_ENTITY type, renderable::Object* object);
 	const byte* loadShader(const char* path);
-	int loadShader(const char* path, Graphics::Shader::TYPE_SHADER type);
-	void reloadShader(const char* path, Graphics::Shader::TYPE_SHADER type, int idShader, int idProgram);
-	int compileShader(std::vector<short>* ids);
-	int compileShader(int ps);
-	int compileShader(std::vector<short>*, void* entity);
-	int compileShader(int ps, void* entity);
-
-	static void closeWindow(GLFWwindow* window);
+	int loadShader(const char* path, renderable::Shader::TYPE type, renderable::Object* object);
+	int compileShader(renderable::Object* object);
+	int compileShader(renderable::Object* object, int ps);*/
 };
 #endif // !__MOTORGL

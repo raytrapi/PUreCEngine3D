@@ -3,7 +3,7 @@
 
 #include "../../src/exportar.h"
 #include "../../src/component.h"
-#include "../../../modules/src/module.h"
+#include <module.h>
 #include "../../../graphics/src/renderable/object.h"
 #include <vector>
 class EXPORTAR_COMPONENTE RenderableComponent : public Component {
@@ -14,7 +14,6 @@ public:
 
 	RenderableComponent(renderable::Object *obj);
 	~RenderableComponent();
-	renderable::Object* getRenderable() { return objeto; };
 };
 
 
