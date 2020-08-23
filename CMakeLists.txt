@@ -57,7 +57,7 @@ set_property(TARGET 2dMotorGame PROPERTY CXX_STANDARD 20)
 target_link_libraries( 2dMotorGame  motor_grafico utils components modules )
 
 
-add_subdirectory("ejemplos")
+#add_subdirectory("ejemplos")
 
 set(GUI_ONLY_BINARIES 2dMotorGame)
 

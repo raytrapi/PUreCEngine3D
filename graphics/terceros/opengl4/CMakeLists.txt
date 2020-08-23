@@ -4,6 +4,8 @@ include_directories(
 	../../src
    ../../modules/src
    ../../../components/src
+   ../../modules/graphic
+   ../../modules/tape
    "${GLFW_SOURCE_DIR}/deps"
    "${GLFW_SOURCE_DIR}/include"
 
