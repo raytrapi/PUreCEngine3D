@@ -95,18 +95,20 @@ void MotorGL::updateEntity(void* entity) {
                     0.8f,  -0.8f,  0.0f
                };
 
-               GLuint vbo = 0;
-               glGenBuffers(1, &vbo);
-               glBindBuffer(GL_ARRAY_BUFFER, vbo);
-               glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), points, GL_STATIC_DRAW);
+               GLuint *vbo = misEntidades[(Entity*)entity]->getVBO();
+               glGenBuffers(1, vbo);
+               if ((*vbo)!=0) {
+                  glBindBuffer(GL_ARRAY_BUFFER, *vbo);
+                  glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), points, GL_STATIC_DRAW);
 
-               glGenVertexArrays(1, vao);
+                  glGenVertexArrays(1, vao);
 
-               misEntidades[(Entity*)entity]->setVertextCount(4); //TODO: El número de vertices se obtendrá de la propia maya del objeto.
-               glBindVertexArray(*vao);
-               glEnableVertexAttribArray(0);
-               glBindBuffer(GL_ARRAY_BUFFER, vbo);
-               glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+                  misEntidades[(Entity*)entity]->setVertextCount(4); //TODO: El número de vertices se obtendrá de la propia maya del objeto.
+                  glBindVertexArray(*vao);
+                  glEnableVertexAttribArray(0);
+                  glBindBuffer(GL_ARRAY_BUFFER, *vbo);
+                  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+               }
                //glDisableVertexAttribArray(0);
             }
 
@@ -117,6 +119,31 @@ void MotorGL::updateEntity(void* entity) {
       //entidad=new EntityGL4()
    }
 
+}
+void MotorGL::removeEntity(void* entity) {
+   for (auto itr = entities.begin(); itr != entities.end(); itr++) {
+      if (entity == (*itr)) {
+         GLuint* vao = misEntidades[(Entity*)entity]->getVAO();
+         glDeleteBuffers(1, misEntidades[(Entity*)entity]->getVBO());
+         glDeleteVertexArrays(1, misEntidades[(Entity*)entity]->getVAO());
+         delete misEntidades[(Entity*)*itr];
+         misEntidades.erase((Entity *)*itr);
+         delete ((Entity*)*itr);
+         entities.erase(itr);
+         return;
+      }
+   }
+}
+void MotorGL::removeEntities() {
+   for (auto itr = entities.begin(); itr != entities.end(); itr++) {
+         //GLuint* vao = ((Entity*)(*itr))->getVAO();
+         glDeleteBuffers(1, misEntidades[((Entity*)(*itr))]->getVBO());
+         glDeleteVertexArrays(1, misEntidades[((Entity*)(*itr))]->getVAO());
+         delete misEntidades[(Entity*)*itr];
+         misEntidades.erase((Entity*)(*itr));
+         delete ((Entity*)*itr);
+   }
+   entities.clear();
 }
 /*void MotorGL::newEntity(TYPE_ENTITY type, renderable::Object* object) {
     //vaos.push_back(Entity(type)GLuint(0));

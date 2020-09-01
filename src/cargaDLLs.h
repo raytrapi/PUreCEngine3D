@@ -13,6 +13,7 @@
 #include <iomanip>
 #include <ctime>
 #include <cstring>
+#include <log.h>
 
 class Libreria {
 	char* fichero;
@@ -30,21 +31,29 @@ public:
 	bool descargar(char*);
 	bool descargar(utilidades::Libreria<Module>&);
 	void* cogerInstancia(char *raiz);
+	void reiniciar();
 	const char* cogerNombreFichero();
 	const char* cogerNombre();
 	
 };
 class CargaDLL {
 	static std::map<Module::MODULES_TYPE, std::vector<Libreria*>*> libreriasDisponibles;
+	static Libreria* existe(Module::MODULES_TYPE, const char* nombre);
 	//static char* raiz;
+	static bool cargarDLL(const std::filesystem::path& p, const char* carpeta);
+	static void remplazarExtension(char*& cadena, const char*);
+	static char* raizLibrerias;
+	static void addLibreria(Module::MODULES_TYPE, char* ruta, char* nombre, std::filesystem::file_time_type tiempo);
 public:
-	static bool cargar(char *, char *);
+	static bool cargar(char * raiz, char *carpeta);
+	static bool cargar(const char*fichero);
 	template <class T>
 	static T* cogerModulo(Module::MODULES_TYPE tipo);
 	template <class T>
 	static T* cogerModulo(Module::MODULES_TYPE tipo, const char* nombre);
 	static void descargar();
 	static int hayModulos(Module::MODULES_TYPE);
+	static void liberarModulo(Module::MODULES_TYPE);
 };
 template<class T>
 static inline T* CargaDLL::cogerModulo(Module::MODULES_TYPE tipo) {
@@ -63,7 +72,7 @@ static inline T* CargaDLL::cogerModulo(Module::MODULES_TYPE tipo, const char* no
 	if (libreriasDisponibles.contains(tipo) && libreriasDisponibles[tipo]->size() > 0) {
 		for (int i = 0; i < (*(libreriasDisponibles[tipo])).size(); i++) {
 			if (strcmp(nombre, (*(libreriasDisponibles[tipo]))[i]->cogerNombre()) == 0) {
-				void* ins = (*(libreriasDisponibles[tipo]))[i]->cogerInstancia(".");
+				void* ins = (*(libreriasDisponibles[tipo]))[i]->cogerInstancia("./");
 				if (ins != NULL) {
 					return (T*)ins;
 				}

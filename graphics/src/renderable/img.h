@@ -1,5 +1,9 @@
 #ifndef _RND_IMG
 #define _RND_IMG
+#define GL_GLEXT_PROTOTYPES
+#include <glad/gl.h>
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
 
 #include "../../../utilidades/global/screen.h"
@@ -18,6 +22,7 @@ namespace renderable {
 		float bottom;
 		int bPixel=4;
 		unsigned int idTextura = 0;
+		GLuint FFrameBuffer;
 		void liberarImagen();
 		void calcularUV();
 	public:

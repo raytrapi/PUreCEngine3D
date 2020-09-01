@@ -16,7 +16,7 @@ set(GLAD_GL "${GLFW_SOURCE_DIR}/deps/glad/gl.h"
 file(GLOB GRAFICO src/*.cpp src/*/*.cpp)
 add_library(mg_gl4 SHARED ${GRAFICO} ${GLAD_GL})
 
-
+set_property(TARGET mg_gl4 PROPERTY CXX_STANDARD 20)
 target_link_libraries(mg_gl4 motor_grafico modules components)
 
 if(WIN32)

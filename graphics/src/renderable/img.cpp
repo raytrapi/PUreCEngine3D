@@ -81,6 +81,23 @@ namespace renderable{
 		calcularUV();
 	}
 	float* Img::getData(){
+		/*
+		// setup FBO
+		glGenFramebuffers( 1, &FFrameBuffer );
+		glBindFramebuffer( GL_FRAMEBUFFER, FFrameBuffer );
+		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, YourTextureID, 0 );
+		glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+
+		// render to FBO
+		glBindFramebuffer( GL_FRAMEBUFFER, FFrameBuffer );
+		glViewport( 0, 0, YourTextureWidth, YourTextureHeight );
+		your rendering code goes here - it will draw directly into the texture
+		glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+
+		// cleanup
+		glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+		glDeleteFramebuffers( 1, &FFrameBuffer );
+		/**/
 		if (data == 0) {
 			long tamaño = (alto * ancho * bPixel);
 			data = new float[tamaño];

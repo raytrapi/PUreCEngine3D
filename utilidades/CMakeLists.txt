@@ -1,12 +1,12 @@
 include_directories(
    log
 ) 
-
-add_library(utils "SHARED"  log/log.cpp  global/screen.cpp timer/timer.cpp global/input.cpp global/mouse.cpp)
+add_library(utils "SHARED"  log/log.cpp  global/screen.cpp timer/timer.cpp global/input.cpp global/mouse.cpp files/filesControl.cpp)
 set_target_properties(utils PROPERTIES
 	COMPILE_DEFINITIONS EXPORTAR_UTILIDADES
    PUBLIC_HEADER utils/utils.h )
 #target_link_libraries( utilidades  ${Boost_LIBRARIES})
+set_property(TARGET utils PROPERTY CXX_STANDARD 20)
 target_link_libraries( utils  ${CONAN_LIBS})
 
 #[[if(WIN32)

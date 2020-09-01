@@ -11,7 +11,7 @@
 #include "../utilidades/timer/timer.h"
 #include "../utilidades/librerias/dll.h"
 #include "../utilidades/log/log.h"
-#include "../cargaDLLs.h"
+#include <cargaDLLs.h>
 //#include "..\Motor gráfico\terceros\opengl\src\opengl.h"
 #include "../utilidades/global/screen.h"
 #include "../utilidades/global/input.h"

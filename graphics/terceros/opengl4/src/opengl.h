@@ -70,6 +70,9 @@ public:
 	void ponerCamara(float posX, float posY, float posZ, float targetX, float targetY, float targetZ);
 
 	void updateEntity(void* entity);
+	//void addEntity(void* entity);
+	void removeEntity(void* entity);
+	void removeEntities();
 	/*void newEntity(TYPE_ENTITY type, renderable::Object* object);*/
 
 	//TODO: Optimizar la carga de Shader para que no se dupliquen
@@ -80,6 +83,8 @@ public:
 	int compileShader(int ps);
 	int compileShader(std::vector<short>*, void* entity);
 	int compileShader(int ps, void* entity);
+
+
 
 	static void closeWindow(GLFWwindow* window);
 };

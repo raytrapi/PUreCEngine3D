@@ -44,6 +44,7 @@ namespace modules {
 			virtual void updateEntity(void* entity) {};
 			virtual void addEntity(void* entity);
 			virtual void removeEntity(void* entity);
+			virtual void removeEntities();
 
 			/*virtual void newEntity(TYPE_ENTITY type, renderable::Object * object) {};*/
 			virtual const byte* loadShader(const char* path) { return 0; };
@@ -56,6 +57,7 @@ namespace modules {
 
 			void addOnFocus(void(*callback)(bool));
 			void addOnFocus(Tape * juego);
+			void removeOnFocus(Tape* juego);
 
 			virtual bool isOpen() { return open;};
 			//virtual void* 

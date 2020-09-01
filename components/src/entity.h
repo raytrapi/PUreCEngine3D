@@ -42,8 +42,22 @@ public:
 			itr->second.clear();
 		}
 		componentes.clear();
+		bool seguir = true;
+		for (auto itr = entidades.begin(); itr != entidades.end() && seguir; itr++) {
+			if (*itr == this) {
+				/*modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
+				if (g) {
+					//g->removeEntity(*itr);
+				}/**/
+				entidades.erase(itr);
+				//itr = entidades.begin(); //Reiniciamos para evitar fallos
+				break;
+				seguir = false;
+			}
+		}
 	};
 	static void destroy() {
+		
 		for (auto itr = entidades.begin(); itr != entidades.end(); itr++) {
 			modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
 			if (g) {

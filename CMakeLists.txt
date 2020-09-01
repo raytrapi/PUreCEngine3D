@@ -11,8 +11,8 @@ conan_basic_setup()
 
 
 add_subdirectory("utilidades")
-add_subdirectory("components")
 add_subdirectory("modules")
+add_subdirectory("components")
 #[[if(WIN32)
 	add_custom_command(
     TARGET modulos POST_BUILD
@@ -34,12 +34,13 @@ add_subdirectory("graphics")
 
 include_directories(
    src
+   modules/src
    utilidades/librerias
 	utilidades/log
-   modules/src
+   utilidades/files
 ) 
 
-file(GLOB CODIGO src/*.cpp )# graphics/src/renderable/renderable.h
+file(GLOB CODIGO src/*.cpp utilidades/librerias/compile.cpp)# graphics/src/renderable/renderable.h
 #file(GLOB MOTOR src/Motor/*/*.cpp src/Motor/*.cpp)
 
 #file(GLOB MOTORGL src/terceros/*/*.cpp)

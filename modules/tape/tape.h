@@ -5,6 +5,8 @@
 #include "../src/module.h"
 #include "../graphic/motor.h"
 #include <vector>
+#include "../../utilidades/files/filesControl.h"
+#include <string>
 
 namespace modules {
 
@@ -16,13 +18,24 @@ namespace modules {
 		short int alto=600;
 		bool ejecutando = true;
 		virtual void setScreenSize(short int width, short int height) {};
-		//modules::graphics::Graphic* Graphic = 0;
+		//modules::graphics::Graphic* graphic = 0;
+		static std::string projectName;
+		static void (*callbackLoad)(const char*);
+		static Tape* cinta;
 	public:
 		//void setGraphic(modules::graphics::Grafico* graphic) { Graphic = graphic; };
 		virtual void update() {};
 		virtual void start() {};
 		virtual void destroy() {};
-		
+		void detener() {
+			ejecutando = false;
+
+			modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
+			if (g) {
+				g->removeEntities();
+			}
+			destroy();
+		}
 		virtual void onFocus(bool) {};
 
 		short int getScreenWidth() { return ancho; };
@@ -41,6 +54,7 @@ namespace modules {
 		}
 		Module::MODULES_TYPE tipo() { return Module::TAPE; };
 		std::vector<void*>* getRenderizables() { return &renders; };
+		static void load(const char* project, modules::Tape* tape, void(*callback)(const char*));
 	};
 
 }

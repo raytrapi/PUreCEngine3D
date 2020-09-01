@@ -12,6 +12,7 @@
 struct EntityGL4 {
 	GLenum _mode;
 	GLuint _vao;
+	GLuint _vbo;
 	int _numeroVertices;
 	renderable::Object* _object;
 	std::vector<GLuint> shadersPrograms;
@@ -20,6 +21,9 @@ public:
 		_mode = mode;
 		_object = object;
 	};
+	~EntityGL4() {
+		
+	}
 	GLenum getMode() { return _mode; };
 
 	/**
@@ -27,6 +31,8 @@ public:
 		@return GLuint valor de tipo
 	*/
 	GLuint* getVAO() { return &_vao; };
+	GLuint* getVBO() { return &_vbo; };
+
 
 	int getVertextCount() {
 		return _numeroVertices;

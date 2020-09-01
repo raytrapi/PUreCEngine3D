@@ -11,7 +11,7 @@ add_library(motor_grafico_gl SHARED ${GRAFICO})
 #    PROPERTIES
 #    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/modulos"
 #)
-
+set_property(TARGET motor_grafico_gl PROPERTY CXX_STANDARD 20)
 #target_link_libraries( motor_grafico_gl  ${CONAN_LIBS} )
 target_link_libraries(motor_grafico_gl motor_grafico modules)
 

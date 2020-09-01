@@ -1,6 +1,131 @@
 #include "cargaDLLs.h"
-#include <log.h>
 
+
+
+Libreria * CargaDLL::existe(Module::MODULES_TYPE tipo, const char* nombre) {
+	if (libreriasDisponibles.contains(tipo)) {
+		for (auto itr = libreriasDisponibles[tipo]->begin(); itr != libreriasDisponibles[tipo]->end(); itr++) {
+			if (strcmp((*itr)->cogerNombreFichero(), nombre) == 0) {
+				return *itr;
+			}
+		}
+	}
+	return NULL;
+}
+
+bool CargaDLL::cargarDLL(const std::filesystem::path& p, const char* carpeta) {
+#ifdef _WIN32
+	std::regex expresionDLL(".*\\\.dll$");
+#else
+	std::regex expresionDLL(".*\\\.so$");
+#endif // _WIN32
+
+	bool esDLL = std::regex_match(p.string(), expresionDLL);
+	if (esDLL) {
+		std::filesystem::file_time_type ftime = std::filesystem::last_write_time(p);
+		std::string ruta = p.string();
+		int longitudCarpeta = p.parent_path().string().length();
+
+		char* ficheroDLL = new char[ruta.length() + 1]; //Ruta completa + nombre del fichero
+		char* nombreFichero = new char[ruta.length() - longitudCarpeta];
+
+		//Obtenemos el nombre de la DLL + su Ruta de carga
+		int j = 0;
+		for (int i = 0; i < ruta.length(); i++) {
+			ficheroDLL[i] = (char)ruta[i];
+			if (i > longitudCarpeta) {
+				nombreFichero[j++] = (char)ruta[i];
+			}
+		}
+		ficheroDLL[ruta.length()] = '\0';
+		nombreFichero[j] = '\0';
+
+
+		utilidades::Libreria<Module> dll("");
+		Module* libreria = dll.crearInstancia(ficheroDLL);
+		if (libreria != NULL) {
+			//utiles::Log::escribir(std::string("Hemos encontrado esta librería ") + p.string() + std::string(" de tipo ") + std::to_string(libreria->tipo()));
+			
+			//Copiamos el fichero en una nueva ubicación
+			if (!std::filesystem::exists(carpeta)) {
+				std::filesystem::create_directories(carpeta);
+			}
+			char* ficheroTemp = new char[strlen(carpeta) + strlen(nombreFichero) + 1];
+			ficheroTemp[0] = '\0';
+
+			strcat(ficheroTemp, carpeta);
+			strcat(ficheroTemp, nombreFichero);
+			//int casosCopia = 1;
+			for (int iRep = 0; iRep < 2; iRep++) {
+				if (iRep == 1) {
+					remplazarExtension(ficheroDLL, "pdb");
+					remplazarExtension(ficheroTemp, "pdb");
+				}
+				if (std::filesystem::exists(ficheroDLL)) {
+					if (std::filesystem::exists(ficheroTemp)) {
+						//Exite
+						if (iRep == 0) {
+							Libreria* l = existe(libreria->tipo(), ficheroTemp);
+							if (l != NULL && l->esActivo()) {
+								l->descargar((char*)carpeta);
+							}
+						}
+						std::filesystem::remove(ficheroTemp);
+					}
+					std::filesystem::copy_file(ficheroDLL, ficheroTemp);
+					
+				}
+				if (iRep == 1) {
+#ifdef _WIN32
+					remplazarExtension(ficheroDLL, "dll");
+					remplazarExtension(ficheroTemp, "dll");
+#else
+					remplazarExtension(ficheroDLL, "so");
+					remplazarExtension(ficheroTemp, "so");
+#endif
+				}
+			}
+			addLibreria(libreria->tipo(),ficheroTemp, libreria->nombre(), ftime);
+			//libreriasDisponibles[libreria->tipo()]->push_back(new Libreria(ficheroTemp, libreria->nombre(), ftime));
+			/**/
+			delete[] ficheroTemp;
+			//libreriasDisponibles[libreria->tipo()]->push_back(new Libreria(ficheroDLL, libreria->nombre(),ftime));
+			dll.descargar(ficheroDLL);
+			delete libreria;
+		}
+		//dll.~Libreria/**/
+		delete[] ficheroDLL;
+		delete[] nombreFichero;
+		return true;
+	}
+	return false;
+}
+
+void CargaDLL::remplazarExtension(char*& cadena, const char* ext) {
+	int lExtenxion = strlen(ext);
+	int posCaracter = strlen(cadena) - lExtenxion;
+	for (int i = 0; i < lExtenxion; i++) {
+		cadena[posCaracter++] = ext[i];
+	}
+}
+
+void CargaDLL::addLibreria(Module::MODULES_TYPE tipo, char* ruta, char* nombre, std::filesystem::file_time_type tiempo) {
+	if (!libreriasDisponibles.contains(tipo)) {
+		libreriasDisponibles[tipo] = new std::vector<Libreria*>();
+		libreriasDisponibles[tipo]->push_back(new Libreria(ruta, nombre, tiempo));
+	} else {
+		//Buscamos si ya existe la librería
+		bool noExiste = true;
+		for (auto itr = libreriasDisponibles[tipo]->begin(); itr != libreriasDisponibles[tipo]->end() && noExiste; itr++) {
+			if (strcmp((*itr)->cogerNombre(), nombre) == 0) {
+				noExiste = false;
+				(*itr)->reiniciar();
+			}
+		}
+
+	}
+	
+}
 
 bool CargaDLL::cargar(char* carpeta, char * raiz) {
 
@@ -14,64 +139,20 @@ bool CargaDLL::cargar(char* carpeta, char * raiz) {
 	int longitudCarpeta = strlen(carpeta);
 	//CargaDLL::raiz = raiz;
 	utilidades::Libreria<Module> dll(raiz);
+	bool correcto = true;
 	for (auto& p : std::filesystem::directory_iterator(carpeta)) {
-	#ifdef _WIN32
-		std::regex expresionDLL(".*\\\.dll$");
-	#else
-		std::regex expresionDLL(".*\\\.so$");
-	#endif // _WIN32
-		std::filesystem::file_time_type ftime = std::filesystem::last_write_time(p.path());
-		//ftime.;
-		//td::string ultimaEscritura(std::asctime(std::localtime(&cftime)));
-		bool esDLL = std::regex_match(p.path().string(), expresionDLL);
-		if (p.is_regular_file() && esDLL) {
-			
-			std::string ruta = p.path().string();
-			char* ficheroDLL = new char[ruta.length()+1];
-			
-			char* nombreFichero= new char[ruta.length()-longitudCarpeta];
-			int j = 0;
-			for (int i = 0; i < ruta.length(); i++) {
-				ficheroDLL[i] = (char)ruta[i];
-				if (i > longitudCarpeta) {
-					nombreFichero[j++] = (char)ruta[i];
-				}
-			}
-			ficheroDLL[ruta.length()] = '\0';
-			nombreFichero[j] = '\0';
-			Module* libreria = dll.crearInstancia(ficheroDLL);
-			if (libreria != NULL) {
-				utiles::Log::escribir(std::string("Hemos encontrado esta librería ")+p.path().string()+std::string(" de tipo ")+std::to_string(libreria->tipo()));
-				if (!libreriasDisponibles.contains(libreria->tipo())) {
-					libreriasDisponibles[libreria->tipo()] = new std::vector<Libreria*>();
-				}
-				//Copiamos el fichero en una nueva ubicación
-				if (!std::filesystem::exists("modulosTEMP")) {
-					std::filesystem::create_directories("modulosTEMP");
-				}
-				char* ficheroTemp = new char[strlen("modulosTEMP/") + strlen(nombreFichero)+1];
-				ficheroTemp[0] = '\0';
-				strcat(ficheroTemp, "modulosTEMP/");
-				strcat(ficheroTemp, nombreFichero);
-				if (std::filesystem::exists(ficheroTemp)) {
-					std::filesystem::remove(ficheroTemp);
-				}
-				std::filesystem::copy_file(ficheroDLL, ficheroTemp);
-				libreriasDisponibles[libreria->tipo()]->push_back(new Libreria(ficheroTemp, libreria->nombre(),ftime));/**/
-				
-				//libreriasDisponibles[libreria->tipo()]->push_back(new Libreria(ficheroDLL, libreria->nombre(),ftime));
-				delete libreria;
-				dll.descargar(ficheroDLL);
-			}
-			//dll.~Libreria/**/
-			delete [] ficheroDLL;
-
-			delete[] nombreFichero;
-			
-		}
+		correcto &=cargarDLL(p.path(), raizLibrerias);
+	
 	}
 
-	return false;
+	return correcto;
+}
+bool CargaDLL::cargar(const char* path) {
+	bool correcto = true;
+	std::filesystem::path p(path);
+	correcto &= cargarDLL(p, raizLibrerias);
+
+	return correcto;
 }
 void CargaDLL::descargar() {
 	utilidades::Libreria<Module> dll(".");
@@ -87,6 +168,16 @@ int CargaDLL::hayModulos(Module::MODULES_TYPE tipo){
 	
 	
 	return libreriasDisponibles.contains(tipo)?libreriasDisponibles[tipo]->size():0;
+}
+
+void CargaDLL::liberarModulo(Module::MODULES_TYPE tipo) {
+	if (libreriasDisponibles.contains(tipo) && libreriasDisponibles[tipo]->size() > 0) {
+		for (int i = 0; i < (*(libreriasDisponibles[tipo])).size(); i++) {
+			if ((*(libreriasDisponibles[tipo]))[i]->esActivo()) {
+				(*(libreriasDisponibles[tipo]))[i]->descargar(raizLibrerias);
+			}
+		}
+	}
 }
 
 
@@ -129,6 +220,8 @@ bool Libreria::descargar(utilidades::Libreria<Module>& dll) {
 	if (descargado) {
 		delete[] fichero;
 	}
+	instancia = NULL;
+	descargando = false;
 	return descargado;
 }
 void* Libreria::cogerInstancia(char*raiz) {
@@ -145,6 +238,11 @@ void* Libreria::cogerInstancia(char*raiz) {
 	}
 	return instancia;
 }
+void Libreria::reiniciar() {
+	instancia = NULL;
+	descargando = false;
+}
+
 const char* Libreria::cogerNombreFichero() {
 	return fichero;
 }
@@ -154,4 +252,5 @@ const char* Libreria::cogerNombre() {
 }
 
 std::map<Module::MODULES_TYPE, std::vector<Libreria*>*> CargaDLL::libreriasDisponibles;
+char* CargaDLL::raizLibrerias = "modulosTEMP/";
 //char* raiz=".";
