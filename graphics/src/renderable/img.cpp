@@ -32,6 +32,7 @@ namespace renderable{
 				imagen[i][j] = new Pixel;
 			}
 		}*/
+
 	}
 
 	Img::~Img(){
@@ -83,10 +84,7 @@ namespace renderable{
 	float* Img::getData(){
 		/*
 		// setup FBO
-		glGenFramebuffers( 1, &FFrameBuffer );
-		glBindFramebuffer( GL_FRAMEBUFFER, FFrameBuffer );
-		glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, YourTextureID, 0 );
-		glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+		
 
 		// render to FBO
 		glBindFramebuffer( GL_FRAMEBUFFER, FFrameBuffer );
@@ -100,6 +98,9 @@ namespace renderable{
 		/**/
 		if (data == 0) {
 			long tamaño = (alto * ancho * bPixel);
+			if (tamaño == 0) {
+				return NULL;
+			}
 			data = new float[tamaño];
 			long pos = 0;
 			for (int y = 0; y < alto; y++) {

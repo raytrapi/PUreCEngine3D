@@ -72,6 +72,7 @@ public:
 	void updateEntity(void* entity);
 	//void addEntity(void* entity);
 	void removeEntity(void* entity);
+	void clearEntity(EntityGL4* entidad);
 	void removeEntities();
 	/*void newEntity(TYPE_ENTITY type, renderable::Object* object);*/
 

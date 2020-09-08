@@ -26,6 +26,7 @@ void modules::graphics::Graphic::removeEntity(void* entity) {
 void modules::graphics::Graphic::removeEntities() {
 	bool seguir = true;
 	for (auto itr = entities.begin(); itr != entities.end() && seguir; itr++) {
+		
 		seguir = false;
 		entities.erase(itr);
 		delete (*itr);

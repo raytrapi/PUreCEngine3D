@@ -1,7 +1,7 @@
 #ifndef __PNG
 #define __PNG
 
-#include<png.h>
+//#include<png.h>
 #include<malloc.h>
 #include"imagen.h"
 //#include"../../../src/modulos.h"

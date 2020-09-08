@@ -1,21 +1,17 @@
 
-set(GLFW_SOURCE_DIR "../../glfw")
 include_directories(
    ../utilidades/log
 	../src
    ../modules/src
    ../modules/graphic
-   src
-   "${GLFW_SOURCE_DIR}/deps"
-   "${GLFW_SOURCE_DIR}/include"
+   src 
 ) 
-set(GLAD_GL "${GLFW_SOURCE_DIR}/deps/glad/gl.h"
-            "${GLFW_SOURCE_DIR}/deps/glad_gl.c")
+
 
 file(GLOB GRAFICO terceros/imagenes/*.cpp)
 file(GLOB RENDERIZABLES src/renderable/object.cpp src/renderable/pixel.cpp src/renderable/img.cpp src/renderable/renderable.cpp src/renderable/cube.cpp )
 # terceros/*/*.cpp
-add_library(motor_grafico SHARED  ${RENDERIZABLES} ${GRAFICO} ${GLAD_GL})
+add_library(motor_grafico SHARED  ${RENDERIZABLES} ${GRAFICO})
 set_property(TARGET motor_grafico PROPERTY CXX_STANDARD 20)
 target_link_libraries(motor_grafico  ${CONAN_LIBS} utils modules components )
 set_target_properties(motor_grafico PROPERTIES

@@ -38,12 +38,13 @@ include_directories(
    utilidades/librerias
 	utilidades/log
    utilidades/files
+   utilidades/timer
 ) 
 
 file(GLOB CODIGO src/*.cpp utilidades/librerias/compile.cpp)# graphics/src/renderable/renderable.h
 #file(GLOB MOTOR src/Motor/*/*.cpp src/Motor/*.cpp)
 
-#file(GLOB MOTORGL src/terceros/*/*.cpp)
+#file(GLOB MOTORGL src/terceros/*/*.cpp) 
 
 if(WIN32)
 	file(GLOB CODIGOWIN src/windows/*/*.cpp src/windows/*.cpp)

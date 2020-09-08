@@ -19,6 +19,10 @@
 
 #include <filesControl.h>
 #include <compile.h>
+#include <watchdog.h>
+
+#include <thread>
+
 
 
 
@@ -39,67 +43,121 @@ int WINAPI WinMain(HINSTANCE hInstance,
     return 0;
 }
 #else
+#ifdef WIN32
+const char* extDLL = "dll";
+#else
+const char* extDLL = "so";
+#endif // WIN32
 
+bool recargarCartucho = false;
 modules::Tape* cartucho = 0;
 modules::graphics::Graphic* motorGrafico = 0;
+
+
 void cargarEscena(const char* projecto) {
    //utiles::Log::debug(path);
-   if (cartucho) {
-      cartucho->detener();
-   }
-   CargaDLL::liberarModulo(Module::TAPE);
+   
    std::string sandbox("H:/Desarrollo/motor_videojuegos_2D/sandbox/");
    std::string ruta = sandbox + std::string(projecto);
 
    //TODO: Esto solo es para Ninja
-   Compile::compileProject(ruta.c_str(),Compile::NINJA);
-   //Con visual studios falla si hay un PDB, así que lo intentamos quitar
-   if (std::filesystem::exists(ruta + std::string("/") + std::string(projecto) + std::string(".pdb"))) {
-      std::filesystem::remove(ruta + std::string("/") + std::string(projecto) + std::string(".pdb"));
-   }
+   modules::Tape::load(projecto, cartucho, [ruta](const char* path) {
+      Compile::compileProject(ruta.c_str(), Compile::NINJA);
+      //cargarEscena(path);
+      //if
+   });
+   
+   
    //----
+   
 
-   ruta += std::string("/")+std::string(projecto)+std::string(".dll");
-   if (std::filesystem::exists(ruta)) {
-      CargaDLL::cargar(ruta.c_str());
-      //cartucho=
-
-      cartucho = CargaDLL::cogerModulo<modules::Tape>(Module::TAPE);
+   ruta += std::string("/")+std::string(projecto)+std::string(".")+std::string(extDLL);
+   FileControl::fileChangeTime(ruta.c_str(), [&,ruta]() {
       if (cartucho) {
-         Screen::setDimension(cartucho->getScreenWidth(), cartucho->getScreenHeight());
-         Module::set(Module::MODULES_TYPE::TAPE, cartucho);
-         if (motorGrafico) {
-            //motorGrafico->inicializar(0, cartucho->getScreenWidth(), cartucho->getScreenHeight());
-            cartucho->start();
-         }
+         cartucho->detener();
+      }
+      CargaDLL::liberarModulo(Module::TAPE);
+#ifdef WIN32
+      //Con visual studios falla si hay un PDB, así que lo intentamos quitar
+      std::string pdb = ruta.substr(0, ruta.size() - 3) + std::string("pdb");
+      if (std::filesystem::exists(pdb)) {
+         std::filesystem::remove(pdb);
+      }
+#endif // WIN32
 
-      }/**/
+      recargarCartucho = true;
+      utiles::Log::debug(ruta);
+      if (std::filesystem::exists(ruta)) {
+         CargaDLL::cargar(ruta.c_str());
+         //cartucho=
+
+         cartucho = CargaDLL::cogerModulo<modules::Tape>(Module::TAPE);
+         if (cartucho) {
+            Screen::setDimension(cartucho->getScreenWidth(), cartucho->getScreenHeight());
+            Module::set(Module::MODULES_TYPE::TAPE, cartucho);
+            //if (motorGrafico) {
+               ////motorGrafico->inicializar(0, cartucho->getScreenWidth(), cartucho->getScreenHeight());
+              // cartucho->start();
+            //}
+
+         }/**/
+      }
+   },2000);
+   
+}
+void run() {
+   Input input;
+   while (motorGrafico && motorGrafico->isOpen()) {
+      Time::update();
+      input.resetKeyPress();
+      if (cartucho && cartucho->isRunning()) {
+         //std::vector<void*>* renderizables = NULL;
+         
+         if (cartucho) {
+            if (recargarCartucho) {
+               cartucho->start();
+               recargarCartucho = false;
+            }
+            try {
+               cartucho->update();
+               //std::thread game([]() {cartucho->update();});
+               //game.join();
+            } catch (std::exception e) {
+               utiles::Log::error("Se ha producido una excepcion");
+               utiles::Log::debug(e.what());
+               cartucho->detener();
+            }
+         }
+      }
+      if (motorGrafico) {
+         motorGrafico->renderizar(Renderable::getRenderable());
+         if (motorGrafico->isEnd()) {
+            if (cartucho) {
+               cartucho->setEnd();
+            }
+         }/**/
+      }
    }
 }
 void main(int numeroArgumentos, char** argumentos) {
     CargaDLL::cargar("./modulos", "./"); 
-    Input input;
-    bool correcto = true;
     
+    bool correcto = true;
+    const char* escena = "micraft";
     
     if (CargaDLL::hayModulos(Module::GRAPHIC) > 0) {
        motorGrafico = CargaDLL::cogerModulo<modules::graphics::Graphic>(Module::GRAPHIC, "OPENGL 4");
        Module::set(Module::MODULES_TYPE::GRAPHIC, motorGrafico);
     }/**/
-
+    utiles::Watchdog wd;
     //--------
     //Esto lo hacemos a mano mientra no tengamos un menú en la aplicación que me permita hacerlo desd ahí
-    fileControl fc;
+    FileControl fc;
     if (motorGrafico) {
        motorGrafico->inicializar(0, 800, 600);
-       const char* escena = "micraft";
-       motorGrafico->addOnFocus(fileControl::onFocus);
-       modules::Tape::load(escena, cartucho, [](const char* path) {
-          cargarEscena(path);
-          //if
-          
-
-       });
+       cargarEscena(escena);
+       //motorGrafico->addOnFocus(fileControl::onFocus);
+       
        
     }
     //-----
@@ -123,27 +181,21 @@ void main(int numeroArgumentos, char** argumentos) {
            correcto = motorGrafico->inicializar(0, 800, 600);
         };
     }/**/
-    
+    run();
+    //std::thread game(run);
+    /*while (motorGrafico && motorGrafico->isOpen()) {
+       //game.join();
+       if (motorGrafico->isEnd()) {
+       }
+    }*/
+    //game.join();
+    /*std::thread game(run,motorGrafico,cartucho);
     while(motorGrafico && motorGrafico->isOpen()){
-       Time::update();
-       input.resetKeyPress();
-       if (cartucho && cartucho->isRunning()) {
-          //std::vector<void*>* renderizables = NULL;
-          if (cartucho) {
-
-             cartucho->update();
-          }
+       //game.join();
+       if (motorGrafico->isEnd()) {
        }
-       if (motorGrafico) {
-          motorGrafico->renderizar(Renderable::getRenderable());
-          if (motorGrafico->isEnd()) {
-             if (cartucho) {
-               cartucho->setEnd();
-             }
-          }
-       }
-    }
-
+    }*/
+    wd.~Watchdog();
     if (cartucho) {
         cartucho->detener();
         delete cartucho;

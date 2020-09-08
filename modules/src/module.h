@@ -28,7 +28,9 @@ class EXPORTAR_MODULO Module {
 public:
 	enum MODULES_TYPE {
 		GRAPHIC,
-		TAPE
+		TAPE,
+		PHISICS,
+
 	};
 private:
 	static std::map<MODULES_TYPE, Module*> modulos;

@@ -5,6 +5,18 @@ void Compile::compileProject(const char* project, Types tipo) {
 	int i;
 	switch (tipo) {
 	case Compile::NINJA:
+#ifdef WIN32
+		comando= std::string(entornoCompilador) + " && cd  " + std::string(project) + "&&ninja" + +" 1>c.txt 2>e.txt";
+		for (int j = 0; j < comando.length(); j++) {
+			if (comando[j] == '/') {
+				comando[j] = '\\';
+			}
+
+		}
+
+		WinExec(comando.c_str(),0);
+		//std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+#else
 		if (!system(NULL)) {
 			return;
 		}
@@ -17,6 +29,7 @@ void Compile::compileProject(const char* project, Types tipo) {
 
 		}
 		i=system(comando.c_str());
+#endif
 
 		break;
 	default:

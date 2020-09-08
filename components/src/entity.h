@@ -79,6 +79,13 @@ public:
 
 	int getId() { return id; };
 
+	virtual void update() {
+		modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
+		if (g) {
+			g->updateEntity(this);
+		}
+	}
+
 };
 
 template<class T>
@@ -116,6 +123,15 @@ inline T* Entity::addComponent() {
 		if (g) {
 			g->addEntity(this);
 		}/**/
+		if (std::is_same<T, renderable::Img>::value) {
+			//Le añadimos ademas el componente Shader
+			Shader* shaders =addComponent<Shader>();
+			shaders->loadShader("shaders/vertex_texture.glsl", Graphics::Shader::TYPE_SHADER::VERTEX);
+			shaders->loadShader("shaders/fragment_texture.glsl", Graphics::Shader::TYPE_SHADER::FRAGMENT);
+			/*shaders->loadShader("shaders/vertex_basic.glsl", Graphics::Shader::TYPE_SHADER::VERTEX);
+			shaders->loadShader("shaders/fragment_solid_color.glsl", Graphics::Shader::TYPE_SHADER::FRAGMENT);*/
+			shaders->compileShader();
+		}
 	}
 	if (c != NULL) {
 		comp->setEntity(this);

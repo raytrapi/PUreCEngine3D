@@ -7,6 +7,7 @@
 #include <vector>
 #include "../../utilidades/files/filesControl.h"
 #include <string>
+#include <functional>
 
 namespace modules {
 
@@ -20,7 +21,7 @@ namespace modules {
 		virtual void setScreenSize(short int width, short int height) {};
 		//modules::graphics::Graphic* graphic = 0;
 		static std::string projectName;
-		static void (*callbackLoad)(const char*);
+		static std::function<void(const char*)> callbackLoad;
 		static Tape* cinta;
 	public:
 		//void setGraphic(modules::graphics::Grafico* graphic) { Graphic = graphic; };
@@ -54,7 +55,7 @@ namespace modules {
 		}
 		Module::MODULES_TYPE tipo() { return Module::TAPE; };
 		std::vector<void*>* getRenderizables() { return &renders; };
-		static void load(const char* project, modules::Tape* tape, void(*callback)(const char*));
+		static void load(const char* project, modules::Tape* tape, std::function<void(const char*)>);
 	};
 
 }

@@ -2,7 +2,7 @@
 
 namespace imagenes {
 	Imagen* PNG::cargar(const char* nombreFichero) {
-		FILE* fp = fopen(nombreFichero, "rb");
+		/*FILE* fp = fopen(nombreFichero, "rb");
 		if (!fp) {
 			return NULL;
 		}
@@ -78,7 +78,8 @@ namespace imagenes {
 		imagen->setDatos(raw);
 
 		fclose(fp);
-		return imagen;
+		return imagen;/**/
+		return NULL;
 	}
 
 };

@@ -1,9 +1,5 @@
 #ifndef _RND_IMG
 #define _RND_IMG
-#define GL_GLEXT_PROTOTYPES
-#include <glad/gl.h>
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
 
 
 #include "../../../utilidades/global/screen.h"
@@ -14,17 +10,21 @@ namespace renderable {
 	class EXPORTAR_MODULO_GRAFICO Img :public Object {
 		Pixel *** imagen=0;
 		float* data = 0;
-		int ancho;
-		int alto;
-		float right;
-		float left;
-		float top;
-		float bottom;
+		int ancho=0;
+		int alto=0;
+		float right=0;
+		float left=0;
+		float top=0;
+		float bottom=0;
 		int bPixel=4;
 		unsigned int idTextura = 0;
-		GLuint FFrameBuffer;
 		void liberarImagen();
 		void calcularUV();
+
+		bool conMinimap = true;
+		bool pixelado = false;
+
+		bool editable = false;
 	public:
 		Img();
 		~Img();
@@ -47,6 +47,14 @@ namespace renderable {
 		float getBottom();
 		unsigned int getId();
 		void setId(unsigned int id);
+
+		bool isMinMap() { return conMinimap; };
+		void setMinMap(bool set = true) { conMinimap = set; };
+		bool isNearest() { return pixelado; };
+		void setNearest(bool set = true) { pixelado = set; };
+		bool isEditable() { return editable; };
+		void setEditable(bool set = true) { editable = set; };
+
 	};
 	
 }
