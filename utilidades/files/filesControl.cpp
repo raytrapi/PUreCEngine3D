@@ -89,6 +89,13 @@ void FileControl::onFocus(bool focus) {
 		}
 	}
 }
+bool FileControl::existsFolder(const char* path) {
+	return std::filesystem::is_directory(std::filesystem::path(path));
+}
+bool FileControl::createFolder(const char* path) {
+	
+	return std::filesystem::create_directory(std::filesystem::path(path));
+}
 std::vector<FileControl::EstadoRuta *> FileControl::carpetasCambio;
 std::vector<FileControl::EstadoRuta *> FileControl::ficherosCambio;
 std::vector<FileControl::EstadoRuta*> FileControl::ficherosCambioTiempo;

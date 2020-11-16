@@ -1,0 +1,36 @@
+cmake_minimum_required(VERSION 3.0.0)
+
+project(%%NAME%%)
+
+#Esto cambiará en el futuro
+##H:/Desarrollo/motor_videojuegos_2D
+set(PATH_EDITOR "%%PATHMOTOR%%") 
+set(PATH_EDITOR_INCLUDE "/")
+##/out/build/x64-Debug/lib/
+set(PATH_EDITOR_LIBRARY "%%PATHMOTORLIB%%")
+##/out/build/x64-Debug/bin/modulos/
+set(PATH_EDITOR_LIBRARY_OUT "%%PATHMOTORDLL%%")
+
+
+
+include_directories(
+	${PATH_EDITOR}${PATH_EDITOR_INCLUDE}modules/tape
+   ${PATH_EDITOR}${PATH_EDITOR_INCLUDE}modules/src
+   ${PATH_EDITOR}${PATH_EDITOR_INCLUDE}utilidades/
+   ${PATH_EDITOR}${PATH_EDITOR_INCLUDE}utilidades/log
+   ${PATH_EDITOR}${PATH_EDITOR_INCLUDE}graphics/src/renderable
+   ${PATH_EDITOR}${PATH_EDITOR_INCLUDE}components/src
+   ../src
+) 
+file(GLOB CODIGO src/*.cpp src/*/*.cpp src/*.h src/*/*.h)
+add_library(${CMAKE_PROJECT_NAME} SHARED ${CODIGO})
+
+
+
+set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY CXX_STANDARD 20)
+target_link_libraries(${CMAKE_PROJECT_NAME}
+   ${PATH_EDITOR}${PATH_EDITOR_LIBRARY}modules.lib 
+   ${PATH_EDITOR}${PATH_EDITOR_LIBRARY}motor_grafico.lib
+   ${PATH_EDITOR}${PATH_EDITOR_LIBRARY}components.lib
+   ${PATH_EDITOR}${PATH_EDITOR_LIBRARY}utils.lib
+)

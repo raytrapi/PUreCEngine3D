@@ -5,6 +5,109 @@ RenderableComponent::RenderableComponent(renderable::Object* obj) {
 };
 	
 RenderableComponent::~RenderableComponent() {
-	delete objeto;
-}
+	utiles::Log::debug("Borro render");
+	if (objeto) {
+		delete objeto;
+		objeto = NULL; 
+	}
 	
+}
+
+void RenderableComponent::rotateX(float radian) {
+	setRotation(radian, 0.0f, 0.0f);
+}
+void RenderableComponent::rotateY(float radian) {
+	setRotation(0.0f, radian, 0.0f);
+}
+void RenderableComponent::rotateZ(float radian) {
+	setRotation(0.0f, 0.0f, radian);
+}
+void RenderableComponent::setPosition(float x, float y, float z) {
+	pX = x;
+	pY = y;
+	pZ = z;
+	transformacion[3] = pX;
+	transformacion[7] = pY;
+	transformacion[11] =  pZ;
+}
+
+void RenderableComponent::setRotation(float x, float y, float z) {
+	rX = x;
+	rY = y;
+	rZ = z;
+	double cX = cos(x);
+	double sX = sin(x);
+	double cY = cos(y);
+	double sY = sin(y);
+	double cZ = cos(z);
+	double sZ = sin(z);
+	
+	transformacion[0] = cZ*cY;
+	transformacion[1] = -cX*sZ+sY*cZ*sX;
+	transformacion[2] = sX*sZ + sY*cX*cZ;
+
+	transformacion[4] = cY*sZ;
+	transformacion[5] = cX*cZ + sY*sZ*sX;
+	transformacion[6] = -sX * cZ + sY * cX * sZ;
+
+	transformacion[8] = sX;
+	transformacion[9] = cY*sX;
+	transformacion[10] = cX*cY;
+	//transformacion[3] = 0.25f;
+	//this->entidad->
+	//updateEntityCUBE
+	
+}
+
+void RenderableComponent::setRotationGimbal(float uX, float uY, float uZ, float angle) {
+	float cA = cosf(angle);
+	float cA_1 = 1 - cA;
+	float sA = sinf(angle);
+	//float SA_1 = 1 - sA;
+	
+
+	transformacion[0] = cA+(uX*uX)*cA_1;
+	transformacion[1] = uX*uY*cA_1-uZ*sA;
+	transformacion[2] = uX*uZ*cA_1+uY*sA;
+	transformacion[3] = 0;
+	transformacion[4] = uY*uX*cA_1+uZ*sA;
+	transformacion[5] = cA+ (uY*uY)*cA_1;
+	transformacion[6] = uY*uZ*cA_1-uX*sA;
+	transformacion[7] = 0;
+	transformacion[8] = uZ*uX*cA_1-uY*sA;
+	transformacion[9] = uZ*uY*cA_1+uX*sA;
+	transformacion[10] = cA+(uZ*uZ)*cA_1;
+	transformacion[11] = 0;
+	transformacion[12] = 0;
+	transformacion[13] = 0;
+	transformacion[14] = 0;
+	transformacion[15] = 1;
+}
+
+float RenderableComponent::getX() {
+	return pX;
+}
+
+float RenderableComponent::getY() {
+	return pY;
+}
+
+float RenderableComponent::getZ() {
+	return pZ;
+}
+
+float RenderableComponent::getRX() {
+	return rX;
+}
+float RenderableComponent::getRY() {
+	return rY;
+}
+float RenderableComponent::getRZ() {
+	return rZ;
+}
+
+float* RenderableComponent::matrixTrans() {
+	return transformacion; 
+}
+
+

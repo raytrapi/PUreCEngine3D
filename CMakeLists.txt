@@ -41,14 +41,15 @@ include_directories(
    utilidades/timer
 ) 
 
-file(GLOB CODIGO src/*.cpp utilidades/librerias/compile.cpp)# graphics/src/renderable/renderable.h
+file(GLOB CODIGO src/*.cpp utilidades/librerias/compile.cpp src/proyectos/*.cpp)# graphics/src/renderable/renderable.h
 #file(GLOB MOTOR src/Motor/*/*.cpp src/Motor/*.cpp)
 
 #file(GLOB MOTORGL src/terceros/*/*.cpp) 
 
 if(WIN32)
-	file(GLOB CODIGOWIN src/windows/*/*.cpp src/windows/*.cpp)
-	add_executable(2dMotorGame WIN32 ${CODIGO} ${CODIGOWIN})
+	#file(GLOB CODIGOWIN src/windows/*/*.cpp src/windows/*.cpp)
+	add_executable(2dMotorGame WIN32 ${CODIGO} )#${CODIGOWIN})
+
 else()
 	add_executable(2dMotorGame ${CODIGO})
 endif()
@@ -68,3 +69,13 @@ if (MSVC)
     set_target_properties(${GUI_ONLY_BINARIES} PROPERTIES
                          LINK_FLAGS "/ENTRY:mainCRTStartup")
 endif()
+
+add_custom_command(
+    TARGET 2dMotorGame POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_HOME_DIRECTORY}/src/proyectos/compiler
+        ${CMAKE_BINARY_DIR}/bin/
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_HOME_DIRECTORY}/src/proyectos/defproj
+        ${CMAKE_BINARY_DIR}/bin/
+   )

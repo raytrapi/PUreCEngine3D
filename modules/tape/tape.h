@@ -21,21 +21,43 @@ namespace modules {
 		virtual void setScreenSize(short int width, short int height) {};
 		//modules::graphics::Graphic* graphic = 0;
 		static std::string projectName;
-		static std::function<void(const char*)> callbackLoad;
+		static std::function<void()> callbackLoad;
 		static Tape* cinta;
+		bool detener = false;
+		bool deteniendo = false;
+
+		std::function<void()>callback=NULL;
 	public:
 		//void setGraphic(modules::graphics::Grafico* graphic) { Graphic = graphic; };
 		virtual void update() {};
 		virtual void start() {};
 		virtual void destroy() {};
-		void detener() {
+		void stop() {
 			ejecutando = false;
-
+			deteniendo = true;
+			detener = false;
 			modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
 			if (g) {
 				g->removeEntities();
 			}
-			destroy();
+			try {
+				destroy();
+			} catch (std::exception e) {
+
+			}
+			if (callback) {
+				callback();
+			}
+		}
+		void sendStop() {
+			detener = true;
+			deteniendo = false;
+		}
+		bool isStoping() { return deteniendo; };
+		bool isOrderStop() { return detener; };
+		
+		void onEnd(std::function<void()>callback) {
+			this->callback = callback;
 		}
 		virtual void onFocus(bool) {};
 
@@ -55,7 +77,7 @@ namespace modules {
 		}
 		Module::MODULES_TYPE tipo() { return Module::TAPE; };
 		std::vector<void*>* getRenderizables() { return &renders; };
-		static void load(const char* project, modules::Tape* tape, std::function<void(const char*)>);
+		static void load(const char* project, modules::Tape* tape, std::function<void()>);
 	};
 
 }

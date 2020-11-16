@@ -53,6 +53,9 @@ public:
 	static bool fileChangeTime(const char* path, std::function<void()>callback, unsigned int milliseconds);
 	static void onFocus(bool focus);
 	static bool check(EstadoRuta* estado, Tipos tipo);
+
+	static bool existsFolder(const char* path);
+	static bool createFolder(const char* path);
 };
 
 

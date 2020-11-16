@@ -3,6 +3,8 @@ include_directories(
    ../utilidades/log
    ../modules/graphic
    ../modules/src
+   ../graphics/src
+   src
 ) 
 
 file(GLOB CODIGO modulos/*/*.cpp src/*.cpp)

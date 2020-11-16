@@ -4,6 +4,8 @@ include_directories(
 	../../src
    ../../modules/src
    ../../../components/src
+   ../../../components/modulos/cameras
+   ../../../components/modulos/renderables
    ../../modules/graphic
    ../../modules/tape
    "${GLFW_SOURCE_DIR}/deps"
@@ -12,7 +14,7 @@ include_directories(
 ) 
 set(GLAD_GL "${GLFW_SOURCE_DIR}/deps/glad/gl.h"
             "${GLFW_SOURCE_DIR}/deps/glad_gl.c")
-            
+             
 file(GLOB GRAFICO src/*.cpp src/*/*.cpp)
 add_library(mg_gl4 SHARED ${GRAFICO} ${GLAD_GL})
 

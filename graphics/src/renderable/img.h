@@ -10,8 +10,8 @@ namespace renderable {
 	class EXPORTAR_MODULO_GRAFICO Img :public Object {
 		Pixel *** imagen=0;
 		float* data = 0;
-		int ancho=0;
-		int alto=0;
+		float ancho=0;
+		float alto=0;
 		float right=0;
 		float left=0;
 		float top=0;
@@ -30,15 +30,15 @@ namespace renderable {
 		~Img();
 		Object::TYPE getType();
 		//TODO: Crear método para redimensionar la imagen
-		float* setSize(int width, int height);
+		float* setSize(float width, float height);
 
 		Pixel * getPixel(short int x, short int y) {
 			return imagen[x][y];
 		};
 		void setPixel(short int x, short int y, Pixel* p);
 		void setPixel(short int x, short int y, float r, float g, float b, float a);
-		int getWidth() { return ancho; };
-		int getHeight() { return alto; };
+		float getWidth() { return ancho; };
+		float getHeight() { return alto; };
 		void setPosition(float x, float y, float z);
 		float* getData();
 		float getRight();

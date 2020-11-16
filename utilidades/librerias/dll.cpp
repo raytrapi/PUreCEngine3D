@@ -1,7 +1,7 @@
 #include "dll.h"
 
 template<class T>
-inline utilidades::Libreria<T>::Libreria(char * raiz) {
+inline utilidades::Libreria<T>::Libreria(const char * raiz) {
 #ifdef _WIN32
 	cookieRaiz=AddDllDirectory((PCWSTR) raiz);
 #endif

@@ -2,6 +2,7 @@
 #define _OBJECT
 #include "../motorExport.h"
 #include <vector>
+#include <log.h>
 
 namespace renderable {
 	class EXPORTAR_MODULO_GRAFICO Object {
@@ -12,15 +13,9 @@ namespace renderable {
 		float rY;
 		float rZ;/**/
 	protected:
-		float pX = 0;
-		float pY = 0;
-		float pZ = 0;
-		float rX = 0;
-		float rY = 0;
-		float rZ = 0;
-		float l;
 		
-
+		float* normales = NULL;
+		float* malla = NULL;
 	public:
 		enum class EXPORTAR_MODULO_GRAFICO TYPE {
 			IMG,
@@ -28,15 +23,7 @@ namespace renderable {
 		};
 		virtual ~Object();
 		virtual Object::TYPE getType() = 0;
-		virtual void setPosition(float x, float y, float z);
-		virtual void setRotation(float x, float y, float z);
-		float getX();
-		float getY();
-		float getZ();
-		float getRX();
-		float getRY();
-		float getRZ();
-
+		void setMesh(float* mesh, float* normals = NULL); 
 		
 	};
 }

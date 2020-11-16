@@ -10,7 +10,7 @@
 //#include "../../graphics/src/renderable/object.h"
 
 
-
+extern class Camera;
 namespace modules {
 	namespace graphics {
 		class EXPORTAR_MODULO Graphic:public Module {
@@ -60,6 +60,9 @@ namespace modules {
 			void removeOnFocus(Tape* juego);
 
 			virtual bool isOpen() { return open;};
+
+			virtual void changeCamera(Camera* camera) {};//Lamentablemente para evitar ciclos hemos de añadir un puntero, pero realmente será un tipo Camera
+			virtual void resizeCamera() {};
 			//virtual void* 
 		};
 

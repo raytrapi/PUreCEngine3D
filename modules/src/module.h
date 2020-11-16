@@ -44,7 +44,7 @@ public:
 	template<class T>
 	static T* get();
 	
-	static void set(MODULES_TYPE type, Module* module);
+	static void set(MODULES_TYPE type, Module* );
 };
 
 template<class T>

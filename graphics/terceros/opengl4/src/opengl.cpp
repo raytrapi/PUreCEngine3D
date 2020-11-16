@@ -21,6 +21,10 @@ MotorGL::~MotorGL() {
 */
 void MotorGL::renderizar(void* rederizables) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //glEnable(GL_DEPTH_TEST);
+    //glDepthFunc(GL_LESS);
+
+    //glDepthMask(GL_FALSE);
     for (auto itr = misEntidades.begin(); itr != misEntidades.end();itr++) {
        std::vector<GLuint>* texts = itr->second->getTexts();
        int numText = GL_TEXTURE0;
@@ -28,6 +32,21 @@ void MotorGL::renderizar(void* rederizables) {
           glActiveTexture(numText++);
           glBindTexture(GL_TEXTURE_2D, *itrT);
        }
+
+       auto comp = itr->second->getShadersPrograms();
+       auto itrC = comp->begin();
+       //glMatrixMode(GL_PROJECTION);
+       /*if (itrC != comp->end()) {
+          glUseProgram(*itrC);
+          int modelLoc;
+          //int modelLoc = glGetUniformLocation(*itrC, "model");
+          //glUniformMatrix4fv(modelLoc, 1, GL_TRUE,itr->second-> >matrixTrans());
+          modelLoc = glGetUniformLocation(*itrC, "view");
+          glUniformMatrix4fv(modelLoc, 1, GL_FALSE, vista);
+          modelLoc = glGetUniformLocation(*itrC, "projection");
+          glUniformMatrix4fv(modelLoc, 1, GL_FALSE, proyeccion);
+
+       }/**/
        auto fbos = itr->second->getFBOs();
        for (auto itrFBO = fbos->begin(); itrFBO != fbos->end(); itrFBO++) {
           //glViewport(0, 0, std::get<1>(*itrFBO), std::get<2>(*itrFBO));
@@ -50,6 +69,40 @@ void MotorGL::renderizar(void* rederizables) {
 
         GLuint vao = *(itr->second->getVAO());
         glBindVertexArray(vao);
+        //for (int iLado = 0; iLado < 6; iLado++) {
+           //glBindBuffer(GL_ARRAY_BUFFER, *(itr->second->getVBO()));
+           //glEnableVertexAttribArray(1);
+           //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)((24+(3*iLado)) * sizeof(float)));
+           //glVertexAttrib3f(1, 0.0, 1.0, 0.0);
+           /*switch (iLado) {
+            case 0:
+               glVertexAttrib3f(1, 0.0, 0.0, 1.0);
+               break;  
+            case 1:
+               glVertexAttrib3f(1, 1.0, 0.0, 0.0);
+               break;
+            case 2:
+               glVertexAttrib3f(1, 0.0, 1.0, 0.0);
+               break;
+            case 3:
+               glVertexAttrib3f(1, -1.0, 0.0, 0.0);
+               break;
+            case 4:
+               glVertexAttrib3f(1, 0.0, -1.0, 0.0);
+               break;
+            case 5:
+               glVertexAttrib3f(1, 0.0, 0.0, -1.0);
+               break;
+
+           }/**/
+           /*glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *(itr->second->getEBO()));
+           glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)((6*iLado) * sizeof(GL_UNSIGNED_INT)));/**/
+           glDrawArrays(GL_TRIANGLES, 0, itr->second->getVertextCount());
+        //}
+        /*glEnableVertexAttribArray(0);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        //glVertexAttrib3f(1, 0.0, 0.0, 1.0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *(itr->second->getEBO()));
         glDrawElements(GL_TRIANGLES, itr->second->getVertextCount(), GL_UNSIGNED_INT, 0);
         //glDrawArrays(itr->second->getMode(), 0, itr->second->getVertextCount());
         /**/
@@ -65,6 +118,9 @@ void MotorGL::renderizar(void* rederizables) {
     if (glfwWindowShouldClose(window)) {
         setEnd();
     }
+    //glDepthMask(GL_TRUE);
+    //glDisable(GL_DEPTH_TEST);
+
     /*float* vertices=new float[18];
     glBufferSubData(0, 0, 18, vertices);
     if (derecha) {
@@ -91,7 +147,8 @@ void MotorGL::renderizarCubo(renderable::Cube * cubo) {
     
 }
 void MotorGL::renderizar() { 
-    renderizar(0);
+   glViewport(0, 0, ancho, alto);
+   renderizar(0);
 }
 
 
@@ -111,110 +168,26 @@ void MotorGL::updateEntity(void* entity) {
    EntityGL4* entidad = NULL;
    if (itr != misEntidades.end()) { //Si existe la borramos
       entidad = misEntidades[(Entity*)entity];
-      clearEntity(entidad);
+      clearEntity(entidad); 
    }
    
    auto renderables = ((Entity*)entity)->getComponent<RenderableComponent>();
    if (renderables != NULL) {
       for (auto itrR = renderables->begin(); itrR != renderables->end(); itrR++) {
          RenderableComponent* r = (RenderableComponent*)(*itrR);
-         switch (r->getRenderable()->getType()) {
-         case renderable::Object::TYPE::IMG: //Es una IMAGEN
-            if (entidad == 0) {
-               entidad = new EntityGL4(GL_TRIANGLE_FAN, r->getRenderable());
-               misEntidades[(Entity*)entity] = entidad;
+         if (r && r->getRenderable()) {
+            switch (r->getRenderable()->getType()) {
+            case renderable::Object::TYPE::IMG: //Es una IMAGEN
+               updateEntityIMG(r, entidad, (Entity*)entity);
+               break;
+            case renderable::Object::TYPE::CUBE:
+               updateEntityCUBE(r, entidad, (Entity*)entity);
+               break;
             }
-               
-            
-            /*float points[] = {
-                  -0.8f,  -0.8f,  0.0f,
-                  -0.8f,   0.8f,  0.0f,
-                  0.8f,   0.8f,  0.0f,
-                  0.8f,  -0.8f,  0.0f
-            };/**/
-            renderable::Img* img = (renderable::Img*)r->getRenderable();
-            float vertices[] = {
-               // posicion           // uv
-                0.5f,  0.5f, 0.0f,   0.0f, 0.0f, // arriba derecha
-                0.5f, -0.5f, 0.0f,   0.0f, 1.0f, // abajo derecha
-               -0.5f, -0.5f, 0.0f,   1.0f, 1.0f, // abajo izquierda
-               -0.5f,  0.5f, 0.0f,   1.0f, 0.0f  // arriba izquierda 
-            };
-            unsigned int indices[] = {
-                0, 1, 3, // primer triangulo
-                1, 2, 3  // segundo triangulo
-            };
-            
-            GLuint *vao = entidad->getVAO();
-            GLuint *vbo = entidad->getVBO();
-            GLuint *ebo = entidad->getEBO();
-            glGenVertexArrays(1, vao);
-            glGenBuffers(1, vbo);
-            glGenBuffers(1, ebo);
-            
-            glBindVertexArray(*vao);
-
-            glBindBuffer(GL_ARRAY_BUFFER, *vbo);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-   
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *ebo);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-            glEnableVertexAttribArray(0);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0); //Cojemos los 3 puntos del vertice
-            glEnableVertexAttribArray(1);
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float))); //Cojemos los 2 valores de la textura a partir del 3 valor
-            
-            //entidad->setVertextCount(4); //TODO: El número de vertices se obtendrá de la propia maya del objeto.
-            entidad->setVertextCount(6); //TODO: El número de vertices se obtendrá de la propia maya del objeto.
-               
-            
-            //glDisableVertexAttribArray(0);
-
-            //Ahora le añadimos una textura
-               
-            
-            if (img->getData()) {
-               GLuint* text = entidad->addText();
-               glGenTextures(1, text);
-
-               glBindTexture(GL_TEXTURE_2D, *text);
-               glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-               glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-               glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, img->isNearest() ? GL_NEAREST:GL_LINEAR); //GL_NEAREST
-               glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, img->isNearest() ? GL_NEAREST: GL_LINEAR);
-               glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->getWidth(), img->getHeight(), 0, GL_RGBA, GL_FLOAT, img->getData());
-
-               if (img->isEditable()) {
-                  //Generamos el FBO
-                  GLuint* fbo = entidad->addFBO(img->getWidth(), img->getHeight(), img->getData(), img->isNearest() ? GL_NEAREST : GL_LINEAR);
-                  glGenFramebuffers(1, fbo);
-                  glBindFramebuffer(GL_FRAMEBUFFER, *fbo);
-                  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *text, 0);
-                  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-               }
-
-
-               if (img->isMinMap()) {
-                  glGenerateMipmap(GL_TEXTURE_2D);
-                  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, img->isNearest()? GL_NEAREST_MIPMAP_NEAREST :GL_LINEAR_MIPMAP_LINEAR);
-                  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, img->isNearest() ? GL_NEAREST_MIPMAP_NEAREST : GL_LINEAR_MIPMAP_LINEAR);
-               }
-
-               //Activamos el Shader
-               auto comp = entidad->getShadersPrograms();
-               for (auto itrC = comp->begin(); itrC != comp->end(); itrC++) {
-                  //glUseProgram(*itrC);
-                  glUniform1i(glGetUniformLocation(*itrC, "textura"), 0);
-                  //glUniform1i(glGetUniformLocation(ID, name.c_str()), );
-               }
-            }
-
          }
 
       }
    }
-
 }
 /**
 * Borra una entidad del sistema
@@ -239,13 +212,27 @@ void MotorGL::clearEntity(EntityGL4 * entidad) {
    entidad->clear();
 }
 void MotorGL::removeEntities() {
-   for (auto itr = entities.begin(); itr != entities.end(); itr++) {
+
+   auto itr = entities.begin();
+   while(itr != entities.end()) {
          //GLuint* vao = ((Entity*)(*itr))->getVAO();
-         glDeleteBuffers(1, misEntidades[((Entity*)(*itr))]->getVBO());
-         glDeleteVertexArrays(1, misEntidades[((Entity*)(*itr))]->getVAO());
-         delete misEntidades[(Entity*)*itr];
-         misEntidades.erase((Entity*)(*itr));
-         delete ((Entity*)*itr);
+         //TODO: REVISAR ESTO QUE SEGURAMENTE ESTÁ MAL Y ADEMÁS FALTARÍAN EL EBO, Texts, Frames...
+      EntityGL4* egl4 = misEntidades[((Entity*)(*itr))];
+      if (egl4) {
+         GLuint* vbo = egl4->getVBO();
+         if (vbo > 0) {
+            glDeleteBuffers(1, vbo);
+         }
+         GLuint* vao = egl4->getVAO();
+         if (vbo > 0) {
+            glDeleteVertexArrays(1, vao);
+         }
+         delete egl4;
+      }
+      misEntidades.erase((Entity*)(*itr));
+      delete ((Entity*)*itr);
+      //itr = entities.begin();
+      itr++;
    }
    entities.clear();
 }
@@ -320,59 +307,14 @@ bool MotorGL::inicializar(void* hwnd, double ancho, double alto) {
 
     
     // tell GL to only draw onto a pixel if the shape is closer to the viewer
-    glEnable(GL_DEPTH_TEST); // enable depth-testing
-    glDepthFunc(GL_LESS); // depth-testing interprets a smaller value as "closer"
+    //glEnable(GL_DEPTH_TEST); // enable depth-testing
+    //glDepthFunc(GL_LESS); // depth-testing interprets a smaller value as "closer"
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glfwWindowHint(GLFW_SAMPLES, 4);
 
-
-    /*
-
-    float pointsT[] = {
-       0.0f,  0.5f,  0.0f,
-       0.5f, -0.5f,  0.0f,
-      -0.5f, -0.5f,  0.0f,
-      1.0f,  1.0f,  0.0f,
-       1.0f,  0.f,  0.0f,
-       0.f, 0.5f,  0.0f
-    };
-    points = new float[18];
-    for (int i = 0; i < 18; i++) {
-        points[i] = pointsT[i];
-    }
-    GLuint vbo = 0;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, 18 * sizeof(float), points, GL_STATIC_DRAW);
-
-    //glBufferData()
-     
-    float points2[] = {
-       1.0f,  1.0f,  0.0f,
-       1.0f,  0.f,  0.0f,
-       0.f, 0.5f,  0.0f
-    };
-    GLuint vbo2;
-    glGenBuffers(1, &vbo2);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo2);
-    glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), points2, GL_STATIC_DRAW);
-
-    vaos.push_back(GLuint(0));
-    glGenVertexArrays(1, &(vaos[0]));
-    glBindVertexArray(vaos[0]);
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo2);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
-
-    /**/
-
-
-
-
-    
+    glEnable(GL_MULTISAMPLE);
+      
 
     return true;
 }
@@ -401,7 +343,7 @@ int MotorGL::loadShader(const char* path, Graphics::Shader::TYPE_SHADER type) {
     const char* data = (const char*)loadShader(path);
     GLuint s = 0;
     if (data != 0) {
-      switch (type) {
+      switch (type) { 
       case Graphics::Shader::TYPE_SHADER::VERTEX:
          s = glCreateShader(GL_VERTEX_SHADER);
          break;
@@ -468,7 +410,13 @@ int MotorGL::compileShader(std::vector<short>* shadersId, void* entity) {
    for (auto itr = misEntidades.begin(); itr != misEntidades.end() && noEncontre; itr++) {
       if (itr->first == entity) {
          itr->second->addShaderProgram(id);
+         noEncontre = false;
       }
+   }
+   if (noEncontre) {
+      EntityGL4* egl4 = new EntityGL4();
+      egl4->addShaderProgram(id);
+      misEntidades[(Entity*)entity] = egl4;
    }
    return id;
 }
@@ -476,6 +424,25 @@ int MotorGL::compileShader(int ps, void* entity) {
    int id = compileShader(ps);
    return id;
 }
+void MotorGL::changeCamera(Camera* camera) {
+   if (camaraActual != 0) {
+      camaraActual->setActive(false);
+   }
+   camaraActual = camera;
+   resizeCamera();
+}
+void MotorGL::resizeCamera() {
+   //TODO: Calculamos la matriz de transformación
+   if (camaraActual) {
+      float centroAnchoVentana=((float)Screen::getWidth()) * 0.5f;
+      float centroAltoVentana = ((float)Screen::getHeight()) * 0.5f;
+
+      float centroAnchoCamara = ((float)camaraActual->getWidth()) * 0.5f;
+      float centroAltoCamara = ((float)camaraActual->getHeight()) * 0.5f;
+      glViewport(centroAnchoVentana-centroAnchoCamara, centroAltoVentana-centroAltoCamara, centroAnchoVentana + centroAnchoCamara, centroAltoVentana + centroAltoCamara);
+   }
+}
+
 void MotorGL::closeWindow(GLFWwindow* window) {
    open = false;
 }
@@ -509,7 +476,364 @@ void MotorGL::focus(GLFWwindow* window, int focused) {
       }
    }
 }
+void MotorGL::updateEntityCUBE(RenderableComponent * render, EntityGL4* entidad, Entity* entity) {
+   renderable::Cube* cubo = (renderable::Cube * )render->getRenderable();
+   if (entidad == 0) {
+      entidad = new EntityGL4(GL_TRIANGLE_FAN, cubo);
+      misEntidades[(Entity*)entity] = entidad;
+   } else {
+      if (entidad->getObject() == NULL) {
+         entidad->setObject(cubo);
+      }
+   }
+   float vertices[] = {
+     //FRENTE
+     //Superior izquierda
+     0.5f,  0.5f, 0.5f, //derecha arriba frente 0
+     0.0f, 0.0f, 1.0f,
+     1.0f, 0.0f, 0.0f,
+     0.5f, -0.5f, 0.5f, //derecha abajo frente 1
+     0.0f, 0.0f, 1.0f,
+     1.0f, 0.0f, 0.0f,
+     -0.5f,  0.5f, 0.5f, //izquiera arriba frente 3
+     0.0f, 0.0f, 1.0f,
+     1.0f, 0.0f, 0.0f,
+     //Superior derecho
+     -0.5f,  0.5f, 0.5f, //izquiera arriba frente 3
+     0.0f, 0.0f, 1.0f,
+     0.8f, 0.0f, 0.0f,
+     -0.5f, -0.5f, 0.5f, //izquierda abajo frente 2
+     0.0f, 0.0f, 1.0f,
+     0.8f, 0.0f, 0.0f,
+     0.5f, -0.5f, 0.5f, //derecha abajo frente 1
+     0.0f, 0.0f, 1.0f,
+     0.8f, 0.0f, 0.0f,
 
+     //DERECHA
+     0.5f,  0.5f,  0.5f, //derecha arriba frente 0
+     1.0f, 0.0f, 0.0f,
+     0.0f, 1.0f, 0.0f,
+     0.5f, -0.5f,  0.5f, //derecha abajo frente 1
+     1.0f, 0.0f, 0.0f,
+     0.0f, 1.0f, 0.0f,
+     0.5f,  0.5f,  -0.5f, //derecha arriba trasara 4
+     1.0f, 0.0f, 0.0f,
+     0.0f, 1.0f, 0.0f,
+
+     0.5f,  0.5f,  -0.5f, //derecha arriba trasara 4
+     1.0f, 0.0f, 0.0f,
+     0.0f, 0.8f, 0.0f,
+     0.5f, -0.5f,  -0.5f, //derecha abajo trasara 5
+     1.0f, 0.0f, 0.0f,
+     0.0f, 0.8f, 0.0f,
+     0.5f, -0.5f,  0.5f, //derecha abajo frente 1
+     1.0f, 0.0f, 0.0f,
+     0.0f, 0.8f, 0.0f,
+
+     //ARRIBA
+     0.5f,  0.5f,  0.5f, //derecha arriba frente 0
+     0.0f, 1.0f, 0.0f,
+     0.0f, 0.0f, 1.0f,
+     0.5f,  0.5f,  -0.5f, //derecha arriba trasara 4
+     0.0f, 1.0f, 0.0f,
+     0.0f, 0.0f, 1.0f,
+     -0.5f,  0.5f,  -0.5f, //izquiera arriba trasera 7
+     0.0f, 1.0f, 0.0f,
+     0.0f, 0.0f, 1.0f,
+
+     -0.5f,  0.5f,  -0.5f, //izquiera arriba trasera 7
+     0.0f, 1.0f, 0.0f,
+     0.0f, 0.0f, 1.0f,
+     -0.5f,  0.5f,  0.5f, //izquierda arriba frente 0
+     0.0f, 1.0f, 0.0f,
+     0.0f, 0.0f, 1.0f,
+     0.5f,  0.5f,  0.5f, //derecha arriba frente 0
+     0.0f, 1.0f, 0.0f,
+     0.0f, 0.0f, 1.0f,
+
+     //IZQUIERDA
+     -0.5f,  0.5f,  0.5f, //izquiera arriba frente 3
+     -1.f,  0.f, 0.f,
+     0.0f, 0.0f, 1.0f,
+     -0.5f, -0.5f,  0.5f, //izquierda abajo frente 2
+     -1.f,  0.f, 0.f,
+     0.0f, 0.0f, 1.0f,
+     -0.5f,  -0.5f,  -0.5f, //izquiera abajo trasera 7
+     -1.f,  0.f, 0.f,
+     0.0f, 0.0f, 1.0f,
+
+     -0.5f,  -0.5f,  -0.5f, //izquiera abajo trasera 7
+     -1.f,  0.f, 0.f,
+     0.0f, 0.0f, 1.0f,
+     -0.5f, 0.5f,  -0.5f, //izquierda arriba trasera 6
+     -1.f,  0.f, 0.f,
+     0.0f, 0.0f, 1.0f,
+     -0.5f, 0.5f,  0.5f, //izquierda arriba frente 2
+     -1.f,  0.f, 0.f,
+     0.0f, 0.0f, 1.0f,
+
+     //ABAJO
+     0.5f, -0.5f,  0.5f, //derecha abajo frente 1
+     0.f, -1.f, 0.f,
+     0.0f, 0.0f, 1.0f,
+     -0.5f, -0.5f,  0.5f, //izquierda abajo frente 2
+     0.f, -1.f, 0.f,
+     0.0f, 0.0f, 1.0f,
+     -0.5f, -0.5f,  -0.5f, //izquierda abajo trasera 6
+     0.f, -1.f, 0.f,
+     0.0f, 0.0f, 1.0f,
+
+     -0.5f, -0.5f,  -0.5f, //izquierda abajo trasera 6
+     0.f, -1.f, 0.f,
+     0.0f, 0.0f, 1.0f,
+     0.5f, -0.5f,  -0.5f, //derecha abajo trasera 6
+     0.f, -1.f, 0.f,
+     0.0f, 0.0f, 1.0f,
+     0.5f, -0.5f,  0.5f, //derecha abajo frente 1
+     0.f, -1.f, 0.f,
+     0.0f, 0.0f, 1.0f,
+
+     //TRASERA
+     -0.5f, -0.5f,  -0.5f, //izquierda abajo trasera 6
+     0.f, 0.f, -1.f,
+     0.0f, 0.0f, 1.0f,
+     0.5f, -0.5f,  -0.5f, //derecha abajo trasera 6
+     0.f, 0.f, -1.f,
+     0.0f, 0.0f, 1.0f,
+     -0.5f,  0.5f,  -0.5f, //izquiera arriba trasera 7
+     0.f, 0.f, -1.f,
+        0.0f, 0.0f, 1.0f,
+
+     -0.5f,  0.5f,  -0.5f, //izquiera arriba trasera 7
+     0.f, 0.f, -1.f,
+        0.0f, 0.0f, 1.0f,
+     0.5f,  0.5f,  -0.5f, //derecha arriba trasara 4
+     0.f, 0.f, -1.f,
+        0.0f, 0.0f, 1.0f,
+     0.5f, -0.5f,  -0.5f, //derecha abajo trasara 5
+     0.f, 0.f, -1.f,
+        0.0f, 0.0f, 1.0f
+   };
+   entidad->setVertextCount(3*(2*6)); //TODO: El número de vertices se obtendrá de la propia maya del objeto.
+   /*float vertices[] = {
+     0.5f,  0.5f,  0.5f, //derecha arriba frente 0
+     0.5f, -0.5f,  0.5f, //derecha abajo frente 1
+    -0.5f, -0.5f,  0.5f, //izquierda abajo frente 2
+    -0.5f,  0.5f,  0.5f, //izquiera arriba frente 3
+     0.5f,  0.5f,  -0.5f, //derecha arriba trasara 4
+     0.5f, -0.5f,  -0.5f, //derecha abajo trasara 5
+    -0.5f, -0.5f,  -0.5f, //izquierda abajo frente 6
+    -0.5f,  0.5f,  -0.5f, //izquiera arriba trasera 7
+   /*0.0f, 0.0f, 1.0f, //Normal frente 8
+   1.0f, 0.0f, 0.0f, //Normal derecha 9
+   0.0f, 1.0f, 0.0f, //Normal superior 10
+   -1.0f, 0.0f, 0.0f, //Normal izquierda 11
+   0.0f, -1.0f, 0.0f, //Normal inferior 12
+   0.0f, 0.0f, -1.0f, //Normal trasera 13/**/
+   //};//(front)(right)(top)(left)(bottom)(back)/**/
+   /*float normales[] = {
+      0.0f, 0.0f, 1.0f,
+      0.0f, 0.0f, 1.0f,
+
+      1.0f, 0.0f, 0.0f,
+      1.0f, 0.0f, 0.0f,
+      
+      0.0f, 1.0f, 0.0f,
+      0.0f, 1.0f, 0.0f,
+
+      -1.0f, 0.0f, 0.0f,
+      -1.0f, 0.0f, 0.0f,
+
+      0.0f, -1.0f, 0.0f,
+      0.0f, -1.0f, 0.0f,
+
+      0.0f, 0.0f, -1.0f,
+      0.0f, 0.0f, -1.0f,
+   };/**/
+   unsigned int indices[] = {
+     /* 0,1,3/*,1,3,2,
+     /* 0,4,3,3,4,7/**/
+     0, 1, 3, 1, 2, 3, //Triangulos de frente
+     4, 5, 0, 5, 1, 0, //Triangulos de derecha
+     7, 4, 3, 4, 0, 3, //Triangulos de arriba
+     3, 2, 7, 2, 6, 7, //Triangulos de izquierda
+     5, 6, 1, 6, 2, 1, //Triangulos de arriba abajo
+     7, 6, 4, 6, 5, 4,  //Triangulos de arriba trasera
+     /*8,8,
+     9,9,
+     10,10,
+     11,11,
+     12,12,
+     13,13
+     /**/
+   };
+
+
+   GLuint* vao = entidad->getVAO();
+   GLuint* vbo = entidad->getVBO();
+   GLuint* ebo = entidad->getEBO();
+   glGenVertexArrays(1, vao);
+   glGenBuffers(1, vbo);
+   //glGenBuffers(1, ebo);
+
+   glBindVertexArray(*vao);
+
+   glBindBuffer(GL_ARRAY_BUFFER, *vbo);
+   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+   //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *ebo);
+   //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+
+   glEnableVertexAttribArray(0);
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0); 
+   glEnableVertexAttribArray(1);
+   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3*sizeof(float)));
+   glEnableVertexAttribArray(2);
+   glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(6 * sizeof(float)));
+
+   
+   
+
+   
+   if (camaraActual != NULL) {
+      auto comp = entidad->getShadersPrograms();
+
+      auto itrC = comp->begin();
+      //glMatrixMode(GL_PROJECTION);
+      if (itrC != comp->end()) {
+         glUseProgram(*itrC);
+         int modelLoc = glGetUniformLocation(*itrC, "model");
+         glUniformMatrix4fv(modelLoc, 1, GL_TRUE, render->matrixTrans());
+         modelLoc = glGetUniformLocation(*itrC, "view");
+
+         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, camaraActual->getViewMatrix());
+         //glUniformMatrix4fv(modelLoc, 1, GL_FALSE, vista);
+         modelLoc = glGetUniformLocation(*itrC, "projection");
+         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, camaraActual->getProjectionMatrix());
+         //glUniformMatrix4fv(modelLoc, 1, GL_FALSE, proyeccionOrto);
+
+      }
+   }
+
+   //glDisableVertexAttribArray(0);
+
+   //Ahora le añadimos una textura
+
+
+   
+}
+void MotorGL::updateEntityIMG(RenderableComponent* render,EntityGL4 *entidad, Entity * entity) {
+   renderable::Img* img = (renderable::Img*)render->getRenderable();
+   if (entidad == 0) {
+      entidad = new EntityGL4(GL_TRIANGLE_FAN, img);
+      misEntidades[(Entity*)entity] = entidad;
+   } else {
+      if (entidad->getObject() == NULL) {
+         entidad->setObject(img);
+      }
+   }
+
+
+   /*float points[] = {
+         -0.8f,  -0.8f,  0.0f,
+         -0.8f,   0.8f,  0.0f,
+         0.8f,   0.8f,  0.0f,
+         0.8f,  -0.8f,  0.0f
+   };/**/
+   //renderable::Img* img = (renderable::Img*)r->getRenderable();
+   /*float vertices[] = {
+      // posicion           // uv
+       0.5f,  0.5f, 0.0f,   0.0f, 0.0f, // arriba derecha
+       0.5f, -0.5f, 0.0f,   0.0f, 1.0f, // abajo derecha
+      -0.5f, -0.5f, 0.0f,   1.0f, 1.0f, // abajo izquierda
+      -0.5f,  0.5f, 0.0f,   1.0f, 0.0f  // arriba izquierda 
+   };/**/
+   float z = render->getZ();
+   float vertices[] = {
+      // posicion                                                                               // uv
+      render->getX() + (img->getWidth() * 0.5f),  render->getY() + (img->getHeight() * 0.5f), z,   0.0f, 0.0f, // arriba derecha
+      render->getX() + (img->getWidth() * 0.5f),  render->getY() - (img->getHeight() * 0.5f), z,   0.0f, 1.0f, // abajo derecha
+      render->getX() - (img->getWidth() * 0.5f),  render->getY() - (img->getHeight() * 0.5f), z,   1.0f, 1.0f, // abajo izquierda
+      render->getX() - (img->getWidth() * 0.5f),  render->getY() + (img->getHeight() * 0.5f), z,   1.0f, 0.0f  // arriba izquierda 
+   };/**/
+   /*float vertices[] = {
+      // posicion                                                                               // uv
+      0.5f,  0.5f, 0.0f,   0.0f, 0.0f, // arriba derecha
+      0.5f,  0.0f, 0.0f,   0.0f, 1.0f, // abajo derecha
+      0.0f,  0.0f, 0.0f,   1.0f, 1.0f, // abajo izquierda
+      0.f, 0.5f, 0.0f,   1.0f, 0.0f  // arriba izquierda 
+   };/**/
+   unsigned int indices[] = {
+       0, 1, 3, // primer triangulo
+       1, 2, 3  // segundo triangulo
+   };
+
+   GLuint* vao = entidad->getVAO();
+   GLuint* vbo = entidad->getVBO();
+   GLuint* ebo = entidad->getEBO();
+   glGenVertexArrays(1, vao);
+   glGenBuffers(1, vbo);
+   glGenBuffers(1, ebo);
+
+   glBindVertexArray(*vao);
+
+   glBindBuffer(GL_ARRAY_BUFFER, *vbo);
+   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *ebo);
+   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+   glEnableVertexAttribArray(0);
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0); //Cojemos los 3 puntos del vertice
+   glEnableVertexAttribArray(1);
+   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float))); //Cojemos los 2 valores de la textura a partir del 3 valor
+
+   //entidad->setVertextCount(4); //TODO: El número de vertices se obtendrá de la propia maya del objeto.
+   entidad->setVertextCount(6); //TODO: El número de vertices se obtendrá de la propia maya del objeto.
+
+
+   //glDisableVertexAttribArray(0);
+
+   //Ahora le añadimos una textura
+
+
+   if (img->getData()) {
+      GLuint* text = entidad->addText();
+      glGenTextures(1, text);
+
+      glBindTexture(GL_TEXTURE_2D, *text);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, img->isNearest() ? GL_NEAREST : GL_LINEAR); //GL_NEAREST
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, img->isNearest() ? GL_NEAREST : GL_LINEAR);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->getWidth(), img->getHeight(), 0, GL_RGBA, GL_FLOAT, img->getData());
+
+      if (img->isEditable()) {
+         //Generamos el FBO
+         GLuint* fbo = entidad->addFBO(img->getWidth(), img->getHeight(), img->getData(), img->isNearest() ? GL_NEAREST : GL_LINEAR);
+         glGenFramebuffers(1, fbo);
+         glBindFramebuffer(GL_FRAMEBUFFER, *fbo);
+         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *text, 0);
+         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      }
+
+
+      if (img->isMinMap()) {
+         glGenerateMipmap(GL_TEXTURE_2D);
+         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, img->isNearest() ? GL_NEAREST_MIPMAP_NEAREST : GL_LINEAR_MIPMAP_LINEAR);
+         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, img->isNearest() ? GL_NEAREST_MIPMAP_NEAREST : GL_LINEAR_MIPMAP_LINEAR);
+      }
+
+      //Activamos el Shader
+      auto comp = entidad->getShadersPrograms();
+      for (auto itrC = comp->begin(); itrC != comp->end(); itrC++) {
+         //glUseProgram(*itrC);
+         glUniform1i(glGetUniformLocation(*itrC, "textura"), 0);
+         //glUniform1i(glGetUniformLocation(ID, name.c_str()), );
+      }
+   }
+}
 
 Input MotorGL::input;
 

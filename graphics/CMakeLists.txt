@@ -9,7 +9,7 @@ include_directories(
 
 
 file(GLOB GRAFICO terceros/imagenes/*.cpp)
-file(GLOB RENDERIZABLES src/renderable/object.cpp src/renderable/pixel.cpp src/renderable/img.cpp src/renderable/renderable.cpp src/renderable/cube.cpp )
+file(GLOB RENDERIZABLES src/renderable/object.cpp src/renderable/pixel.cpp src/renderable/img.cpp src/renderable/renderable.cpp src/renderable/cube.cpp)
 # terceros/*/*.cpp
 add_library(motor_grafico SHARED  ${RENDERIZABLES} ${GRAFICO})
 set_property(TARGET motor_grafico PROPERTY CXX_STANDARD 20)

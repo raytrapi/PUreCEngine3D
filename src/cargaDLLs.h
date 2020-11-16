@@ -27,10 +27,10 @@ public:
 	~Libreria();
 	bool esActivo();
 	void ponerActivo(bool);
-	bool cargar(char*);
-	bool descargar(char*);
+	bool cargar(const char*);
+	bool descargar(const char*);
 	bool descargar(utilidades::Libreria<Module>&);
-	void* cogerInstancia(char *raiz);
+	void* cogerInstancia(const char *raiz);
 	void reiniciar();
 	const char* cogerNombreFichero();
 	const char* cogerNombre();
@@ -43,9 +43,9 @@ class CargaDLL {
 	static bool cargarDLL(const std::filesystem::path& p, const char* carpeta);
 	static void remplazarExtension(char*& cadena, const char*);
 	static char* raizLibrerias;
-	static void addLibreria(Module::MODULES_TYPE, char* ruta, char* nombre, std::filesystem::file_time_type tiempo);
+	static void addLibreria(Module::MODULES_TYPE, const char* ruta, const char* nombre, std::filesystem::file_time_type tiempo);
 public:
-	static bool cargar(char * raiz, char *carpeta);
+	static bool cargar(const char * raiz, const char *carpeta);
 	static bool cargar(const char*fichero);
 	template <class T>
 	static T* cogerModulo(Module::MODULES_TYPE tipo);

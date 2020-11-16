@@ -15,12 +15,12 @@ namespace renderable{
 		}
 	}
 	void Img::calcularUV() {
-		float y=(float)pY/ (float)Screen::getHeight();
+		/*float y=(float)pY/ (float)Screen::getHeight();
 		float x= (float)pX/ (float)Screen::getWidth();
 		top = (float)alto / (float)Screen::getHeight()+y;
 		bottom = y;
 		left = x;
-		right = (float)ancho / (float)Screen::getWidth() + x;
+		right = (float)ancho / (float)Screen::getWidth() + x;*/
 	}
 	Img::Img(){
 		/*ancho = Screen::getWidth();
@@ -43,8 +43,9 @@ namespace renderable{
 		return Object::TYPE::IMG;
 	}
 
-	float* Img::setSize(int width, int height) {
+	float* Img::setSize(float width, float height) {
 		liberarImagen();
+		//TODO: Quitar los decimales para evitar problemas
 		ancho = width;
 		alto = height;
 		imagen = new Pixel * *[ancho];
@@ -76,10 +77,10 @@ namespace renderable{
 		}
 	}
 	void Img::setPosition(float x, float y, float z) {
-		pX = x;
+		/*pX = x;
 		pY = y;
 		pZ = z;
-		calcularUV();
+		calcularUV();*/
 	}
 	float* Img::getData(){
 		/*

@@ -1,6 +1,7 @@
 #ifndef _COMPONENT
 #define _COMPONENT
 #include "exportar.h"
+#include <log.h>
 //#include
 extern struct Entity;
 
@@ -9,6 +10,7 @@ protected:
 	Entity* entidad = NULL;
 public:
 	Component();
+	virtual ~Component();
 	Component(Entity* entity) {
 		entidad = entity;
 	}

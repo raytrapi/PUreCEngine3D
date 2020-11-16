@@ -1,41 +1,34 @@
 #include "object.h"
 
 renderable::Object::~Object() {
-
+	utiles::Log::debug("borro obj");
+	if (malla != NULL) {
+		delete[] malla;
+		malla = NULL;
+	}
+	if (normales) {
+		delete[] normales;
+		normales = NULL;
+	}
 }
 
-void renderable::Object::setPosition(float x, float y, float z) {
-	pX = x;
-	pY = y;
-	pZ = z;
-}
+void renderable::Object::setMesh(float* mesh, float* normals) {
+	if (malla != NULL) {
+		delete[] malla;
+		malla = NULL;
+	}
+	if (normales) {
+		delete[] normales;
+		normales = NULL;
+	}
+	
+	malla = new float[sizeof(mesh)];
+	for (int i = 0; i < sizeof(mesh); i++) {
+		malla[i] = mesh[i];
+	}
+	if (normals) {
 
-void renderable::Object::setRotation(float x, float y, float z) {
-	rX = x;
-	rY = y;
-	rZ = z;
-}
-
-float renderable::Object::getX() {
-	return pX;
-}
-
-float renderable::Object::getY() {
-	return pY;
-}
-
-float renderable::Object::getZ() {
-	return pZ;
-}
-
-float renderable::Object::getRX() {
-	return rX;
-}
-float renderable::Object::getRY() {
-	return rY;
-}
-float renderable::Object::getRZ() {
-	return rZ;
+	}
 }
 
 

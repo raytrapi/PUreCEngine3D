@@ -25,7 +25,7 @@ namespace utilidades {
 		void* cookieRaiz = NULL;
 	public:
 		Libreria() {};
-		Libreria(char *);
+		Libreria(const char *);
 		~Libreria();
 		 void* cargar(const char* fichero);
 		 bool descargar(const char* fichero);

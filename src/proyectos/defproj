@@ -1,0 +1,4 @@
+name=%%NAME%%
+path=%%PATH%%
+pathSRC=%%PATHSRC%%
+pathBuild=%%PATHBUILD%%

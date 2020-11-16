@@ -109,7 +109,7 @@ void CargaDLL::remplazarExtension(char*& cadena, const char* ext) {
 	}
 }
 
-void CargaDLL::addLibreria(Module::MODULES_TYPE tipo, char* ruta, char* nombre, std::filesystem::file_time_type tiempo) {
+void CargaDLL::addLibreria(Module::MODULES_TYPE tipo, const char* ruta, const char* nombre, std::filesystem::file_time_type tiempo) {
 	if (!libreriasDisponibles.contains(tipo)) {
 		libreriasDisponibles[tipo] = new std::vector<Libreria*>();
 		libreriasDisponibles[tipo]->push_back(new Libreria(ruta, nombre, tiempo));
@@ -127,10 +127,10 @@ void CargaDLL::addLibreria(Module::MODULES_TYPE tipo, char* ruta, char* nombre, 
 	
 }
 
-bool CargaDLL::cargar(char* carpeta, char * raiz) {
+bool CargaDLL::cargar(const char* carpeta, const char * raiz) {
 
 	std::filesystem::path ruta=std::filesystem::current_path();
-	utiles::Log::escribir(ruta.string());
+	utiles::Log::debug(ruta.string());
 	
 
 	if(!std::filesystem::exists(carpeta)){
@@ -204,12 +204,12 @@ bool Libreria::esActivo() {
 void Libreria::ponerActivo(bool activo) {
 	this->activo = activo;
 }
-bool Libreria::cargar(char *raiz) {
+bool Libreria::cargar(const char *raiz) {
 	utilidades::Libreria<Module> dll(raiz);
 	return dll.cargar(fichero);
 }
 
-bool Libreria::descargar(char *raiz) {
+bool Libreria::descargar(const char *raiz) {
 	utilidades::Libreria<Module> dll(raiz);
 
 	return dll.descargar(fichero);
@@ -224,7 +224,7 @@ bool Libreria::descargar(utilidades::Libreria<Module>& dll) {
 	descargando = false;
 	return descargado;
 }
-void* Libreria::cogerInstancia(char*raiz) {
+void* Libreria::cogerInstancia(const char*raiz) {
 	if (descargando) {
 		return NULL;
 	}
@@ -252,5 +252,5 @@ const char* Libreria::cogerNombre() {
 }
 
 std::map<Module::MODULES_TYPE, std::vector<Libreria*>*> CargaDLL::libreriasDisponibles;
-char* CargaDLL::raizLibrerias = "modulosTEMP/";
+char* CargaDLL::raizLibrerias = (char *)"modulosTEMP/";
 //char* raiz=".";

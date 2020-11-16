@@ -55,7 +55,7 @@ void MotorGL::renderizar(void* rederizables) {
     SwapBuffers(ghDC);
 }
 void MotorGL::renderizarImagen(renderable::Img* img) {
-    glEnable(GL_TEXTURE_2D);
+    /*glEnable(GL_TEXTURE_2D);
     //glDrawPixels(img->getWidth(), img->getHeight(), GL_RGBA, GL_FLOAT, img->getData());
     GLuint imgTextura;
     imgTextura = img->getId();
@@ -66,10 +66,6 @@ void MotorGL::renderizarImagen(renderable::Img* img) {
     glBindTexture(GL_TEXTURE_2D, imgTextura);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);//Probar con GL_LINEAR
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);//Probar con GL_LINEAR
-    /*if (repetir) {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    }/**/
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->getWidth(), img->getHeight(), 0, GL_RGBA, GL_FLOAT, img->getData());
     glPushMatrix();
     glTranslatef(img->getX(), img->getY(), img->getZ());
@@ -80,28 +76,26 @@ void MotorGL::renderizarImagen(renderable::Img* img) {
     glBegin(GL_QUADS);
 
     glVertex2f(0, 0);//coordenada u-v 
-    //glTexCoord2f(img->getLeft(), img->getBottom());//Abajo - Izquierda
     glTexCoord2f(0,0);//Abajo - Izquierda
 
     glVertex2f(img->getWidth(), 0);//coordenada u-v
-    //glTexCoord2f(img->getRight(), img->getBottom());//Abajo - Derecha
     glTexCoord2f(1,0);//Abajo - Derecha
 
     glVertex2f(img->getWidth(), img->getHeight());//coordenada u-v
-    //glTexCoord2f(img->getRight(), img->getTop());//Arriba - Derecha
     glTexCoord2f(1, 1);//Arriba - Derecha
 
     glVertex2f(0, img->getHeight());//coordenada u-v
-    //glTexCoord2f(img->getLeft(), img->getTop()); //Arriba - Izquierda //Representa la posición en pantalla
     glTexCoord2f(0, 1); //Arriba - Izquierda //Representa la posición en pantalla
 
     glEnd();
     glPopMatrix();
-    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_2D);/**/
 
 }
 
-void MotorGL::renderizarCubo(renderable::Cube * cubo) {
+void MotorGL::renderizarCubo(renderable::Cube* cube) {
+
+   /*renderable::Cube * cubo=render->ob
     float mitadLado = cubo->getSize();
     float cX = cubo->getX();
     float cX_2 = cX * 0.5f;
@@ -116,12 +110,6 @@ void MotorGL::renderizarCubo(renderable::Cube * cubo) {
     glColor3f(cubo->r, cubo->g,  cubo->b);
     //float ancho = 200;
     GLfloat vertices[] = {
-        /*1, 1, 1,  -1, 1, 1,  -1,-1, 1,   1,-1, 1,   // v0,v1,v2,v3 (front)
-        1, 1, 1,   1,-1, 1,   1,-1,-1,   1, 1,-1,   // v0,v3,v4,v5 (right)
-        1, 1, 1,   1, 1,-1,  -1, 1,-1,  -1, 1, 1,   // v0,v5,v6,v1 (top)
-        -1, 1, 1,  -1, 1,-1,  -1,-1,-1,  -1,-1, 1,   // v1,v6,v7,v2 (left)
-        -1,-1,-1,   1,-1,-1,   1,-1, 1,  -1,-1, 1,   // v7,v4,v3,v2 (bottom)
-        1,-1,-1,  -1,-1,-1,  -1, 1,-1,   1, 1,-1/**/
         //Frente
         + mitadLado,+ mitadLado,+ mitadLado,
         - mitadLado,+ mitadLado,+ mitadLado,
@@ -152,37 +140,7 @@ void MotorGL::renderizarCubo(renderable::Cube * cubo) {
         - mitadLado,- mitadLado,- mitadLado,
         - mitadLado,+ mitadLado,- mitadLado,
         + mitadLado,+ mitadLado,- mitadLado,
-        /**/
-        /*//Frente
-        cX - mitadLado,cY + mitadLado,cZ + mitadLado,
-        cX + mitadLado,cY + mitadLado,cZ + mitadLado,
-        cX + mitadLado,cY - mitadLado,cZ + mitadLado,
-        cX - mitadLado,cY - mitadLado,cZ + mitadLado,
-        //Trasera
-        cX - mitadLado,cY + mitadLado,cZ - mitadLado,
-        cX + mitadLado,cY + mitadLado,cZ - mitadLado,
-        cX + mitadLado,cY - mitadLado,cZ - mitadLado,
-        cX + mitadLado,cY - mitadLado,cZ - mitadLado,
-        //Izquierda
-        cX - mitadLado,cY + mitadLado,cZ + mitadLado,
-        cX - mitadLado,cY + mitadLado,cZ - mitadLado,
-        cX - mitadLado,cY - mitadLado,cZ - mitadLado,
-        cX - mitadLado,cY - mitadLado,cZ + mitadLado,
-        //Derecha
-        cX + mitadLado,cY + mitadLado,cZ + mitadLado,
-        cX + mitadLado,cY + mitadLado,cZ - mitadLado,
-        cX + mitadLado,cY - mitadLado,cZ - mitadLado,
-        cX + mitadLado,cY - mitadLado,cZ + mitadLado,
-        //Arriba
-        cX - mitadLado,cY + mitadLado,cZ + mitadLado,
-        cX - mitadLado,cY + mitadLado,cZ - mitadLado,
-        cX + mitadLado,cY + mitadLado,cZ - mitadLado,
-        cX + mitadLado,cY + mitadLado,cZ + mitadLado,
-        //Abajo
-        cX - mitadLado,cY - mitadLado,cZ + mitadLado,
-        cX - mitadLado,cY - mitadLado,cZ - mitadLado,
-        cX + mitadLado,cY - mitadLado,cZ - mitadLado,
-        cX + mitadLado,cY - mitadLado,cZ + mitadLado,/**/
+        
 
     };
     GLfloat normales[] = { 
@@ -203,24 +161,19 @@ void MotorGL::renderizarCubo(renderable::Cube * cubo) {
     glRotatef(cubo->getRX(), 0,1.f, 0);
     glRotatef(cubo->getRY(), 1.f, 0, 0);
     glRotatef(cubo->getRZ(), 0, 0, 1.f);
-    //glTranslatef(-cX, -cY, -cZ );/**/
+    //glTranslatef(-cX, -cY, -cZ );
     //glTranslatef(-cX, -cY, 0);
     //glTranslatef(cX, cY, cZ);
     
     //
     
     //glTranslatef(-cX_2, -cY_2, 0.0f);
-    /*glTranslatef(cX_2, cY_2, 0.0f);
-    glRotatef(cubo->rY, 0, 1, 0);
-    glTranslatef(-cX_2, -cY_2, 0.0f);
-    glTranslatef(cX_2, cY_2, 0.0f);
-    glRotatef(cubo->rZ, 0, 0, 1);
-    glTranslatef(-cX_2, -cY_2, 0.0f);/**/
+
     glDrawArrays(GL_QUADS, 0, 24);
     //glDrawArrays(GL_TRIANGLES, 0, 36);
     glPopMatrix();
     glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_NORMAL_ARRAY);
+    glDisableClientState(GL_NORMAL_ARRAY);/**/
 }
 void MotorGL::renderizar() { 
     

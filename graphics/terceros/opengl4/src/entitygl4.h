@@ -21,7 +21,9 @@ struct EntityGL4 {
 	renderable::Object* _object;
 	std::vector<GLuint> shadersPrograms;
 public:
-	
+	EntityGL4() {
+		_object = NULL;
+	}
 	EntityGL4(GLenum mode, renderable::Object* object) {
 		_mode = mode;
 		_object = object;
@@ -60,6 +62,7 @@ public:
 	}
 
 	renderable::Object* getObject() { return _object; };
+	void setObject(renderable::Object* o) { _object=o; };
 	void addShaderProgram(GLuint idProgram) {
 		shadersPrograms.push_back(idProgram);
 	}

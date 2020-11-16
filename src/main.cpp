@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #ifdef WIN32__
     #include <windows.h>
     #include "windows/ventana.h"
@@ -23,6 +24,8 @@
 
 #include <thread>
 
+
+#include "proyectos/proyecto.h"
 
 
 
@@ -52,17 +55,30 @@ const char* extDLL = "so";
 bool recargarCartucho = false;
 modules::Tape* cartucho = 0;
 modules::graphics::Graphic* motorGrafico = 0;
+std::string carpertaProyecto = "";
+std::string proyecto = "";
 
-
-void cargarEscena(const char* projecto) {
+void cargarEscena() {
    //utiles::Log::debug(path);
    
-   std::string sandbox("H:/Desarrollo/motor_videojuegos_2D/sandbox/");
-   std::string ruta = sandbox + std::string(projecto);
+   //std::string sandbox("H:/Desarrollo/motor_videojuegos_2D/sandbox/");
+   //td::string ruta = sandbox + std::string(projecto);
 
    //TODO: Esto solo es para Ninja
-   modules::Tape::load(projecto, cartucho, [ruta](const char* path) {
-      Compile::compileProject(ruta.c_str(), Compile::NINJA);
+   modules::Tape::load(Proyecto::cogerRutaCodigoProyecto(), cartucho, []() {
+      if (cartucho) {
+         if (!cartucho->isStoping()) {
+            cartucho->sendStop();
+            cartucho->onEnd([] {
+               Compile::compileProject(Proyecto::cogerRutaCompilacionProyecto(), Compile::NINJA);
+            });
+         }
+         //cartucho->detener();
+      } else {
+         Compile::compileProject(Proyecto::cogerRutaCompilacionProyecto(), Compile::NINJA);
+      }
+      
+      
       //cargarEscena(path);
       //if
    });
@@ -71,11 +87,17 @@ void cargarEscena(const char* projecto) {
    //----
    
 
-   ruta += std::string("/")+std::string(projecto)+std::string(".")+std::string(extDLL);
+   std::string ruta = "";
+   ruta+= Proyecto::cogerRutaCompilacionProyecto()+std::string("/") + Proyecto::cogerNombreProyecto() + std::string(".") + std::string(extDLL);
+   if (std::filesystem::exists(ruta)) {
+      std::filesystem::remove(ruta);
+   }
    FileControl::fileChangeTime(ruta.c_str(), [&,ruta]() {
       if (cartucho) {
-         cartucho->detener();
-      }
+         cartucho->stop();
+         delete cartucho;
+         cartucho = 0;
+      }/**/
       CargaDLL::liberarModulo(Module::TAPE);
 #ifdef WIN32
       //Con visual studios falla si hay un PDB, así que lo intentamos quitar
@@ -85,14 +107,15 @@ void cargarEscena(const char* projecto) {
       }
 #endif // WIN32
 
-      recargarCartucho = true;
-      utiles::Log::debug(ruta);
+      
+      //utiles::Log::debug(ruta);
       if (std::filesystem::exists(ruta)) {
          CargaDLL::cargar(ruta.c_str());
          //cartucho=
 
          cartucho = CargaDLL::cogerModulo<modules::Tape>(Module::TAPE);
          if (cartucho) {
+            recargarCartucho = true;
             Screen::setDimension(cartucho->getScreenWidth(), cartucho->getScreenHeight());
             Module::set(Module::MODULES_TYPE::TAPE, cartucho);
             //if (motorGrafico) {
@@ -102,7 +125,7 @@ void cargarEscena(const char* projecto) {
 
          }/**/
       }
-   },2000);
+   },1000);
    
 }
 void run() {
@@ -115,17 +138,31 @@ void run() {
          
          if (cartucho) {
             if (recargarCartucho) {
-               cartucho->start();
                recargarCartucho = false;
-            }
-            try {
-               cartucho->update();
-               //std::thread game([]() {cartucho->update();});
-               //game.join();
-            } catch (std::exception e) {
-               utiles::Log::error("Se ha producido una excepcion");
-               utiles::Log::debug(e.what());
-               cartucho->detener();
+               try {
+                  cartucho->start();
+               } catch (std::exception e) {
+                  utiles::Log::error("Se ha producido una excepcion");
+                  utiles::Log::debug(e.what());
+               }
+            } else {
+               try {
+                  if (cartucho->isRunning()) {
+                     if (cartucho->isOrderStop()) {
+                        cartucho->stop();
+                        delete cartucho;
+                        cartucho = 0;
+                     } else {
+                        cartucho->update();
+                     }
+                  }
+                  //std::thread game([]() {cartucho->update();});
+                  //game.join();
+               } catch (std::exception e) {
+                  utiles::Log::error("Se ha producido una excepcion");
+                  utiles::Log::debug(e.what());
+                  cartucho->stop();
+               }
             }
          }
       }
@@ -139,11 +176,31 @@ void run() {
       }
    }
 }
+
+bool procesarParametros(int numeroArgumentos, char** argumentos);
 void main(int numeroArgumentos, char** argumentos) {
+
+
+   /*if (numeroArgumentos > 1) {
+      /*if (!procesarParametros(numeroArgumentos, argumentos)) {
+         return;
+      };
+   }/**/
+   /*char** parametros = new char* [4];
+   parametros[0] = "a";
+   parametros[1] = "-g";
+   parametros[2] = "prueba";
+   parametros[3] = "H:/Desarrollo/motor_videjuegos_sandbox";
+   if (!procesarParametros(4, parametros)) {
+      return;
+   };
+   delete[] parametros;
+   /**/
+   
+
     CargaDLL::cargar("./modulos", "./"); 
     
     bool correcto = true;
-    const char* escena = "micraft";
     
     if (CargaDLL::hayModulos(Module::GRAPHIC) > 0) {
        motorGrafico = CargaDLL::cogerModulo<modules::graphics::Graphic>(Module::GRAPHIC, "OPENGL 4");
@@ -153,9 +210,22 @@ void main(int numeroArgumentos, char** argumentos) {
     //--------
     //Esto lo hacemos a mano mientra no tengamos un menú en la aplicación que me permita hacerlo desd ahí
     FileControl fc;
+
+    char** parametros = new char* [4];
+    parametros[0] = (char*)"a";
+    parametros[1] = (char*)"-l";
+    parametros[2] = (char*)"H:/Desarrollo/motor_videjuegos_sandbox/micraft";
+    if (!procesarParametros(4, parametros)) {
+       return;
+    };
+    delete[] parametros;/**/
+
+    Screen::setDimension(800, 800);
     if (motorGrafico) {
-       motorGrafico->inicializar(0, 800, 600);
-       cargarEscena(escena);
+       motorGrafico->inicializar(0, Screen::getWidth(), Screen::getHeight());
+       if (Proyecto::estaCargado()) {
+          cargarEscena();
+       }
        //motorGrafico->addOnFocus(fileControl::onFocus);
        
        
@@ -197,7 +267,7 @@ void main(int numeroArgumentos, char** argumentos) {
     }*/
     wd.~Watchdog();
     if (cartucho) {
-        cartucho->detener();
+        cartucho->stop();
         delete cartucho;
     }
     Entity::destroy();
@@ -207,3 +277,63 @@ void main(int numeroArgumentos, char** argumentos) {
     }
 }/**/
 #endif
+
+
+bool procesarParametros(int numeroArgumentos, char** argumentos) {
+
+   int pos = 1;
+   while (pos < numeroArgumentos) {
+      char* param = argumentos[pos];
+      //C++ no tiene switch para cadenas
+      if (strcmp(param, "-g") == 0) {
+         if (pos + 2 >= numeroArgumentos) {
+#ifdef WIN32
+            MessageBox(NULL, "Se ha de indicar tanto el nombre como la ruta del proyecto", TEXT("Motor de videojuegos version 1.0"), MB_OK);
+#else
+            std::cout << "Motor de videojuegos version 1.0\r\n"Se ha de indicar tanto el nombre como la ruta del proyecto"\r\n" << ayuda;
+#endif // WIN32
+            return false;
+         }
+         const char* error = Proyecto::generarProyecto(argumentos[pos + 1], argumentos[pos + 2]);
+         pos += 3;
+         if (error) {
+#ifdef WIN32
+            MessageBox(NULL, error, TEXT("Motor de videojuegos version 1.0"), MB_OK);
+#else
+            std::cout << "Motor de videojuegos version 1.0\r\n" << error << std::endl;
+#endif // WIN32
+            return false;
+         }
+         return true;
+      } else if (strcmp(param, "-l") == 0) {
+         if (pos + 1 >= numeroArgumentos) {
+#ifdef WIN32
+            MessageBox(NULL, "Se ha de indicar la ruta del proyecto", TEXT("Motor de videojuegos version 1.0"), MB_OK);
+#else
+            std::cout << "Motor de videojuegos version 1.0\r\n"Se ha de indicar la ruta del proyecto"\r\n" << ayuda;
+#endif // WIN32
+            return false;
+         }
+         //carpertaProyecto = std::string();
+         if (!Proyecto::cargarProyecto(argumentos[pos + 1])) {
+            return false;
+         }
+         
+         pos += 2;
+         return true;
+      } else if (strcmp(param, "-h") == 0) {
+         std::string ayuda;
+         ayuda += "-g name path\t\tGenerara proyecto\r\n";
+         ayuda += "-l path\t\tCargar proyecto indicado en la ruta\r\n";
+         ayuda += "-h\t\tAyuda\r\n";
+#ifdef WIN32
+         MessageBox(NULL, ayuda.c_str(), TEXT("Motor de videojuegos version 1.0"), MB_OK);
+#else
+         std::cout<<"Motor de videojuegos version 1.0\r\n"<<ayuda;
+#endif // WIN32
+         return false;
+      }
+      pos++;
+   }
+   return false;
+}

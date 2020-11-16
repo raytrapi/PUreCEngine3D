@@ -12,6 +12,7 @@ namespace utiles {
 			fichero.close();
 		}
 	}
+	
 	void Log::escribir(std::string &s) {
 		escribir(s, utiles::Log::NIVEL::INF);
 	} 
