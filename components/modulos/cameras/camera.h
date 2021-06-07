@@ -11,8 +11,8 @@ class EXPORTAR_COMPONENTE Camera : public Component {
 	bool activa=false;
 	bool focal = false;
 	bool ortogonal=true;
-	unsigned int ancho=2;
-	unsigned int alto=2;
+	//unsigned int ancho=2;
+	//unsigned int alto=2;
 	float derecha = 1.f;
 	float izquierda = -1.f;
 	float arriba = 1.f;
@@ -38,14 +38,19 @@ public:
 	void setActive(bool active);
 	bool isOrtho();
 	void setOrto(bool ortho);
-	void setSize(unsigned int width, unsigned int height);
+	void setSize( float x,  float y, float width,  float height);
 	void setDistance(float _near, float _far);
 	void setFocalAngle(float angle);
 	void setFocal(float focal);
 	void setLookAt(float eyeX, float eyeY, float eyeZ, float targetX, float targetY, float targetZ, float upX, float upY, float upZ);
 	const float* getViewMatrix();
 	const float* getProjectionMatrix();
-	unsigned int getWidth();
-	unsigned int getHeight();
+	float getWidth();
+	float getHeight();
+	float getLeft();
+	float getRight();
+	float getTop();
+	float getBottom();
+	const float getFocalAngle();
 };
 #endif // !__CAMERA

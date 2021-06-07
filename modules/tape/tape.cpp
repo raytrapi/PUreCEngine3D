@@ -8,18 +8,19 @@ void modules::Tape::load(const char* projectFolderSrc, modules::Tape* tape,std::
    //projectName = s;
    callbackLoad = callback;
    //cinta = tape;
-   bool existe=FileControl::fileChangeTime(projectFolderSrc, []() {
+   bool existe=FileControl::folderChangeTime(projectFolderSrc, [](char* rutaT) {
       //if (cinta != 0) {
          //utili
       //}
       callbackLoad();
       //utiles::Log::debug("Cambio");
-   },1000);/**/
+   },3000);/**/
    if (existe) {
       //callbackLoad();
    }
-
+   
 }
+
 std::string modules::Tape::projectName;
-std::function<void()> modules::Tape::callbackLoad;
-modules::Tape* cinta;
+std::function<void()> modules::Tape::callbackLoad= NULL;
+modules::Tape* cinta=NULL;

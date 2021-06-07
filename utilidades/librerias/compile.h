@@ -7,6 +7,7 @@
 #include <windows.h>
 #endif
 #include "../log/log.h"
+#include "../timer/watchdog.h"
 #include <filesystem>
 
 class Compile {
@@ -19,7 +20,7 @@ class Compile {
 
 public:
 	enum Types{NINJA};
-	static void compileProject(const char* project, Types tipo);
+	static void compileProject(const char* project, Types tipo, std::function<void()> callbackEnd);
 	static void generateProject(const char* project, Types tipo, bool generar = true);
 	static const char* pathCompiler();
 	static const char* compilerScope();

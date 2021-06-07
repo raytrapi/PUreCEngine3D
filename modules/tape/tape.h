@@ -8,6 +8,7 @@
 #include "../../utilidades/files/filesControl.h"
 #include <string>
 #include <functional>
+#include "../../components/src/entity.h"
 
 namespace modules {
 
@@ -38,20 +39,19 @@ namespace modules {
 			detener = false;
 			modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
 			if (g) {
-				g->removeEntities();
+				g->removeAll();
+				
 			}
-			try {
-				destroy();
-			} catch (std::exception e) {
-
-			}
+			
+			destroy();
+			//deteniendo = false;
 			if (callback) {
 				callback();
 			}
 		}
 		void sendStop() {
 			detener = true;
-			deteniendo = false;
+			//deteniendo = false;
 		}
 		bool isStoping() { return deteniendo; };
 		bool isOrderStop() { return detener; };
@@ -71,6 +71,8 @@ namespace modules {
 				delete renders[i];
 			}
 			ejecutando = false;
+			callback == NULL;
+			
 		};
 		std::vector<void*> renderes() {
 			return renders;
@@ -78,6 +80,7 @@ namespace modules {
 		Module::MODULES_TYPE tipo() { return Module::TAPE; };
 		std::vector<void*>* getRenderizables() { return &renders; };
 		static void load(const char* project, modules::Tape* tape, std::function<void()>);
+
 	};
 
 }

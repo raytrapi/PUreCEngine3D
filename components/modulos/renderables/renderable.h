@@ -6,10 +6,13 @@
 #include "../../../modules/src/module.h"
 #include "../../../graphics/src/renderable/object.h"
 #include <vector>
+#define M_PI           3.14159265358979323846
+#define M_PI2          1.57079632679489661923
+#define M_2PI          6.28318530717958647692
 class EXPORTAR_COMPONENTE RenderableComponent : public Component {
-public:
+private:
 	renderable::Object  * objeto; 
-	float pX = 0;
+	float pX = M_PI;
 	float pY = 0;
 	float pZ = 0;
 	float rX = 0;
@@ -52,6 +55,7 @@ public:
 	void rotateY(float radian);
 	void rotateZ(float radian);
 	virtual void setPosition(float x, float y, float z);
+	virtual void moveX(float x);
 	void setRotation(float x, float y, float z);
 	void setRotationGimbal(float uX, float uY, float uZ, float angle);
 	float getX();

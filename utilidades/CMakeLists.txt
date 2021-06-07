@@ -1,7 +1,11 @@
+
 include_directories(
    log
+   ../graphics/src/renderable
 ) 
-add_library(utils "SHARED"  log/log.cpp  global/screen.cpp timer/timer.cpp global/input.cpp global/mouse.cpp files/filesControl.cpp timer/watchdog.cpp)
+
+add_library(utils "SHARED"  log/log.cpp  global/screen.cpp timer/timer.cpp global/input.cpp global/mouse.cpp files/filesControl.cpp timer/watchdog.cpp )
+
 set_target_properties(utils PROPERTIES
 	COMPILE_DEFINITIONS EXPORTAR_UTILIDADES
    PUBLIC_HEADER utils/utils.h )

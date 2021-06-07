@@ -187,6 +187,7 @@ protected:
 
 	void updateEntityIMG(RenderableComponent* render, EntityGL4* entidad, Entity* entity);
 	void updateEntityCUBE(RenderableComponent* render, EntityGL4* entidad, Entity* entity);
+	void updateEntityMESH(RenderableComponent* render, EntityGL4* entidad, Entity* entity);
 public:
 	MotorGL();
 	~MotorGL();
@@ -202,6 +203,7 @@ public:
 	void removeEntity(void* entity);
 	void clearEntity(EntityGL4* entidad);
 	void removeEntities();
+	void removeAll();
 	/*void newEntity(TYPE_ENTITY type, renderable::Object* object);*/
 
 	//TODO: Optimizar la carga de Shader para que no se dupliquen

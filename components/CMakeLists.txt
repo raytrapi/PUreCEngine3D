@@ -5,7 +5,7 @@ include_directories(
    ../modules/src
    ../graphics/src
    src
-) 
+)  
 
 file(GLOB CODIGO modulos/*/*.cpp src/*.cpp)
 

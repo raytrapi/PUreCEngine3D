@@ -7,21 +7,28 @@
 //#include "../../components/src/entity.h"
 #include <list>
 #include <vector>
+#include <map>
+#include <string>
 //#include "../../graphics/src/renderable/object.h"
 
 
 extern class Camera;
 namespace modules {
 	namespace graphics {
+		struct EXPORTAR_MODULO Texture {
+
+		};
 		class EXPORTAR_MODULO Graphic:public Module {
 			//std::list<void*>elementosRenderizar;
 			//TODO: Ver si aceleramos el pintado si procesamos nosotros la capa.
 			//byte* lienzo = null;
 			bool end = false;
+			std::map<std::string, Texture *>texturas;
 		protected:
 			void setEnd() { end = true; };
 			std::vector<void*> entities;
 			static bool open;
+			bool stopping = false;
 		public:
 			static std::vector<void(*)(bool)> onFocus;
 			static std::vector<Tape*> onFocusTapes;
@@ -29,6 +36,10 @@ namespace modules {
 				NONE,
 				IMG,
 				MESH
+			};
+			enum TYPE_TEXTURE {
+				NONE,
+				IMG
 			};
 			
 			/*~Grafico() {
@@ -45,7 +56,7 @@ namespace modules {
 			virtual void addEntity(void* entity);
 			virtual void removeEntity(void* entity);
 			virtual void removeEntities();
-
+			virtual void removeAll();
 			/*virtual void newEntity(TYPE_ENTITY type, renderable::Object * object) {};*/
 			virtual const byte* loadShader(const char* path) { return 0; };
 			virtual int loadShader(const char* path, Graphics::Shader::TYPE_SHADER type) { return 0; };
@@ -58,12 +69,14 @@ namespace modules {
 			void addOnFocus(void(*callback)(bool));
 			void addOnFocus(Tape * juego);
 			void removeOnFocus(Tape* juego);
+			void removeAllFocus();
 
 			virtual bool isOpen() { return open;};
 
 			virtual void changeCamera(Camera* camera) {};//Lamentablemente para evitar ciclos hemos de añadir un puntero, pero realmente será un tipo Camera
 			virtual void resizeCamera() {};
 			//virtual void* 
+			void loadTexture(std::string name, std::string path, TYPE_TEXTURE type = TYPE_TEXTURE::NONE);
 		};
 
 	}

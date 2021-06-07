@@ -2,6 +2,9 @@
 #define _INPUT
 
 #include "../utiles/utilidades.h"
+#include "log.h"
+//#include ""
+#include <string>
 #include <map>
 #include <vector>
 #include <list>

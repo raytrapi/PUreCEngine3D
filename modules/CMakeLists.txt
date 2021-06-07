@@ -2,6 +2,7 @@
 include_directories(
    ../utilidades/log
    ../utilidades/files
+ 
 ) 
 
 file(GLOB CODIGO graphic/*.cpp tape/*.cpp)

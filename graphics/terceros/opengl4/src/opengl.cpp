@@ -171,7 +171,7 @@ void MotorGL::updateEntity(void* entity) {
       clearEntity(entidad); 
    }
    
-   auto renderables = ((Entity*)entity)->getComponent<RenderableComponent>();
+   auto renderables = ((Entity*)entity)->getComponents<RenderableComponent>();
    if (renderables != NULL) {
       for (auto itrR = renderables->begin(); itrR != renderables->end(); itrR++) {
          RenderableComponent* r = (RenderableComponent*)(*itrR);
@@ -182,6 +182,9 @@ void MotorGL::updateEntity(void* entity) {
                break;
             case renderable::Object::TYPE::CUBE:
                updateEntityCUBE(r, entidad, (Entity*)entity);
+               break;
+            case renderable::Object::TYPE::MESH:
+               updateEntityMESH(r, entidad, (Entity*)entity);
                break;
             }
          }
@@ -235,6 +238,11 @@ void MotorGL::removeEntities() {
       itr++;
    }
    entities.clear();
+}
+void MotorGL::removeAll() {
+   camaraActual = NULL;
+   removeEntities();
+   removeAllFocus();
 }
 /*void MotorGL::newEntity(TYPE_ENTITY type, renderable::Object* object) {
     //vaos.push_back(Entity(type)GLuint(0));
@@ -434,12 +442,14 @@ void MotorGL::changeCamera(Camera* camera) {
 void MotorGL::resizeCamera() {
    //TODO: Calculamos la matriz de transformación
    if (camaraActual) {
-      float centroAnchoVentana=((float)Screen::getWidth()) * 0.5f;
-      float centroAltoVentana = ((float)Screen::getHeight()) * 0.5f;
+      /*float centroAnchoVentana=((float)Screen::getWidth()) * 0.5f;
+      float centroAltoVentana = ((float)Screen::getHeight()) * 0.5f;*/
 
       float centroAnchoCamara = ((float)camaraActual->getWidth()) * 0.5f;
       float centroAltoCamara = ((float)camaraActual->getHeight()) * 0.5f;
-      glViewport(centroAnchoVentana-centroAnchoCamara, centroAltoVentana-centroAltoCamara, centroAnchoVentana + centroAnchoCamara, centroAltoVentana + centroAltoCamara);
+      //glViewport(centroAnchoVentana-centroAnchoCamara, centroAltoVentana-centroAltoCamara, centroAnchoVentana + centroAnchoCamara, centroAltoVentana + centroAltoCamara);
+      //glViewport(0, 0, ((float)Screen::getWidth()), ((float)Screen::getHeight()));
+      glViewport(camaraActual->getLeft(), camaraActual->getBottom(), camaraActual->getRight()- camaraActual->getLeft(), camaraActual->getBottom()- camaraActual->getTop());
    }
 }
 
@@ -476,6 +486,300 @@ void MotorGL::focus(GLFWwindow* window, int focused) {
       }
    }
 }
+
+
+void MotorGL::updateEntityMESH(RenderableComponent* render, EntityGL4* entidad, Entity* entity) {
+   renderable::Mesh* malla = (renderable::Mesh*)render->getRenderable();
+   int tamañoVertices = malla->getAllSize();
+   if (tamañoVertices == 0) {
+      return;
+   }
+   if (entidad == 0) {
+      entidad = new EntityGL4(GL_TRIANGLE_FAN, malla);
+      misEntidades[(Entity*)entity] = entidad;
+   } else {
+      if (entidad->getObject() == NULL) {
+         entidad->setObject(malla);
+      }
+   }
+   
+   float* vertices = new float[tamañoVertices];
+
+   float* vectorMalla = malla->getMesh();
+   int numeroVertices = malla->getVertexNumber(); 
+   float* vectorNormales = malla->getNormals();
+   float* vectorColores = malla->getColors();
+
+   int j = 0;
+   int k = 0;
+   for (int i = 0; i < numeroVertices; i++) {
+      vertices[j++] = vectorMalla[k];
+      vertices[j++] = vectorMalla[k+1];
+      vertices[j++] = vectorMalla[k+2];
+      if (vectorNormales) {
+         vertices[j++] = vectorNormales[k];
+         vertices[j++] = vectorNormales[k + 1];
+         vertices[j++] = vectorNormales[k + 2];
+      } else {
+         vertices[j++] = 0.0f;
+         vertices[j++] = 0.0f;
+         vertices[j++] = 1.f;
+      }
+      if (vectorColores) {
+         vertices[j++] = vectorColores[k];
+         vertices[j++] = vectorColores[k + 1];
+         vertices[j++] = vectorColores[k + 2];
+      } else {
+         vertices[j++] = 1.f;
+         vertices[j++] = .0f;
+         vertices[j++] = .0f;
+      }
+      k += 3;
+   }/**/
+   /*float vertices[] = {
+      //FRENTE
+      //Superior izquierda
+      0.5f,  0.5f, 0.5f, //derecha arriba frente 0
+      0.0f, 0.0f, 1.0f,
+      1.0f, 0.0f, 0.0f,
+      0.5f, -0.5f, 0.5f, //derecha abajo frente 1
+      0.0f, 0.0f, 1.0f,
+      1.0f, 0.0f, 0.0f,
+      -0.5f,  0.5f, 0.5f, //izquiera arriba frente 3
+      0.0f, 0.0f, 1.0f,
+      1.0f, 0.0f, 0.0f,
+      //Superior derecho
+      -0.5f,  0.5f, 0.5f, //izquiera arriba frente 3
+      0.0f, 0.0f, 1.0f,
+      0.8f, 0.0f, 0.0f,
+      -0.5f, -0.5f, 0.5f, //izquierda abajo frente 2
+      0.0f, 0.0f, 1.0f,
+      0.8f, 0.0f, 0.0f,
+      0.5f, -0.5f, 0.5f, //derecha abajo frente 1
+      0.0f, 0.0f, 1.0f,
+      0.8f, 0.0f, 0.0f,
+
+      //DERECHA
+      0.5f,  0.5f,  0.5f, //derecha arriba frente 0
+      1.0f, 0.0f, 0.0f,
+      0.0f, 1.0f, 0.0f,
+      0.5f, -0.5f,  0.5f, //derecha abajo frente 1
+      1.0f, 0.0f, 0.0f,
+      0.0f, 1.0f, 0.0f,
+      0.5f,  0.5f,  -0.5f, //derecha arriba trasara 4
+      1.0f, 0.0f, 0.0f,
+      0.0f, 1.0f, 0.0f,
+
+      0.5f,  0.5f,  -0.5f, //derecha arriba trasara 4
+      1.0f, 0.0f, 0.0f,
+      0.0f, 0.8f, 0.0f,
+      0.5f, -0.5f,  -0.5f, //derecha abajo trasara 5
+      1.0f, 0.0f, 0.0f,
+      0.0f, 0.8f, 0.0f,
+      0.5f, -0.5f,  0.5f, //derecha abajo frente 1
+      1.0f, 0.0f, 0.0f,
+      0.0f, 0.8f, 0.0f,
+
+      //ARRIBA
+      0.5f,  0.5f,  0.5f, //derecha arriba frente 0
+      0.0f, -1.0f, 0.0f,
+      0.0f, 0.0f, 1.0f,
+      0.5f,  0.5f,  -0.5f, //derecha arriba trasara 4
+      0.0f, -1.0f, 0.0f,
+      0.0f, 0.0f, 1.0f,
+      -0.5f,  0.5f,  -0.5f, //izquiera arriba trasera 7
+      0.0f, -1.0f, 0.0f,
+      0.0f, 0.0f, 1.0f,
+
+      -0.5f,  0.5f,  -0.5f, //izquiera arriba trasera 7
+      0.0f, 1.0f, 0.0f,
+      0.0f, 0.0f, 1.0f,
+      -0.5f,  0.5f,  0.5f, //izquierda arriba frente 0
+      0.0f, 1.0f, 0.0f,
+      0.0f, 0.0f, 1.0f,
+      0.5f,  0.5f,  0.5f, //derecha arriba frente 0
+      0.0f, 1.0f, 0.0f,
+      0.0f, 0.0f, 1.0f,
+
+      //IZQUIERDA
+      -0.5f,  0.5f,  0.5f, //izquiera arriba frente 3
+      -1.f,  0.f, 0.f,
+      0.0f, 0.0f, 1.0f,
+      -0.5f, -0.5f,  0.5f, //izquierda abajo frente 2
+      -1.f,  0.f, 0.f,
+      0.0f, 0.0f, 1.0f,
+      -0.5f,  -0.5f,  -0.5f, //izquiera abajo trasera 7
+      -1.f,  0.f, 0.f,
+      0.0f, 0.0f, 1.0f,
+
+      -0.5f,  -0.5f,  -0.5f, //izquiera abajo trasera 7
+      -1.f,  0.f, 0.f,
+      0.0f, 0.0f, 1.0f,
+      -0.5f, 0.5f,  -0.5f, //izquierda arriba trasera 6
+      -1.f,  0.f, 0.f,
+      0.0f, 0.0f, 1.0f,
+      -0.5f, 0.5f,  0.5f, //izquierda arriba frente 2
+      -1.f,  0.f, 0.f,
+      0.0f, 0.0f, 1.0f,
+
+      //ABAJO
+      0.5f, -0.5f,  0.5f, //derecha abajo frente 1
+      0.f, -1.f, 0.f,
+      0.0f, 0.0f, 1.0f,
+      -0.5f, -0.5f,  0.5f, //izquierda abajo frente 2
+      0.f, -1.f, 0.f,
+      0.0f, 0.0f, 1.0f,
+      -0.5f, -0.5f,  -0.5f, //izquierda abajo trasera 6
+      0.f, -1.f, 0.f,
+      0.0f, 0.0f, 1.0f,
+
+      -0.5f, -0.5f,  -0.5f, //izquierda abajo trasera 6
+      0.f, -1.f, 0.f,
+      0.0f, 0.0f, 1.0f,
+      0.5f, -0.5f,  -0.5f, //derecha abajo trasera 6
+      0.f, -1.f, 0.f,
+      0.0f, 0.0f, 1.0f,
+      0.5f, -0.5f,  0.5f, //derecha abajo frente 1
+      0.f, -1.f, 0.f,
+      0.0f, 0.0f, 1.0f,
+
+      //TRASERA
+      -0.5f, -0.5f,  -0.5f, //izquierda abajo trasera 6
+      0.f, 0.f, -1.f,
+      0.0f, 0.0f, 1.0f,
+      0.5f, -0.5f,  -0.5f, //derecha abajo trasera 6
+      0.f, 0.f, -1.f,
+      0.0f, 0.0f, 1.0f,
+      -0.5f,  0.5f,  -0.5f, //izquiera arriba trasera 7
+      0.f, 0.f, -1.f,
+         0.0f, 0.0f, 1.0f,
+
+      -0.5f,  0.5f,  -0.5f, //izquiera arriba trasera 7
+      0.f, 0.f, -1.f,
+         0.0f, 0.0f, 1.0f,
+      0.5f,  0.5f,  -0.5f, //derecha arriba trasara 4
+      0.f, 0.f, -1.f,
+         0.0f, 0.0f, 1.0f,
+      0.5f, -0.5f,  -0.5f, //derecha abajo trasara 5
+      0.f, 0.f, -1.f,
+         0.0f, 0.0f, 1.0f
+   };/**/
+   /*utiles::Log::debug("MESH");
+   for (int i = 0; i < tamañoVertices; i++) {
+      utiles::Log::debug(vertices[i]);
+   }/**/
+   entidad->setVertextCount(numeroVertices); //TODO: El número de vertices se obtendrá de la propia maya del objeto.
+   unsigned int* indices = new unsigned int[numeroVertices];
+   for (int i = 0; i < numeroVertices; i++) {
+      indices[i] = i;
+   } /**/
+   float vertices1[] = {
+      //FRENTE
+      //Superior izquierda
+      1.0f,  0.5f, 0.5f, //derecha arriba frente 0
+      0.0f, 1.0f, 0.0f,
+      1.0f, 0.0f, 0.0f,
+      0.0f, 0.5f, 0.5f, //derecha abajo frente 1
+      0.0f, 1.0f, 0.0f,
+      1.0f, 0.0f, 0.0f,
+      0.0f,  0.5f, -0.5f, //izquiera arriba frente 3
+      0.0f, 1.0f, 0.0f,
+      1.0f, 0.0f, 0.0f
+
+      
+   };
+   /*vertices[j++] = 1.0f;
+   vertices[j++] = 0.5f;
+   vertices[j++] = 0.5f;
+   vertices[j++] = 0.0f;
+   vertices[j++] = 1.0f;
+   vertices[j++] = 0.0f;
+   vertices[j++] = 1.0f;
+   vertices[j++] = 0.0f;
+   vertices[j++] = 0.0f;
+   vertices[j++] = 0.0f;
+   vertices[j++] = 0.5f;
+   vertices[j++] = 0.5f;
+   vertices[j++] = 0.0f;
+   vertices[j++] = 1.0f;
+   vertices[j++] = 0.0f;
+   vertices[j++] = 1.0f;
+   vertices[j++] = 0.0f;
+   vertices[j++] = 0.0f;
+   vertices[j++] = 0.0f;
+   vertices[j++] = 0.5f;
+   vertices[j++] = -0.5f;
+   vertices[j++] = 0.0f;
+   vertices[j++] = 1.0f;
+   vertices[j++] = 0.0f;
+   vertices[j++] = 1.0f;
+   vertices[j++] = 0.0f;
+   vertices[j++] = 0.0f;*/
+/*entidad->setVertextCount(3 * (1 * 1));
+   unsigned int* indices = new unsigned int[3];
+   for (int i = 0; i < numeroVertices; i++) {
+      indices[i] = i;
+   }
+   tamañoVertices = sizeof(vertices1);/**/ 
+
+   GLuint* vao = entidad->getVAO();
+   GLuint* vbo = entidad->getVBO();
+   GLuint* ebo = entidad->getEBO();
+   glGenVertexArrays(1, vao);
+   glGenBuffers(1, vbo);
+   //glGenBuffers(1, ebo);
+
+   glBindVertexArray(*vao);
+
+   glBindBuffer(GL_ARRAY_BUFFER, *vbo);
+   glBufferData(GL_ARRAY_BUFFER, tamañoVertices*sizeof(float), vertices, GL_STATIC_DRAW);
+   //glBufferData(GL_ARRAY_BUFFER, 27 * sizeof(float), vertices, GL_STATIC_DRAW);
+
+   //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *ebo);
+   //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+   //TODO: Modificar para que se adapte al shader que toque
+
+   glEnableVertexAttribArray(0);
+   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0);
+   glEnableVertexAttribArray(1);
+   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float)));
+   glEnableVertexAttribArray(2);
+   glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(6 * sizeof(float)));
+   //glBindVertexArray(0);
+
+
+
+
+   if (camaraActual != NULL) {
+      auto comp = entidad->getShadersPrograms();
+
+      auto itrC = comp->begin();
+      //glMatrixMode(GL_PROJECTION);
+      if (itrC != comp->end()) {
+         glUseProgram(*itrC);
+         int modelLoc = glGetUniformLocation(*itrC, "model");
+         glUniformMatrix4fv(modelLoc, 1, GL_TRUE, render->matrixTrans());
+         modelLoc = glGetUniformLocation(*itrC, "view");
+
+         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, camaraActual->getViewMatrix());
+         //glUniformMatrix4fv(modelLoc, 1, GL_FALSE, vista);
+         modelLoc = glGetUniformLocation(*itrC, "projection");
+         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, camaraActual->getProjectionMatrix());
+         //glUniformMatrix4fv(modelLoc, 1, GL_FALSE, proyeccionOrto);
+
+      }
+   }
+
+   //glDisableVertexAttribArray(0);
+
+   //Ahora le añadimos una textura
+
+   delete[] vertices;
+   delete[] indices;
+
+}
+
 void MotorGL::updateEntityCUBE(RenderableComponent * render, EntityGL4* entidad, Entity* entity) {
    renderable::Cube* cubo = (renderable::Cube * )render->getRenderable();
    if (entidad == 0) {
@@ -532,13 +836,13 @@ void MotorGL::updateEntityCUBE(RenderableComponent * render, EntityGL4* entidad,
 
      //ARRIBA
      0.5f,  0.5f,  0.5f, //derecha arriba frente 0
-     0.0f, 1.0f, 0.0f,
+     0.0f, -1.0f, 0.0f,
      0.0f, 0.0f, 1.0f,
      0.5f,  0.5f,  -0.5f, //derecha arriba trasara 4
-     0.0f, 1.0f, 0.0f,
+     0.0f, -1.0f, 0.0f,
      0.0f, 0.0f, 1.0f,
      -0.5f,  0.5f,  -0.5f, //izquiera arriba trasera 7
-     0.0f, 1.0f, 0.0f,
+     0.0f, -1.0f, 0.0f,
      0.0f, 0.0f, 1.0f,
 
      -0.5f,  0.5f,  -0.5f, //izquiera arriba trasera 7
@@ -614,7 +918,23 @@ void MotorGL::updateEntityCUBE(RenderableComponent * render, EntityGL4* entidad,
      0.f, 0.f, -1.f,
         0.0f, 0.0f, 1.0f
    };
-   entidad->setVertextCount(3*(2*6)); //TODO: El número de vertices se obtendrá de la propia maya del objeto.
+   entidad->setVertextCount(3*(2*6)); //TODO: El número de vertices se obtendrá de la propia maya del objeto./**/
+   /*utiles::Log::debug("\r\n\r\nCUBE");
+   for (int i = 0; i < 324; i++) {
+      utiles::Log::debug(vertices[i]);
+   }/**/
+   /*float vertices[] = {
+     0.5f,  0.5f,  0.5f, //derecha arriba frente 0
+     0.0f, -1.0f, 0.0f,
+     0.0f, 0.0f, 1.0f,
+     0.5f,  0.5f,  -0.5f, //derecha arriba trasara 4
+     0.0f, -1.0f, 0.0f,
+     0.0f, 0.0f, 1.0f,
+     -0.5f,  0.5f,  -0.5f, //izquiera arriba trasera 7
+     0.0f, -1.0f, 0.0f,
+     0.0f, 0.0f, 1.0f
+   };
+   entidad->setVertextCount(3 * (1 * 1)); //TODO: El número de vertices se obtendrá de la propia maya del objeto./**/
    /*float vertices[] = {
      0.5f,  0.5f,  0.5f, //derecha arriba frente 0
      0.5f, -0.5f,  0.5f, //derecha abajo frente 1
@@ -723,6 +1043,7 @@ void MotorGL::updateEntityCUBE(RenderableComponent * render, EntityGL4* entidad,
 
    
 }
+
 void MotorGL::updateEntityIMG(RenderableComponent* render,EntityGL4 *entidad, Entity * entity) {
    renderable::Img* img = (renderable::Img*)render->getRenderable();
    if (entidad == 0) {

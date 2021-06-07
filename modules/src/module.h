@@ -30,7 +30,7 @@ public:
 		GRAPHIC,
 		TAPE,
 		PHISICS,
-
+		CODE,
 	};
 private:
 	static std::map<MODULES_TYPE, Module*> modulos;
@@ -73,7 +73,7 @@ inline T* Module::get() {
 			return (Module *) new classname();\
 	}\
 	extern "C" void destroy(Module * p) {\
-	    delete p;\
+		if(p) {delete p;};p=NULL;\
 	}
 	#ifdef _WIN32
 	extern "C" __declspec(dllexport) Module * crearInstancia();

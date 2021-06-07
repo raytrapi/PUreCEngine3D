@@ -32,7 +32,10 @@ void modules::graphics::Graphic::removeEntities() {
 		delete (*itr);
 	}
 }
-
+void modules::graphics::Graphic::removeAll() {
+	removeEntities();
+	removeAllFocus();
+}
 void modules::graphics::Graphic::addOnFocus(void(*callback)(bool)) {
 	onFocus.push_back(callback);
 }
@@ -52,6 +55,22 @@ void modules::graphics::Graphic::removeOnFocus(Tape* juego) {
 	}
 }
 
+void modules::graphics::Graphic::removeAllFocus() {
+	onFocusTapes.clear();
+}
+
+void  modules::graphics::Graphic::loadTexture(std::string name, std::string path, TYPE_TEXTURE type) {
+	switch (type) {
+		case modules::graphics::Graphic::NONE:
+			break;
+		case modules::graphics::Graphic::IMG:
+			break;
+		default:
+			break;
+	}
+	//if(texturas.e)
+	texturas[name] = new Texture();
+}
 
 std::vector<void(*)(bool)> modules::graphics::Graphic::onFocus;
 std::vector<modules::Tape*> modules::graphics::Graphic::onFocusTapes;

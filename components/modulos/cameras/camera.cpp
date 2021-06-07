@@ -24,9 +24,25 @@ void Camera::ponerOrto() {
 	proyeccion[14] = -(lejos + cerca) / (lejos - cerca);
 	proyeccion[15] = 1.f;/**/
 }
+/*void Camera::ponerOrto() {
+	proyeccion[0] = 2.f / (derecha - izquierda);
+	proyeccion[1] = proyeccion[2] = 0.f;
+	proyeccion[3] = -((derecha + izquierda) / (derecha - izquierda));
+	proyeccion[4] = 0.f;
+	proyeccion[5] = 2.f / (arriba - abajo);
+	proyeccion[6] = 0.f;
+	proyeccion[7] = -((arriba + abajo) / (arriba - abajo));
+	proyeccion[8] = proyeccion[9] = 0.f;
+	proyeccion[10] = -2.f / (lejos - cerca);
+	proyeccion[11] = -((lejos + cerca) / (lejos - cerca));
+	proyeccion[12] = proyeccion[13] = proyeccion[14] = 0.f;
+	proyeccion[15] = 1;
+
+}/**/
 
 void Camera::ponerPerspectiva() {
 	if (!focal) {
+
 		proyeccion[0] = 2.f  / (derecha - izquierda);
 		proyeccion[1] = 0;
 		proyeccion[2] = (derecha + izquierda) / (derecha - izquierda);
@@ -53,7 +69,7 @@ void Camera::ponerPerspectiva() {
 	} else {
 		float const a = 1.f / tanf(anguloFocal / 2.f);
 
-		proyeccion[0] = a / (float)(ancho / alto);
+		proyeccion[0] = a / ((derecha-izquierda) / (arriba- abajo));
 		proyeccion[1] = proyeccion[2] = proyeccion[3] = 0.f;
 		proyeccion[4] = 0.f;
 		proyeccion[5] = a;
@@ -232,20 +248,18 @@ void Camera::setOrto(bool ortho) {
 	actualizarProyeccion();
 }
 
-void Camera::setSize(unsigned int width, unsigned int height) {
-	ancho = width;
-	alto = height;
-	izquierda = 0;
-	derecha = ancho;
-	arriba = 0;
-	abajo = alto;
-	//if (activa) {
-		/*modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
+void Camera::setSize(float x, float y, float width, float height) {
+	izquierda = x;
+	derecha = width;
+	arriba = height;
+	abajo = y;
+	if (activa) {
+		modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
 		if (g) {
 			g->resizeCamera();
-		}*/
+		}/**/
 		actualizarProyeccion();
-	//}
+	}
 }
 
 void Camera::setDistance(float _near, float _far) {
@@ -291,10 +305,26 @@ const float* Camera::getProjectionMatrix() {
 	return proyeccion;
 }
 
-unsigned int Camera::getWidth() {
-	return ancho;
+float Camera::getWidth() {
+	return derecha-izquierda;
 }
 
-unsigned int Camera::getHeight() {
-	return alto;
+float Camera::getHeight() {
+	return abajo-arriba;
+}
+float Camera::getLeft() {
+	return izquierda;
+}
+float Camera::getRight() {
+	return derecha;
+}
+float Camera::getTop() {
+	return arriba;
+}
+float Camera::getBottom() {
+	return abajo;
+}
+
+const float Camera::getFocalAngle() {
+	return anguloFocal;
 }

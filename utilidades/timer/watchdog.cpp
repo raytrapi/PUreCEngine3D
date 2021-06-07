@@ -13,6 +13,10 @@ namespace utiles {
       }
       controles.clear();
    }
+   unsigned int Watchdog::setTimeOut(std::function<void()> callback, unsigned int milliseconds) {
+      int yo = setInterval([yo, callback]() {clearInterval(yo); callback(); }, milliseconds);
+      return yo;
+   };
 
    unsigned int Watchdog::setInterval(std::function<void()> callback, unsigned int milliseconds) {
       //unsigned int id = controles.size();

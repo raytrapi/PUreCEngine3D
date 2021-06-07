@@ -55,7 +55,8 @@ void Compile::leerRegistro(HKEY clave, const char* subClave, bool& valor) {
 	
 }
 
-void Compile::compileProject(const char* project, Types tipo) {
+void Compile::compileProject(const char* project, Types tipo, std::function<void()> callbackEnd) {
+	utiles::Log::debug("Compilando el código");
 	std::string comando;
 	int i;
 	switch (tipo) {
@@ -72,7 +73,42 @@ void Compile::compileProject(const char* project, Types tipo) {
 
 		}
 
-		WinExec(comando.c_str(),0);
+		/*unsigned int idProceso=WinExec(comando.c_str(),0);
+		unsigned int yo = utiles::Watchdog::setInterval([yo, idProceso]() {
+			GetMessage(idProceso);
+		}, 500);/**/
+		STARTUPINFO si;
+		PROCESS_INFORMATION pi;
+
+		ZeroMemory(&si, sizeof(si));
+		si.cb = sizeof(si);
+		ZeroMemory(&pi, sizeof(pi));
+
+		// Start the child process. 
+		if (!CreateProcess(NULL,   // No module name (use command line)
+			(char *)comando.c_str(),        // Command line
+			NULL,           // Process handle not inheritable
+			NULL,           // Thread handle not inheritable
+			FALSE,          // Set handle inheritance to FALSE
+			CREATE_NO_WINDOW,              // No creation flags
+			NULL,           // Use parent's environment block
+			NULL,           // Use parent's starting directory 
+			&si,            // Pointer to STARTUPINFO structure
+			&pi )           // Pointer to PROCESS_INFORMATION structure
+			)
+		{
+			utiles::Log::error("No se puede ejecutar");
+			return;
+		}
+		WaitForSingleObject(pi.hProcess, 120000);
+		//utiles::Log::debug("Se termino de compilar");
+		if (callbackEnd) {
+			callbackEnd();
+		}
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
+
+
 		//std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 #else
 		if (!system(NULL)) {

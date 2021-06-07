@@ -14,13 +14,14 @@ RenderableComponent::~RenderableComponent() {
 }
 
 void RenderableComponent::rotateX(float radian) {
-	setRotation(radian, 0.0f, 0.0f);
+
+	setRotation(radian, rY, rZ);
 }
 void RenderableComponent::rotateY(float radian) {
-	setRotation(0.0f, radian, 0.0f);
+	setRotation(rX, radian, rZ);
 }
 void RenderableComponent::rotateZ(float radian) {
-	setRotation(0.0f, 0.0f, radian);
+	setRotation(rX, rY, radian);
 }
 void RenderableComponent::setPosition(float x, float y, float z) {
 	pX = x;
@@ -31,22 +32,42 @@ void RenderableComponent::setPosition(float x, float y, float z) {
 	transformacion[11] =  pZ;
 }
 
+void RenderableComponent::moveX(float x) {
+	pX += x;
+	transformacion[3] = pX;
+}
+
 void RenderableComponent::setRotation(float x, float y, float z) {
 	rX = x;
+	if (rX > M_2PI) {
+		rX = rX-M_2PI ;
+	} else if (rX < 0) {
+		rX = M_2PI + rX;
+	}
 	rY = y;
+	if (rY > M_2PI) {
+		rY = rY - M_2PI;
+	} else if (rY < 0) {
+		rY = M_2PI + rY;
+	}
 	rZ = z;
-	double cX = cos(x);
-	double sX = sin(x);
-	double cY = cos(y);
-	double sY = sin(y);
-	double cZ = cos(z);
-	double sZ = sin(z);
+	if (rZ > M_2PI) {
+		rZ = rZ - M_2PI;
+	} else if (rZ < 0) {
+		rZ = M_2PI + rZ;
+	}/**/
+	double cX = cos(rX);
+	double sX = sin(rX);
+	double cY = cos(rY);
+	double sY = sin(rY);
+	double cZ = cos(rZ);
+	double sZ = sin(rZ);
 	
 	transformacion[0] = cZ*cY;
 	transformacion[1] = -cX*sZ+sY*cZ*sX;
-	transformacion[2] = sX*sZ + sY*cX*cZ;
+	transformacion[2] = sX* sZ + sY * cX * cZ;
 
-	transformacion[4] = cY*sZ;
+	transformacion[4] = cY * sZ;
 	transformacion[5] = cX*cZ + sY*sZ*sX;
 	transformacion[6] = -sX * cZ + sY * cX * sZ;
 
