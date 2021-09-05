@@ -10,7 +10,7 @@
 #else
 	#define EXPORTAR_MODULO
 #endif // WIN32
-#include <log.h>
+#include "../../utilidades/log/log.h"
 #include <string>
 #include <sstream>
 #include <map>
@@ -20,6 +20,9 @@ namespace modules {
 	class Tape;
 	namespace graphics {
 		class Graphic;
+	}
+	namespace resources {
+		class Resource;
 	}
 }/**/
 
@@ -31,6 +34,7 @@ public:
 		TAPE,
 		PHISICS,
 		CODE,
+		RESOURCES
 	};
 private:
 	static std::map<MODULES_TYPE, Module*> modulos;
@@ -64,6 +68,9 @@ inline T* Module::get() {
 	}
 	if (std::is_same<T, modules::Tape>::value) {
 		return (T*)modulos[MODULES_TYPE::TAPE];
+	}/**/
+	if (std::is_same<T, modules::resources::Resource>::value) {
+		return (T*)modulos[MODULES_TYPE::RESOURCES];
 	}/**/
 	return NULL;
 }

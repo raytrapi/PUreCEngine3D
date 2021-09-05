@@ -38,6 +38,22 @@
 #include <log.h>
 
 #include <map>
+
+
+#define NK_IMPLEMENTATION
+#define NK_INCLUDE_FIXED_TYPES
+#define NK_INCLUDE_FONT_BAKING
+#define NK_INCLUDE_DEFAULT_FONT
+#define NK_INCLUDE_DEFAULT_ALLOCATOR
+#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
+#define NK_INCLUDE_STANDARD_VARARGS
+#include <nuklear.h>
+
+#define NK_GLFW_GL2_IMPLEMENTATION
+#include <nuklear_glfw_gl2.h>
+
+
+
 #if defined(_MSC_VER)
  // Make MS math.h define M_PI
 #define _USE_MATH_DEFINES
@@ -46,8 +62,7 @@
 #include <math.h>
 class  MotorGL:public modules::graphics::Graphic {
 private:
-		double ancho;
-		double alto;
+		
 		GLFWwindow* window;
 
 		//TODO: Posible fallo si necesitamos representar los elementos en orde
@@ -55,12 +70,15 @@ private:
 
 		//std::vector<GLuint> shaders;
 		static Input input;
+		static Mouse raton;
 		void inicializarLuz();
 		void renderizarCubo(renderable::Cube* cube);
 		void renderizarImagen(renderable::Img* img);
 
 		
 		static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+		static void mouseMove_callback(GLFWwindow* window, double x, double y);
+		static void mouseButtom_callback(GLFWwindow* window, int buttom, int action, int mods);
 		static void focus(GLFWwindow* window, int focused);
 		
 		Camera* camaraActual=NULL;
@@ -179,15 +197,16 @@ private:
 			0.00f, 0.00f, -2/(f2-n2), -(f2+n2)/(f2-n2),
 			0.00f, 0.00f, 0.00f, 1.00f
 		};
+		struct nk_font_atlas* atlas;
 protected:
 	float* points;
 	bool derecha = true;
 
 	void SetData();
 
-	void updateEntityIMG(RenderableComponent* render, EntityGL4* entidad, Entity* entity);
-	void updateEntityCUBE(RenderableComponent* render, EntityGL4* entidad, Entity* entity);
-	void updateEntityMESH(RenderableComponent* render, EntityGL4* entidad, Entity* entity);
+	void updateEntityIMG(RenderableComponent* render, EntityGL4* entidad, Entity* entity, TYPE_OPERATION type);
+	void updateEntityCUBE(RenderableComponent* render, EntityGL4* entidad, Entity* entity, TYPE_OPERATION type);
+	void updateEntityMESH(RenderableComponent* render, EntityGL4* entidad, Entity* entity, TYPE_OPERATION type);
 public:
 	MotorGL();
 	~MotorGL();
@@ -198,7 +217,7 @@ public:
 		
 	void ponerCamara(float posX, float posY, float posZ, float targetX, float targetY, float targetZ);
 
-	void updateEntity(void* entity);
+	void updateEntity(void* entity, TYPE_OPERATION type);
 	//void addEntity(void* entity);
 	void removeEntity(void* entity);
 	void clearEntity(EntityGL4* entidad);
@@ -217,7 +236,7 @@ public:
 
 	void changeCamera(Camera* camera);
 	void resizeCamera();
-
+	bool addTexture(float* image, unsigned int length, int width, int height, unsigned int& idTexture, modules::graphics::TextureImg::FORMAT_COLOR typeColor);
 	static void closeWindow(GLFWwindow* window);
 };
 #endif // !__MOTORGL

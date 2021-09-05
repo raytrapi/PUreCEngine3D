@@ -5,7 +5,7 @@ Renderable::~Renderable(){
 	for (int i = 0; i < renderizables.size(); i++) {
 		delete renderizables[i];
 	}
-	renderizables.clear();
+	renderizables.clear(); 
 }
 
 void Renderable::clearRenderable(){

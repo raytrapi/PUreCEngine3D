@@ -54,7 +54,7 @@ void Camera::ponerPerspectiva() {
 		proyeccion[10] = -(lejos + cerca) / (lejos - cerca);
 		proyeccion[11] = -2.f*lejos*cerca/(lejos-cerca);
 		proyeccion[12] = proyeccion[13] = 0.f;
-		proyeccion[14] = -1.f;
+		proyeccion[14] = 1.f;
 		proyeccion[15] = 0.f;
 		/*proyeccion[0] = 2.f * cerca / (derecha - izquierda);
 		proyeccion[1] = proyeccion[2] = proyeccion[3] = 0.f;
@@ -76,7 +76,10 @@ void Camera::ponerPerspectiva() {
 		proyeccion[6] = proyeccion[7] = proyeccion[8] = proyeccion[9] = 0.f;
 		proyeccion[10] = -((lejos + cerca) / (lejos - cerca));
 		proyeccion[11] = -1.f;
-		proyeccion[12] = proyeccion[13] = 0.f;
+		
+		proyeccion[12] = proyeccion[13] = proyeccion[14] = 0.f;
+		proyeccion[15] = 1.f;
+		/*proyeccion[12] = proyeccion[13] = 0.f;
 		proyeccion[14] = -((2.f * lejos * cerca) / (lejos - cerca));
 		proyeccion[15] = 0.f;/**/
 	}
@@ -90,16 +93,20 @@ void Camera::ponerVista() {
 	float f_t[3] = { target[0] - eye[0], target[1] - eye[1], target[2] - eye[2] };
 
 	//OJO puede ser todo 0;
-	float f_dimension =  sqrtf(f_t[0]* f_t[0] + f_t[1]* f_t[1]  + f_t[2]*f_t[2]);
-	float axiZ[3] = { f_t[0] / f_dimension, f_t[1] / f_dimension, f_t[2] / f_dimension };
+	distanciaObjetivo= sqrtf(f_t[0] * f_t[0] + f_t[1] * f_t[1] + f_t[2] * f_t[2]);
+	//float normalDistancia = 1.f / distanciaObjetivo;
+	//float f_dimension =  sqrtf(f_t[0]* f_t[0] + f_t[1]* f_t[1]  + f_t[2]*f_t[2]);
+	float axiZ[3] = { f_t[0] / distanciaObjetivo, f_t[1] / distanciaObjetivo, f_t[2] / distanciaObjetivo };
 
 	//float s_t[3] = { f[1] * up[2] - f[2] * up[1], f[2] * up[0] - f[0] * up[2], f[0] * up[1] - f[1] * up[0] };
-	/*float s_t[3] = {
+	//Producto en cuz de axiZ y Up
+	float s_t[3] = {
 		axiZ[1] * up[2] - axiZ[2] * up[1],
 		axiZ[2] * up[0] - axiZ[0] * up[2],
 		axiZ[0] * up[1] - axiZ[1] * up[0]
 	};/**/
-	float s_t[3] = {
+	
+	/*float s_t[3] = {
 		up[1] * axiZ[2] - up[2] * axiZ[1],
 		up[2] * axiZ[0] - up[0] * axiZ[2],
 		up[0] * axiZ[1] - up[1] * axiZ[0]
@@ -138,7 +145,7 @@ void Camera::ponerVista() {
 	vista[12] = (axiX[0] * -eye[0]) + (axiY[0] * -eye[1]) + (axiZ[0] * eye[2]);
 	vista[13] = (axiX[1] * -eye[0]) + (axiY[1] * -eye[1]) + (axiZ[1] * eye[2]);
 	vista[14] = (axiX[2] * -eye[0]) + (axiY[2] * -eye[1]) + (axiZ[2] * eye[2]);
-	vista[15] = 1;
+	vista[15] = 1.f;
 }
 void Camera::ponerVista2() {
 
@@ -206,23 +213,33 @@ void Camera::actualizarProyeccion() {
 		ponerPerspectiva();
 	}
 	if (activa) {
-		modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
+		if (graphic == NULL) {
+			graphic=Module::get<modules::graphics::Graphic>();
+		}
+		if (graphic != NULL) {
+			graphic->updateEntities();
+		}
+		/*modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
 		if (g) {
 			g->changeCamera(this);
-		}
+		}/**/
+
 	}
 }
 
 Camera::Camera() {
-	transformada = new Transform();
+	//transformada = new Transform();
+	graphic = Module::get<modules::graphics::Graphic>();
+	
 }
 
 Camera::~Camera() {
-	delete transformada;
+	//delete transformada;
 }
 
 Transform* Camera::transform() {
-	return transformada;
+	//return transformada;
+	return NULL;
 }
 
 bool Camera::isActive() {
@@ -232,9 +249,12 @@ bool Camera::isActive() {
 void Camera::setActive(bool active) {
 	activa = active;
 	if (active) {
-		modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
-		if (g) {
-			g->changeCamera(this);
+		if (graphic == NULL) {
+			graphic = Module::get<modules::graphics::Graphic>();
+		}
+		
+		if (graphic != NULL) {
+			graphic->changeCamera(this);
 		}
 	}
 }
@@ -266,6 +286,8 @@ void Camera::setDistance(float _near, float _far) {
 	cerca = _near;
 	lejos = _far;
 	actualizarProyeccion();
+	conCambio = true;
+
 }
 
 void Camera::setFocalAngle(float angle) {
@@ -288,13 +310,21 @@ void Camera::setLookAt(float eyeX, float eyeY, float eyeZ, float targetX, float 
 	this->up[0] = upX;
 	this->up[1] = upY;
 	this->up[2] = upZ;
+
+	float dX = eye[0] - target[0];
+	float dY = eye[1] - target[1];
+	float dZ = eye[2] - target[2];
+	distanciaObjetivo = sqrtf(dX * dX + dY * dY + dZ * dZ);
+	
+
 	ponerVista();
-	if (activa) {
+	conCambio = true;
+	/*if (activa) {
 		modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
 		if (g) {
 			g->changeCamera(this);
 		}
-	}
+	}/**/
 }
 
 const float* Camera::getViewMatrix() {
@@ -327,4 +357,127 @@ float Camera::getBottom() {
 
 const float Camera::getFocalAngle() {
 	return anguloFocal;
+}
+
+void Camera::setPosX(float v) {
+	eye[0] = v;
+	conCambio = true;
+};
+void Camera::setPosEyeX(float v) {
+	target[0] = v;
+	conCambio = true;
+};
+float Camera::getPosX() {
+	return eye[0];
+};
+float Camera::getPosEyeX() {
+	return target[0];
+};
+void Camera::setPosY(float v) {
+	eye[1] = v;
+	conCambio = true;
+};
+void Camera::setPosEyeY(float v) {
+	target[1] = v;
+	conCambio = true;
+};
+float Camera::getPosY() {
+	return eye[1];
+};
+float Camera::getPosEyeY() {
+	return target[1];
+};
+void Camera::setPosZ(float v) {
+	eye[2] = v;
+	conCambio = true;
+};
+void Camera::setPosEyeZ(float v) {
+	target[2] = v;
+	conCambio = true;
+};
+float Camera::getPosZ() {
+	return eye[2];
+};
+float Camera::getPosEyeZ() {
+	return target[2];
+}
+std::tuple<float, float> Camera::getNormalizeScreenExtra(double x, double y) {
+	if (graphic == NULL) {
+		graphic = Module::get<modules::graphics::Graphic>();
+	}
+	if (graphic != NULL) {
+		auto [w, h] = graphic->getScreenSize();
+		return { (((float)x / (float)w) * 2.0f) - 1.f,(((float)y / (float)h) * 2.0f) - 1.f };
+	} else {
+		return { 0,0 };
+	}
+
+};
+std::tuple<float, float> Camera::getNormalizeScreen(double x, double y) {
+	if (graphic == NULL) {
+		graphic = Module::get<modules::graphics::Graphic>();
+	}
+	if (graphic != NULL) {
+		auto [w,h]=graphic->getScreenSize();
+		return {(float)x/(float)w,(float)y / (float)h};
+	} else {
+		return { 0,0 };
+	}
+	
+};
+
+float Camera::getRotX() {
+	return anguloCamara[0];
+};
+float Camera::getRotY() {
+	return anguloCamara[1];
+};
+float Camera::getRotZ() {
+	return anguloCamara[2];
+};
+void Camera::setRotate(float x, float y, float z) {
+	anguloCamara[0] = x;
+	anguloCamara[1] = y;
+	anguloCamara[2] = z;
+	target[0] = distanciaObjetivo * sinf(y);
+	target[2] = distanciaObjetivo * cosf(y);
+	conCambio = true;
+};
+void Camera::refresh(int modo) {
+
+	if ((modo & 1)>0) {
+		ponerVista();
+	}
+	if ((modo & 2)>0) {
+		if (ortogonal) {
+			//Modificamos la tabla a modo ortogonal
+			ponerOrto();
+		} else {
+			ponerPerspectiva();
+		}
+	}
+	
+	/*if (activa) {
+		if (graphic == NULL) {
+			graphic = Module::get<modules::graphics::Graphic>();
+		}
+		if (graphic != NULL) {
+			graphic->updateEntities();
+		}
+
+	}/**/
+}
+
+bool Camera::isChange() {
+	if (conCambio) {
+		conCambio = false;
+		return true;
+	}
+	return false;
+}
+bool modules::graphics::Graphic::isChangeCamera(Camera* camera) {
+	if (camera != NULL) {
+		return camera->isChange();
+	}
+	return false;
 }

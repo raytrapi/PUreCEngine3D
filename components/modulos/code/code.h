@@ -7,8 +7,11 @@
 class EXPORTAR_COMPONENTE Code : public Component {
 	CodeBase* codigoBase = NULL;
 	bool updating = false;
+	
+	
+	CodeBase::TYPE_OPERATION tipo = CodeBase::MOVE;
 protected:
-	void refresh() { updating = true; };
+	void refresh(CodeBase::TYPE_OPERATION type = CodeBase::MOVE) { updating = true; tipo = type; };
 public:
 	template<class T>
 	void linkClass();
@@ -41,8 +44,6 @@ public:
 		codigoBase->setEntity(e);
 	}
 };
-#endif // !__CODE
-
 template<class T>
 inline void Code::linkClass() {
 	if (std::is_base_of<CodeBase, T>::value) {
@@ -50,3 +51,6 @@ inline void Code::linkClass() {
 		codigoBase->setEntity(entidad);
 	}
 };
+#endif // !__CODE
+
+

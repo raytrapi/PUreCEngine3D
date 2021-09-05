@@ -9,6 +9,7 @@
 #include <entity.h>
 #include <vector>
 #include <tuple>
+#include <string>
 
 struct EntityGL4 {
 	GLenum _mode;
@@ -46,9 +47,8 @@ public:
 	GLuint* getEBO() { return &_ebo; };
 	std::vector<std::tuple<GLuint, int, int, void*, GLenum>>* getFBOs() { return &_fbos; };
 	std::vector<GLuint>* getTexts() { return &_texts; };
-	GLuint* addText() {
-		_texts.push_back(0);
-		return &_texts[_texts.size() - 1];
+	void addText(GLuint idTexture) {
+		_texts.push_back(idTexture);
 	}
 	GLuint* addFBO(int width=0, int height=0, void *data=NULL, GLenum scale=GL_LINEAR) {
 		_fbos.push_back({ 0,width, height, data, scale });
@@ -90,6 +90,23 @@ public:
 		_vbo = 0;
 		glDeleteVertexArrays(1, &_vao);
 		_vao = 0;
+	}
+	static void checkCompileErrors(GLuint shader, std::string type) {
+		GLint success;
+		GLchar infoLog[1024];
+		if (type != "PROGRAM") {
+			glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+			if (!success) {
+				glGetShaderInfoLog(shader, 1024, NULL, infoLog);
+				LOG_DBG("ERROR EN SHADER: Se ha producido un error en la coplilación de tipo \r\n\t%\r\n\t%", type, infoLog);
+			}
+		} else {
+			glGetProgramiv(shader, GL_LINK_STATUS, &success);
+			if (!success) {
+				glGetProgramInfoLog(shader, 1024, NULL, infoLog);
+				LOG_DBG("ERROR EN SHADER: Se ha producido un error al linkar el programa \r\n\t%\r\n\t%", type, infoLog);
+			}
+		}
 	}
 };
 

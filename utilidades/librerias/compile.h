@@ -9,7 +9,9 @@
 #include "../log/log.h"
 #include "../timer/watchdog.h"
 #include <filesystem>
-
+#include <iostream>
+#include <fstream>
+#include <regex>
 class Compile {
 	static std::string rutaCompilador;
 	static std::string entornoCompilador;
@@ -24,6 +26,7 @@ public:
 	static void generateProject(const char* project, Types tipo, bool generar = true);
 	static const char* pathCompiler();
 	static const char* compilerScope();
+	static const void checkCompiled(const char* project);
 };
 
 

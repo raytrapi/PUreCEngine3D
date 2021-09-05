@@ -1,6 +1,6 @@
 #include "component.h"
 
-Component::Component() {}
+Component::Component() { DBG("Creo componente"); }
 Component::~Component() {
-	utiles::Log::debug("borro");
+	DBG("borro componente");
 }

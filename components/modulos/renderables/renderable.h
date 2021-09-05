@@ -40,12 +40,13 @@ private:
 		0.0f, -1.0f, 0.0f, //Normal inferior 12
 		0.0f, 0.0f, -1.0f //Normal trasera 13
 	};*/
-	float *malla=NULL;
+	float *vertices=NULL;
 
 	float r;
 	float g;
 	float b;
 	float a;
+	bool actualizar = false;
 public:
 
 	RenderableComponent(renderable::Object *obj);
@@ -65,7 +66,8 @@ public:
 	float getRY();
 	float getRZ();
 	float* matrixTrans();
-
+	bool isUpdatable();
+	void update();
 
 
 };

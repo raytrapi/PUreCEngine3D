@@ -4,22 +4,26 @@
 #include "../utiles/utilidades.h"
 #include "screen.h"
 #include "../log/log.h"
+#include <tuple>
+#include <map>
 
 class EXPORTAR_UTILIDADES Mouse {
 	static bool encima;
-	static float x;
-	static float y;
-	
+	static std::map<double, bool> botones;
+protected:
+	static double x;
+	static double y;
 public:
-	static bool mouseOver();
+	enum BUTTOMS { LEFT,RIGHT,MIDDLE, FUNC1, FUN2 };
+	//static bool mouseOver();
 	/*
 	Return the position of mouse in relation of screen
 	*/
-	static void getPosition(float& x, float& y);
-	void setPosition(float x, float y,unsigned long flags);
-	void setOver(bool over);
-	//void setButtonDown(float x, float y);
-	//void setButtonUp(int button, );
-
+	static std::tuple<double, double> getPosition();
+	void setPosition(double x, double y);
+	//void setOver(bool over);
+	void setButtomDown(BUTTOMS buttom, int mod);
+	void setButtomUp(BUTTOMS buttom, int mod);
+	bool isButtomPress(BUTTOMS buttom);
 };
 #endif // !_MOUSE

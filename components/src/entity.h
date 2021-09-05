@@ -4,6 +4,7 @@
 #include "../../modules/graphic/motor.h"
 #include "../modulos/shader/shader.h"
 #include "../modulos/cameras/camera.h"
+#include "../modulos/collider/collider.h"
 //#include "../modulos/code/code.h"
 #include "../modulos/renderables/renderable.h"
 #include "../../modules/src/module.h"
@@ -18,21 +19,28 @@
 #include <vector>
 #include "transform.h"
 extern class Code;
-
+namespace collider {
+	extern class Ray;
+}
 struct EXPORTAR_COMPONENTE Entity {
 	enum TIPO {
 		RENDERABLE,
 		SHADER,
 		CAMERA,
-		CODE
+		CODE,
+		COLLIDER
 	};
+	enum TYPE_OPERATION { ALL, MOVE };
 	int id = -1;
+	friend collider::Ray;
 	static std::vector<Entity*> entidades;
 	std::vector<Component*> componentesOrden;
 	std::map<Entity::TIPO,std::vector<Component *>> componentes;
 	Transform* transformada;
 	std::string nombre = "";
 	std::map<std::string, std::string> texturas;
+	bool active=true;
+	bool actualizarRender = false;
 public:
 	enum EXPORTAR_COMPONENTE TYPE {
 		EMPTY,
@@ -48,7 +56,7 @@ public:
 		if (g) {
 			g->addEntity(this);
 		}/**/
-		transformada = new Transform();
+		transformada = new Transform(this);
 	}
 	~Entity() {
 		for (auto itr = componentes.begin(); itr != componentes.end(); itr++) {
@@ -99,10 +107,19 @@ public:
 
 		entidades.clear();
 	}
+
 	template <class T>
 	std::vector<T*>* getComponents();
+	/**
+	* Get the List of components in the entity, but return if the type of renderable is K
+	*/
 	template <class T,class K>
 	std::vector<T*>* getComponents();
+	/**
+	* 	  Get the first component that is of the same class than T
+	*/
+	template <class T>
+	T* getComponent();
 	template <class T>
 	T* addComponent();
 
@@ -115,10 +132,10 @@ public:
 	/**
 	* Actualiza el componte gráfico 
 	*/
-	virtual void update() {
+	virtual void update(TYPE_OPERATION type=MOVE) {
 		modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
 		if (g) {
-			g->updateEntity(this);
+			g->updateEntity(this, (modules::graphics::Graphic::TYPE_OPERATION)type);
 		}
 	}
 	/**
@@ -136,6 +153,16 @@ public:
 	std::string getName() {
 		return nombre;
 	}
+	/**
+	*  Activa o desactiva la entidad para su representación  
+	*/
+	void setActive(bool active) {
+		this->active = active;
+	}
+	bool isActive() {
+		return active;
+	}
+	void setRenderUpdatable();
 };
 
 template<class T>
@@ -147,9 +174,37 @@ inline std::vector<T *>* Entity::getComponents() {
 		return (std::vector<T*>*) &componentes[CAMERA];
 	} else if (std::is_same<T, Code>::value) {
 		return (std::vector<T*>*) &componentes[CODE];
+	} else if (std::is_base_of<Collider, T>::value) {
+		return (std::vector<T*>*) & componentes[COLLIDER];
 	} else if (std::is_same<T, RenderableComponent>::value) {
 		//TODO: OJO, aquí devolvemos todos los renderables no sólo el tipo que me piden por ejemplo si pido img me devuelve todo, incluso los mesh
 		return (std::vector<T*>*) &componentes[RENDERABLE];
+	}
+	return NULL;
+}
+template <class T>
+inline T* Entity::getComponent() {
+	//std::vector<T*> componente;
+	if (std::is_same<T, Shader>::value) {
+		if (componentes[SHADER].size() > 0) {
+			return (T*)componentes[SHADER][0];
+		}
+	} else if (std::is_same<T, Camera>::value) {
+		if (componentes[CAMERA].size() > 0) {
+			return (T*) componentes[CAMERA][0];
+		}
+	} else if (std::is_same<T, Code>::value) {
+		if (componentes[CODE].size() > 0) {
+			return (T*)componentes[CODE][0];
+		}
+	} else if (std::is_base_of<Collider, T>::value) {
+		if (componentes[COLLIDER].size() > 0) {
+			return (T*)componentes[COLLIDER][0];
+		}
+	} else if (std::is_same<T, RenderableComponent>::value) {
+		if (componentes[RENDERABLE].size() > 0) {
+			return (T*)componentes[RENDERABLE][0];
+		}
 	}
 	return NULL;
 }
@@ -187,11 +242,16 @@ inline T* Entity::addComponent() {
 			//g->getEntity(this)->
 			((Shader*)comp)->setEntity(g->getEntity(this));
 		}/**/
-	}else if (std::is_same<T, Camera>::value) {
+	} else if (std::is_same<T, Camera>::value) {
 		c = new T();
 		comp = (Component*)c;
 		componentes[CAMERA].push_back(comp);
 //		modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
+
+	} else if (std::is_base_of<Collider, T>::value) {
+		c = new T();
+		comp = (Component*)c;
+		componentes[COLLIDER].push_back(comp);
 
 	} else if (std::is_same<T, Code>::value) {
 		utiles::Log::debug("Cargamos un codigo");
@@ -229,8 +289,9 @@ inline T* Entity::addComponent() {
 		} else if (std::is_same<T, renderable::Mesh>::value) {
 			//Le añadimos ademas el componente Shader
 			Shader* shaders = addComponent<Shader>();
+			LOG_DBG("Cargamos los saders shaders/vertex_basic_mesh.glsl y shaders/fragment_texture.glsl");
 			shaders->loadShader("shaders/vertex_basic_mesh.glsl", Graphics::Shader::TYPE_SHADER::VERTEX);
-			shaders->loadShader("shaders/fragment_solid_color_light.glsl", Graphics::Shader::TYPE_SHADER::FRAGMENT);
+			shaders->loadShader("shaders/fragment_texture.glsl", Graphics::Shader::TYPE_SHADER::FRAGMENT);
 			shaders->compileShader();
 			//g->updateEntity(this);
 		}

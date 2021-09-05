@@ -1,5 +1,6 @@
+
 [requires]
-#libpng/1.6.37
+libpng/1.6.37
 [options]
 [imports]
 [generators]

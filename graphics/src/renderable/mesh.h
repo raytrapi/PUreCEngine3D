@@ -1,11 +1,13 @@
 #ifndef _MESH
 #define _MESH
-
+#include <tuple>
 #include "object.h"
+#include "../../modules/graphic/motor.h"
 #include "../motorExport.h"
 namespace renderable {
 	class EXPORTAR_MODULO_GRAFICO Mesh : public Object {
 		int numCoordenadas =0; //Suponemos que normales y colores son por vertice.
+		
 	public:
 
 		Mesh();
@@ -24,7 +26,10 @@ namespace renderable {
 		float* getColors();
 		int* getIndexs();
 		int getVertexNumber();
-		void setTriangles(std::vector<float**>* vectors, float ** color, std::vector<float**>* normals=NULL);
+		
+		void setTriangles(std::vector<float**>* vectors, std::vector<float*>* color, std::vector<float**>* normals=NULL, float** uvs=NULL, renderable::Object::MODE_COLOR mode= renderable::Object::MODE_COLOR::COLOR);
+		void setObject(std::vector<float*>* vectors, std::vector<int>* indexes, std::vector<float**>* normals = NULL, float** color = NULL);
+		
 		//void setTriangles(std::vector<vector3d *>);
 	};
 }

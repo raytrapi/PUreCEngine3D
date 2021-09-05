@@ -5,7 +5,7 @@ include_directories(
  
 ) 
 
-file(GLOB CODIGO graphic/*.cpp tape/*.cpp)
+file(GLOB CODIGO graphic/*.cpp tape/*.cpp resources/*.cpp)
 
 add_library(modules SHARED src/module.cpp ${CODIGO})
 set_property(TARGET modules PROPERTY CXX_STANDARD 20)

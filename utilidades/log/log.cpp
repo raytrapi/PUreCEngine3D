@@ -49,6 +49,7 @@ namespace utiles {
 		}
 		return (*instancia);
 	}
+
 	/**/
 	/*template<class T>
 	std::ostream& Log::operator<<(T const& texto) {
@@ -60,6 +61,9 @@ namespace utiles {
 		h.salida << texto<<std::endl;
 		return *this;
 	}
+
+	
+
  	std::string Log::nombreFichero = "log.log";
 	Log* Log::instancia=NULL;
 	

@@ -62,6 +62,7 @@ public:
 	static bool existsFolder(const char* path);
 	static bool createFolder(const char* path);
 	static bool stopTimers();
+
 };
 
 

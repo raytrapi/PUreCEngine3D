@@ -15,7 +15,7 @@ namespace renderable {
 				static std::vector<std::string>  split(std::string cadena, char c = ' ');
 			public:
 				//virtual renderable::Mesh* load(std::string fileName) = 0;
-				static std::vector<Entity*>* load(std::string fileName);
+				static std::vector<Entity*>* load(std::string fileName,float directionY=-1.0f);
 		};
 	}
 };

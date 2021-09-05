@@ -471,7 +471,7 @@ bool MotorGL::inicializar(void * hwnd, double ancho, double alto) {
     glLoadIdentity();/**/
 
 
-    Mouse::getPosition(xMouse, yMouse);
+    //Mouse::getPosition(xMouse, yMouse);
 
     //
     //glTranslatef(0.0f, 0.0f, 0.0f);

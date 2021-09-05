@@ -10,7 +10,7 @@ namespace renderable {
 	namespace model {
 		class Obj {
 		public:
-			static std::vector<Entity*>* load(std::string fileName);
+			static std::vector<Entity*>* load(std::string fileName, float directionY = -1.0f);
 		};
 	}
 };

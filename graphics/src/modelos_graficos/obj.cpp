@@ -1,6 +1,6 @@
 #include "obj.h"
 
-std::vector<Entity*>* renderable::model::Obj::load(std::string fileName) {
+std::vector<Entity*>* renderable::model::Obj::load(std::string fileName, float directionY) {
 	if (std::filesystem::exists(std::filesystem::path(fileName))) {
 		//Abrimos el fichero
 		std::ifstream fichero;
@@ -15,7 +15,7 @@ std::vector<Entity*>* renderable::model::Obj::load(std::string fileName) {
 		std::vector<std::vector<float>> uv;
 		std::vector<float**> triangulos;
 		std::vector<float**> normalesTriangulos;
-
+		utiles::Log::debug("Cargo objeto " + std::string(fileName));
 		if (fichero.is_open()) {
 			while (std::getline(fichero, linea)) {
 				linea = Model::trim(linea);
@@ -25,16 +25,18 @@ std::vector<Entity*>* renderable::model::Obj::load(std::string fileName) {
 						//Tenemos un objeto
 						if (objeto != NULL) {
 							//Le cargamos los triangulos
-							float** colorTriangulo = new float* [triangulos.size()];
+							std::vector<float*>* colorTriangulo = new std::vector<float*>();
+
 							for (int i = 0; i < triangulos.size(); i++) {
-								colorTriangulo[i] = new float[3];
+								colorTriangulo->push_back( new float[3]);
 								for (int j = 0; j < 3; j++) {
-									colorTriangulo[i][j] = 1.f;
+									colorTriangulo->operator[](i)[j] = 1.f;
 								}
 							}
-							objeto->setTriangles(&triangulos, colorTriangulo,&normalesTriangulos);
+							utiles::Log::debug("Cargo  " + std::string(parametros[1]) + " con " + std::to_string(triangulos.size())+" triangulos");
+							objeto->setTriangles(&triangulos, colorTriangulo,&normalesTriangulos); //TODO: AÑADIR LAS UV
 							for (int i = 0; i < triangulos.size(); i++) {
-								delete[]colorTriangulo[i];
+								delete[]colorTriangulo->operator[](i);
 								delete[]triangulos[i][0];
 								delete[]triangulos[i][1];
 								delete[]triangulos[i][2];
@@ -44,6 +46,7 @@ std::vector<Entity*>* renderable::model::Obj::load(std::string fileName) {
 								delete[]normalesTriangulos[i][2];
 								delete[]normalesTriangulos[i];
 							}
+							delete colorTriangulo;
 							triangulos.clear();
 							normalesTriangulos.clear();
 							
@@ -54,13 +57,14 @@ std::vector<Entity*>* renderable::model::Obj::load(std::string fileName) {
 						}
 						entidad= Entity::create<Entity::TYPE::MESH>();
 						objeto = ((renderable::Mesh*)((entidad->getComponents<RenderableComponent, renderable::Mesh>())->operator[](0)->getRenderable()));
-						//entidad->setName(parametros[1]);
+						
+						entidad->setName(parametros[1]);
 						
 
 					} else if (parametros[0] == "v") { //Cargamos los vertices
 						std::vector<float> v;
 						v.push_back(std::stof(parametros[1]));
-						v.push_back(std::stof(parametros[2]));
+						v.push_back(directionY * std::stof(parametros[2]));
 						v.push_back(std::stof(parametros[3]));
 						vertices.push_back(v);
 					}else if (parametros[0] == "vn") { //Cargamos las normales
@@ -106,16 +110,16 @@ std::vector<Entity*>* renderable::model::Obj::load(std::string fileName) {
 			}
 			if (objeto != NULL) {
 				//Le cargamos los triangulos
-				float** colorTriangulo = new float* [triangulos.size()];
+				std::vector<float*>* colorTriangulo = new std::vector<float*>();
 				for (int i = 0; i < triangulos.size(); i++) {
-					colorTriangulo[i] = new float[3];
+					colorTriangulo->push_back(new float[3]);
 					for (int j = 0; j < 3; j++) {
-						colorTriangulo[i][j] = 1.f;
+						colorTriangulo->operator[](i)[j] = 1.f;
 					}
 				}
 				objeto->setTriangles(&triangulos, colorTriangulo, &normalesTriangulos);
 				for (int i = 0; i < triangulos.size(); i++) {
-					delete[]colorTriangulo[i];
+					delete[]colorTriangulo->operator[](i);
 					delete[]triangulos[i][0];
 					delete[]triangulos[i][1];
 					delete[]triangulos[i][2];
@@ -125,6 +129,7 @@ std::vector<Entity*>* renderable::model::Obj::load(std::string fileName) {
 					delete[]normalesTriangulos[i][2];
 					delete[]normalesTriangulos[i];
 				}
+				delete colorTriangulo;
 				triangulos.clear();
 				normalesTriangulos.clear();
 

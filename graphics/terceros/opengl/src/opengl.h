@@ -53,6 +53,6 @@ class  MotorGL:public modules::graphics::Graphic {
 		char* nombre() { return (char*)"OPENGL 2"; };
 		
 		void ponerCamara(float posX, float posY, float posZ, float targetX, float targetY, float targetZ);
-		
+		bool addTexture(float* image, unsigned int length, int width, int height, unsigned int& idTexture, modules::graphics::TextureImg::FORMAT_COLOR typeColor) { return true; }
 };
 #endif // !__MOTORGL

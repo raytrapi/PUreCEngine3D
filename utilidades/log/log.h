@@ -10,6 +10,13 @@
 #include <chrono>
 #include <time.h>
 #include <iomanip>
+//#define TRACE(m, ...) Log::trace(m, __VA_ARGS__)
+//#define TRACE_STR(m, ...) Log::trace_str(m, __VA_ARGS__)
+#define LOG_DBG(s, ...) utiles::Log::debug(s, __VA_ARGS__)
+#define DBG(s, ...) utiles::Log::debug(s, __VA_ARGS__)
+//#define TRACE_DBG_STR(m, ...) Log::debug_str(__VA_ARGS__)
+//#define TRACE_ERR(m, ...) Log::error(__VA_ARGS__)
+//#define TRACE_ERR_STR(m, ...) Log::error(__VA_ARGS__)
 namespace utiles {
 		
 	class EXPORTAR_UTILIDADES Log {
@@ -18,6 +25,10 @@ namespace utiles {
 		
 		std::filebuf fichero;
 		static Log* instancia;
+		template<typename T, typename... Targs>
+		static std::string debug2( const char* text, T value, Targs... Fargs);
+		static std::string debug2(const char* text);
+
 		public:
 			std::ostream* salida;
 			Log();
@@ -33,7 +44,10 @@ namespace utiles {
 			static void escribir(std::string &s);
 			static void escribir(std::string &s, utiles::Log::NIVEL nivel);
 			template<class T>
-			static void debug(T valor);
+			static void debug(T text);
+			template<typename T, typename... Targs>
+			static void debug(const char* text, T value, Targs... Fargs);
+			
 			template<class T>
 			static void error(T valor);
 			template<class T>
@@ -46,14 +60,52 @@ namespace utiles {
 	};
 	template<class T>
 	EXPORTAR_UTILIDADES Log& operator<<(Log& h, T const& texto);
+
 	template<class T>
-	inline void Log::debug(T valor) {
+	inline void Log::debug(T text) {
 		std::string s;
 		std::stringstream ss;
-		ss << valor;
-		s=ss.str();
+		ss << text;
+		s = ss.str();
 		//s << std::endl;
 		escribir(s, DEB);
+	}
+	template<typename T, typename... Targs>
+	inline void Log::debug(const char* text, T value, Targs... Fargs) {
+		std::string s;
+		std::stringstream ss;
+		for (; *text != '\0'; text++) {
+			if (*text == '%') {
+				ss << value;
+				ss << debug2(text + 1, Fargs...);
+				s = ss.str();
+				escribir(s, DEB);
+				return;
+			} else {
+				ss << *text;
+			}
+		}
+		s = ss.str();
+		escribir(s, DEB);
+	}
+	template<typename T, typename... Targs>
+	inline std::string Log::debug2(const char* text, T value, Targs... Fargs) {
+		std::stringstream ss;
+		for (; *text != '\0'; text++) {
+			if (*text == '%') {
+				ss << value;
+				ss<<debug2(text + 1, Fargs...);
+				return ss.str();
+			} else {
+				ss << *text;
+			}
+		}
+		return ss.str();
+	}
+	inline std::string Log::debug2(const char* text) {
+		std::stringstream ss;
+		ss << text;
+		return ss.str();
 	}
 	template<class T>
 	inline void Log::error(T valor) {

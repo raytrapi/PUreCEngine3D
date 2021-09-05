@@ -1,6 +1,6 @@
 ﻿cmake_minimum_required(VERSION 3.0.0)
 
-project(2dMotorGame)
+project(2dMotorGame) 
 
 find_program(conan conan)
 execute_process(COMMAND ${conan} install -s build_type=${CMAKE_BUILD_TYPE} ${CMAKE_CURRENT_SOURCE_DIR})
@@ -8,11 +8,12 @@ execute_process(COMMAND ${conan} install -s build_type=${CMAKE_BUILD_TYPE} ${CMA
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 
 conan_basic_setup()
-
+#find_package(libpng REQUIRED)
 
 add_subdirectory("utilidades")
-add_subdirectory("modules")
-add_subdirectory("components")
+add_subdirectory("modules") 
+add_subdirectory("components") 
+add_subdirectory("lib")
 #[[if(WIN32)
 	add_custom_command(
     TARGET modulos POST_BUILD

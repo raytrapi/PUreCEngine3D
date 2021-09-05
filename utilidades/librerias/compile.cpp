@@ -56,7 +56,7 @@ void Compile::leerRegistro(HKEY clave, const char* subClave, bool& valor) {
 }
 
 void Compile::compileProject(const char* project, Types tipo, std::function<void()> callbackEnd) {
-	utiles::Log::debug("Compilando el código");
+	LOG_DBG("Compilando el código %",project);
 	std::string comando;
 	int i;
 	switch (tipo) {
@@ -184,6 +184,25 @@ const char* Compile::compilerScope() {
 		buscarCompilador();
 	}
 	return entornoCompilador.c_str();
+}
+
+const void Compile::checkCompiled(const char* project) {
+	//Leeremos el fichero línea a línea intentando buscar los errores
+	std::ifstream fichero;
+	std::string ficheroError(project);
+	ficheroError += "c.txt";
+	fichero.open(ficheroError.c_str(), std::ios::in);
+	std::string linea;
+	std::regex error("^(.*): error (.*) (.*)$");
+	if (fichero.is_open()) {
+		while (std::getline(fichero, linea)) {
+			std::cmatch errores;
+			std::regex_match(linea.c_str(), errores, error);
+			if (errores.size() > 0) {
+				LOG_DBG(linea);
+			}
+		}
+	}
 }
 
 

@@ -1,4 +1,5 @@
 #include "renderable.h"
+#include "entity.h"
 RenderableComponent::RenderableComponent(renderable::Object* obj) {
 	objeto = obj;
 
@@ -24,12 +25,14 @@ void RenderableComponent::rotateZ(float radian) {
 	setRotation(rX, rY, radian);
 }
 void RenderableComponent::setPosition(float x, float y, float z) {
+	Transform* global = entidad->transform();
+	actualizar = true;
 	pX = x;
 	pY = y;
 	pZ = z;
-	transformacion[3] = pX;
-	transformacion[7] = pY;
-	transformacion[11] =  pZ;
+	transformacion[3] = pX+global->position()->x;
+	transformacion[7] = pY + global->position()->y;
+	transformacion[11] =  pZ + global->position()->z;
 }
 
 void RenderableComponent::moveX(float x) {
@@ -38,6 +41,7 @@ void RenderableComponent::moveX(float x) {
 }
 
 void RenderableComponent::setRotation(float x, float y, float z) {
+	entidad->setRenderUpdatable();
 	rX = x;
 	if (rX > M_2PI) {
 		rX = rX-M_2PI ;
@@ -45,11 +49,11 @@ void RenderableComponent::setRotation(float x, float y, float z) {
 		rX = M_2PI + rX;
 	}
 	rY = y;
-	if (rY > M_2PI) {
+	/*if (rY > M_2PI) {
 		rY = rY - M_2PI;
 	} else if (rY < 0) {
 		rY = M_2PI + rY;
-	}
+	}*/
 	rZ = z;
 	if (rZ > M_2PI) {
 		rZ = rZ - M_2PI;
@@ -106,14 +110,17 @@ void RenderableComponent::setRotationGimbal(float uX, float uY, float uZ, float 
 }
 
 float RenderableComponent::getX() {
+	actualizar = true;
 	return pX;
 }
 
 float RenderableComponent::getY() {
+	actualizar = true;
 	return pY;
 }
 
 float RenderableComponent::getZ() {
+	actualizar = true;
 	return pZ;
 }
 
@@ -129,6 +136,43 @@ float RenderableComponent::getRZ() {
 
 float* RenderableComponent::matrixTrans() {
 	return transformacion; 
+}
+
+bool RenderableComponent::isUpdatable() {
+	if (actualizar) {
+		actualizar = false;
+		return true;
+	}
+	return false;
+}
+/**
+* Este método forzará la actualización del objeto 
+*/
+void RenderableComponent::update() {
+	actualizar = true;
+	Transform* global = entidad->transform();
+	double cX = cos(rX);
+	double sX = sin(rX);
+	double cY = cos(rY);
+	double sY = sin(rY);
+	double cZ = cos(rZ);
+	double sZ = sin(rZ);
+
+	transformacion[0] = cZ * cY;
+	transformacion[1] = -cX * sZ + sY * cZ * sX;
+	transformacion[2] = sX * sZ + sY * cX * cZ;
+
+	transformacion[4] = cY * sZ;
+	transformacion[5] = cX * cZ + sY * sZ * sX;
+	transformacion[6] = -sX * cZ + sY * cX * sZ;
+
+	transformacion[8] = sX;
+	transformacion[9] = cY * sX;
+	transformacion[10] = cX * cY;
+
+	transformacion[3] = pX + global->position()->x;
+	transformacion[7] = pY + global->position()->y;
+	transformacion[11] = pZ + global->position()->z;
 }
 
 

@@ -29,12 +29,12 @@ std::vector<std::string> renderable::model::Model::split(std::string cadena, cha
 	return palabras;
 }
 
-std::vector<Entity*>* renderable::model::Model::load(std::string fileName) {
+std::vector<Entity*>* renderable::model::Model::load(std::string fileName, float directionY) {
 	int posicionPunto=fileName.rfind('.');
 	if (posicionPunto > 0) {
 		std::string extension = fileName.substr(posicionPunto + 1); //TODO: Convertir a minusculas para asegurarnos de que la extensión exista
 		if (extension == "obj") {
-			return Obj::load(fileName);
+			return Obj::load(fileName,directionY);
 		}
 	}
 	return nullptr;
