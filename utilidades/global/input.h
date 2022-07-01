@@ -2,12 +2,13 @@
 #define _INPUT
 
 #include "../utiles/utilidades.h"
-#include "log.h"
+//#include "log.h"
 //#include ""
 #include <string>
 #include <map>
 #include <vector>
 #include <list>
+#include <functional>
 class Tecla {
 	bool pulsada = false;
 public:
@@ -17,7 +18,7 @@ public:
 };
 enum class EXPORTAR_UTILIDADES Key {
 	
-	NONE,N0=48,N1,N2,N3,N4,N5,N6,N7,N8,N9,
+	NONE,SPACE=32,N0=48,N1,N2,N3,N4,N5,N6,N7,N8,N9,
 	A=65, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, 
 	ARROW_RIGHT=262, ARROW_LEFT, ARROW_DOWN, ARROW_UP,
 	F1=290, F2, F3, F4, F5, F6, F7, F8, F9, F10, F11, F12,
@@ -29,16 +30,39 @@ enum class EXPORTAR_UTILIDADES Key {
 class EXPORTAR_UTILIDADES Input {
 	static std::map <Key, Tecla> teclas;
 	//static std::vector<void (*)(Key)> eventosKeyPress; //Guardamos los eventos de pulsación de tecla
-	Key traducirTecla(unsigned int key);
+	static Key traducirTecla(unsigned int key);
 	static std::map<Key, std::vector<Key>>mapeadas;
 	static std::map<Key,Tecla*> presionadas;
+	std::vector<std::tuple<Key, std::function<void(Key)>, bool>> controlTeclasPulsadas;
+	//static Input* instancia;
+	
 public:
-	static bool isKeyDown(Key key);
-	static bool isKeyUp(Key key);
-	static bool isKeyPress(Key key);
-	void setKeyDown(unsigned int key, long extra);
-	void setKeyUp(unsigned int key, long extra);
+	/*Input() {
+		if (instancia == NULL) {
+			instancia = this;
+		}
+	}
+	
+	Input* getInstance() {
+		if (instancia == NULL) {
+			instancia = new Input();
+		}
+		return instancia;
+	}
+	void setInstance(Input* i) { instancia = i; };/**/
+	bool isKeyDown(Key key);
+	bool isKeyUp(Key key);
+	bool isKeyPress(Key key);
+	void onKeyPress(Key key, std::function<void(Key)>);
+	static void setKeyDown(unsigned int key, long extra);
+	static void setKeyUp(unsigned int key, long extra);
 	void resetKeyPress();
+	void checkKeysPress();
+	void resetAllKeysPress() { 
+		controlTeclasPulsadas.clear(); 
+	}
 	//static void onPress(void (*f)(Key));
 };
+/*Input* Input::instancia;
+std::vector<std::tuple<Key, std::function<void(Key)>, bool>> Input::controlTeclasPulsadas;*/
 #endif // !_INPUT

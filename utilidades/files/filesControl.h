@@ -9,7 +9,7 @@
 #include "../timer/watchdog.h"
 
 //#include "../../modules/src/module.h"
-#include "../log/log.h"
+//#include "../log/log.h"
 
 /**
 * Este módulo contiene la funcionalidad para controlar una carpeta y ejecutar la función solicitada

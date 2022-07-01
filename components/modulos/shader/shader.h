@@ -4,7 +4,7 @@
 #include "../../src/exportar.h"
 #include "../../src/component.h"
 #include "../../../modules/src/module.h"
-#include "../../../modules/graphic/motor.h"
+
 #include "types.h"
 #include <vector>
 //extern enum modules::graphics::Graphic::TYPE_SHADER;
@@ -19,6 +19,7 @@ private:
 	Graphics::Shader::TYPE_SHADER tipo;
 	byte* codigo = 0;
 	int longitudCodigo;
+	bool compilado = false;
 public:
 	Shader();
 	Shader(short int id, Graphics::Shader::TYPE_SHADER type, const byte*& data, int count);
@@ -45,6 +46,7 @@ public:
 	//Para agilizar mantendremos un vector para los compilados
 	std::vector<short int>* getShadersCompiled();
 	std::vector<short>* getShadersId();
+	bool isCompiled() { return compilado; }
 };
 template<class T>
 inline T* Shader::getData() {

@@ -9,7 +9,7 @@ file(GLOB RES src/*.cpp src/*/*.cpp)
 add_library(res_dll SHARED ${RES})
 
 set_property(TARGET res_dll PROPERTY CXX_STANDARD 20)
-target_link_libraries( res_dll utils modules ${CONAN_LIBS})
+target_link_libraries( res_dll utils modules ${CONAN_LIBS} libpng16d.lib)
 #target_link_libraries( res_dll optimized libpng16d.lib)
 
 if(WIN32)

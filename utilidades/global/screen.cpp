@@ -12,10 +12,14 @@ float Screen::getHeightNormal(double n) {
 	return ((float)n / alto_2) - 1;
 }
 void Screen::setDimension(int width, int height) {
-	ancho = width;
-	ancho_2 = 0.5f*ancho;
-	alto = height;
-	alto_2 = 0.5f * alto;
+	if (ancho != width) {
+		ancho = width;
+		ancho_2 = 0.5f * ancho;
+	}
+	if (alto != height) {
+		alto = height;
+		alto_2 = 0.5f * alto;
+	}
 }
 int Screen::ancho = 0;
 int Screen::alto = 0;

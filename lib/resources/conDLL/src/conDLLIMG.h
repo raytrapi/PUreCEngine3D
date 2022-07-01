@@ -3,6 +3,7 @@
 
 #include "../../../../modules/resources/resource.h"
 #include "../../../../utilidades/log/log.h"
+//#include "../../../../utilidades/global/input.h"
 #include <png.h>
 #include <module.h>
 #include <vector>

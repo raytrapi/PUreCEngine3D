@@ -1,5 +1,5 @@
 #include "object.h"
-
+#include "../../../components/modulos/renderables/renderable.h"
 renderable::Object::~Object() {
 	//utiles::Log::debug("borro obj");
 	borrar();
@@ -9,11 +9,20 @@ void renderable::Object::setName(std::string name) {
 	nombre = name;
 }
 void renderable::Object::borrar() {
+	borrarMesh();
+	borrarMaterial();
+	cambio = true;
+	
+}
+void renderable::Object::borrarVertex() {
 	numeroVertices = 0;
 	if (vertices != NULL) {
 		delete[] vertices;
 		vertices = NULL;
 	}
+}
+void renderable::Object::borrarMesh() {
+	borrarVertex();
 	if (normales) {
 		delete[] normales;
 		normales = NULL;
@@ -30,9 +39,21 @@ void renderable::Object::borrar() {
 		delete[] uvs;
 		uvs = NULL;
 	}
-	cambio = true;
-
+	if (caras) {
+		delete caras;
+		caras = NULL;
+	}
 }
+void renderable::Object::borrarMaterial() {
+	for (auto itr = materials.begin(); itr != materials.end(); itr++) {
+		if (std::get<1>(*itr)) {
+			
+			delete std::get<0>(*itr);
+		}
+	}
+	materials.clear();
+}
+
 void renderable::Object::ponerMesh(float* mesh, float* normals, float * colors, int * indexs) {
 	borrar();
 	int longitud = sizeof(mesh);
@@ -67,15 +88,34 @@ void renderable::Object::ponerMesh(float* mesh, float* normals, float * colors, 
 /**
 * Add material but not delete when remove the mesh
 * */
-void renderable::Object::setMaterial(modules::graphics::Material* m) {
-	materials.push_back(std::make_tuple(m, false));
+unsigned renderable::Object::setMaterial(modules::graphics::Material* m, int pos, bool del) {
+	if (pos > -1 && pos<materials.size()) {
+		delete std::get<0>(materials[pos]);
+		if (del) {
+			std::get<0>(materials[pos]) = new modules::graphics::Material(*m);
+		} else {
+			std::get<0>(materials[pos]) = m;
+		}
+		std::get<1>(materials[pos]) = del;
+		return pos;
+	} else {
+		materials.push_back(std::make_tuple(m, del));
+		return materials.size() - 1;
+	}
 }
 /**
 * Add material and delete when remove the mesh
 * */
-void renderable::Object::setMaterial(modules::graphics::Material m) {
-	//TODO: ERROR, hay que crear realmente el objeto, al tener punteros es posible que falle la copia, o mejor dicho el borrado
-	materials.push_back(std::make_tuple(new modules::graphics::Material(m), false));
+unsigned renderable::Object::setMaterial(modules::graphics::Material m, int pos, bool del) {
+	modules::graphics::Material* m2 = new modules::graphics::Material(m);
+	return setMaterial(m2, pos, del);
+	
+}
+
+
+
+RenderableComponent* renderable::Object::getRenderable() {
+	return renderizador;
 }
 
 std::vector<modules::graphics::Material*> renderable::Object::getMaterials() {
@@ -97,6 +137,40 @@ unsigned int renderable::Object::getIdTexture() {
 	return 0;
 }
 
+int renderable::Object::getNormalsNumber() {
+	return numeroNormales;
+}
+
+int renderable::Object::getVertexNumber() {
+	return numeroVertices;
+}
+
+int renderable::Object::getFacesNumber() {
+	return caras->size();
+}
+void renderable::Object::setUV(float** uv) {
+	/*if (uvs) {
+		delete[] uvs;
+		uvs = NULL;
+	}*/
+	if (this->uvs != NULL) {
+		for (int i = 0; i < numeroVertices; i++) {
+			for (int jC = 0; jC < 2; jC++) {
+				this->uvs[(i * 2) + jC] = uv[i][jC];
+			}
+		}
+	}
+	
+	cambio = true;
+	actualizarVertices = true;
+	setToRender(true);
+}
+void renderable::Object::setToRender(bool toRender) {
+	RenderableComponent* renderizador = getRenderable();
+	if (renderizador!=NULL) {
+		renderizador->setUpdated(toRender);
+	}
+}
 
 
-
+std::vector<renderable::Object*> renderable::Object::objetos;

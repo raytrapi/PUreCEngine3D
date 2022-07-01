@@ -12,25 +12,36 @@
 #include <string>
 
 struct EntityGL4 {
+	boolean inicializada=false;
 	GLenum _mode;
 	GLuint _vao=0; //Array de vertices -> Apunta a un buffer
 	GLuint _vbo=0; //Buffer de vertices
 	GLuint _ebo=0; //Indice de vertices -> Indica como se lee el buffer
 	std::vector<GLuint> _texts; //Texturas
 	std::vector<std::tuple<GLuint,int,int,void*, GLenum>> _fbos; //Buffer de frames
-	int _numeroVertices;
+	int _numeroVertices=0;
 	renderable::Object* _object;
 	std::vector<GLuint> shadersPrograms;
 public:
 	EntityGL4() {
 		_object = NULL;
+		//_numeroVertices = object->getVertexNumber();
 	}
 	EntityGL4(GLenum mode, renderable::Object* object) {
 		_mode = mode;
 		_object = object;
+		_numeroVertices = object->getVertexNumber();
 	};
 	~EntityGL4() {
 		clear();
+	}
+	bool isInitiate() { 
+		if (inicializada) {
+			return true;
+		} else {
+			inicializada = true;
+			return false;
+		}
 	}
 	GLenum getMode() { return _mode; };
 
@@ -47,8 +58,9 @@ public:
 	GLuint* getEBO() { return &_ebo; };
 	std::vector<std::tuple<GLuint, int, int, void*, GLenum>>* getFBOs() { return &_fbos; };
 	std::vector<GLuint>* getTexts() { return &_texts; };
-	void addText(GLuint idTexture) {
+	unsigned addText(GLuint idTexture) {
 		_texts.push_back(idTexture);
+		return _texts.size() - 1;
 	}
 	GLuint* addFBO(int width=0, int height=0, void *data=NULL, GLenum scale=GL_LINEAR) {
 		_fbos.push_back({ 0,width, height, data, scale });
@@ -70,18 +82,19 @@ public:
 		
 		return &shadersPrograms;
 	}
-
-	void clear() {
-		
-		for (auto itr = _fbos.begin(); itr != _fbos.end(); itr++) {
-			glDeleteFramebuffers(1, &(std::get<0>(*itr)));
-		}
-		_fbos.clear();
+	void clearText() {
 		for (auto itr = _texts.begin(); itr != _texts.end(); itr++) {
 			glDeleteTextures(1, &(*itr));
 
 		}
 		_texts.clear();
+	}
+	void clear() {
+		for (auto itr = _fbos.begin(); itr != _fbos.end(); itr++) {
+			glDeleteFramebuffers(1, &(std::get<0>(*itr)));
+		}/**/
+		//_fbos.clear();
+		clearText();
 		if (_ebo != 0) {
 			glDeleteBuffers(1, &_ebo);
 			_ebo = 0;
@@ -98,13 +111,13 @@ public:
 			glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 			if (!success) {
 				glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-				LOG_DBG("ERROR EN SHADER: Se ha producido un error en la coplilación de tipo \r\n\t%\r\n\t%", type, infoLog);
+				DBG("ERROR EN SHADER: Se ha producido un error en la coplilación de tipo \r\n\t%\r\n\t%", type, infoLog);
 			}
 		} else {
 			glGetProgramiv(shader, GL_LINK_STATUS, &success);
 			if (!success) {
 				glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-				LOG_DBG("ERROR EN SHADER: Se ha producido un error al linkar el programa \r\n\t%\r\n\t%", type, infoLog);
+				DBG("ERROR EN SHADER: Se ha producido un error al linkar el programa \r\n\t%\r\n\t%", type, infoLog);
 			}
 		}
 	}

@@ -3,17 +3,25 @@
 project(2dMotorGame) 
 
 find_program(conan conan)
-execute_process(COMMAND ${conan} install -s build_type=${CMAKE_BUILD_TYPE} ${CMAKE_CURRENT_SOURCE_DIR})
+execute_process(COMMAND ${conan} install -s build_type=${CMAKE_BUILD_TYPE} ${CMAKE_CURRENT_SOURCE_DIR} --build=missing)# --build=libpng --build=zlib --build=glfw --build=imgui --build=openal)
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 
-conan_basic_setup()
+conan_basic_setup() 
 #find_package(libpng REQUIRED)
+
+#add_subdirectory("vendors/openal-soft")
+add_subdirectory("vendors/freetype") 
+
 
 add_subdirectory("utilidades")
 add_subdirectory("modules") 
 add_subdirectory("components") 
 add_subdirectory("lib")
+
+ 
+
+add_subdirectory("audio")
 #[[if(WIN32)
 	add_custom_command(
     TARGET modulos POST_BUILD
@@ -42,7 +50,7 @@ include_directories(
    utilidades/timer
 ) 
 
-file(GLOB CODIGO src/*.cpp utilidades/librerias/compile.cpp src/proyectos/*.cpp)# graphics/src/renderable/renderable.h
+file(GLOB CODIGO src/*.cpp utilidades/librerias/compile.cpp src/proyectos/*.cpp)# graphics/src/renderable/renderable.h 
 #file(GLOB MOTOR src/Motor/*/*.cpp src/Motor/*.cpp)
 
 #file(GLOB MOTORGL src/terceros/*/*.cpp) 
@@ -58,7 +66,7 @@ endif()
 
 set_property(TARGET 2dMotorGame PROPERTY CXX_STANDARD 20)
 
-target_link_libraries( 2dMotorGame  motor_grafico utils components modules )
+target_link_libraries( 2dMotorGame utils motor_grafico  components modules ) 
 
 
 #add_subdirectory("ejemplos")
@@ -80,3 +88,8 @@ add_custom_command(
         ${CMAKE_HOME_DIRECTORY}/src/proyectos/defproj
         ${CMAKE_BINARY_DIR}/bin/
    )
+
+
+#make_directory(${CMAKE_CURRENT_BINARY_DIR}/bin/resources)
+
+file(COPY ${CMAKE_HOME_DIRECTORY}/resources DESTINATION  ${CMAKE_CURRENT_BINARY_DIR}/bin)

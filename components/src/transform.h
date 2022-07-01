@@ -1,6 +1,7 @@
 #ifndef __TRANSFORM
 #define __TRANSFORM
 
+#include <vector>
 #include "exportar.h"
 extern class Entity;
 struct EXPORTAR_COMPONENTE Vector3 {
@@ -18,6 +19,8 @@ class EXPORTAR_COMPONENTE Transform {
 	Vector3* _rotation;
 	Vector3* _scale;
 	Entity* entidad;
+	std::vector<Transform*> hijos;
+	void cambiado();
 public:
 	Transform(Entity * entidad) {
 		_position = new Vector3(0, 0, 0);
@@ -37,6 +40,11 @@ public:
 	void setY(float y);
 	void setZ(float z);
 	void setPosition(float x, float y, float z);
+
+	void appendChild(Entity* child);
+	void appendChild(Transform* child);
+	void removeChild(Entity* child);
+	void removeChild(Transform* child);
 	
 };
 #endif // !__TRANSFORM

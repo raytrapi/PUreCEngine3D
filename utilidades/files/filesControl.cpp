@@ -76,9 +76,9 @@ bool FileControl::fileChangeTime(const char* path, std::function<void(char*)>cal
 void FileControl::folderChange(const char* path, std::function<void(char*)>callback, bool subCarpeta) {
 	carpetasCambio.push_back(new EstadoRuta(path,callback));
 	if (subCarpeta) {
-		for (auto& carpeta : std::filesystem::recursive_directory_iterator(std::filesystem::path(path))){
-			utiles::Log::debug((char *)carpeta.path().c_str());
-		}
+		//for (auto& carpeta : std::filesystem::recursive_directory_iterator(std::filesystem::path(path))){
+			//utiles::Log::debug((char *)carpeta.path().c_str());
+		//}
 	}
 }
 void FileControl::cargarSubcarpetas(const char* path, std::function<void(char*)>callback,  std::vector<FileControl::EstadoRuta*> *carpetas, bool subCarpeta, bool registrarTiempo) {
@@ -133,8 +133,8 @@ bool FileControl::folderChangeTime(const char* path, std::function<void(char*)>c
 				bool sinCambio = true;
 				for (auto carpeta = carpetas.begin(); sinCambio && carpeta != carpetas.end(); carpeta++) {
 					if (FileControl::check(*carpeta, FileControl::Tipos::FICHERO)) { //TODO: Modificar para gestionar carpetas
-						utiles::Log::debug("Hay cambios");
-						utiles::Log::debug((*carpeta)->ruta);
+						//utiles::Log::debug("Hay cambios");
+						//utiles::Log::debug((*carpeta)->ruta);
 						(*carpeta)->callback((*carpeta)->ruta);
 						cargarSubcarpetas(path, (*carpeta)->callback, (std::vector<FileControl::EstadoRuta*>*)(&carpetas), true,true);
 						carpeta = carpetas.begin();

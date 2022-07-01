@@ -23,7 +23,11 @@ namespace utiles {
 		static unsigned int setInterval(std::function<void()> callback, unsigned int milliseconds);
 		static void clearInterval(unsigned int);
 		static unsigned int setTimeOut(std::function<void()> callback, unsigned int milliseconds);
+		static void clearTimeOut(unsigned int);
 	private:
+		/**
+		* id, milisegundos, funcion, delta_time
+		*/
 		static std::vector < std::tuple<unsigned int, unsigned int, std::function<void()>, double>*> controles;
 		static std::thread hilo;
 		static bool ejecutando;

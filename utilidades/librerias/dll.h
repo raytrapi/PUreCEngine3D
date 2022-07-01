@@ -9,6 +9,7 @@
 #endif
 #include <map>
 #include <string>
+
 namespace utilidades {
 	struct cmp_str {
 		bool operator()(char const* a, char const* b) const {

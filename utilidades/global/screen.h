@@ -10,6 +10,7 @@ class EXPORTAR_UTILIDADES Screen {
 public:
 	static int getWidth();
 	static int getHeight();
+	
 	static float getWidthNormal(double n);
 	static float getHeightNormal(double n);
 	static void setDimension(int width, int height);

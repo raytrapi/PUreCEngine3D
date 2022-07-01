@@ -254,3 +254,5 @@ const char* Libreria::cogerNombre() {
 std::map<Module::MODULES_TYPE, std::vector<Libreria*>*> CargaDLL::libreriasDisponibles;
 char* CargaDLL::raizLibrerias = (char *)"modulosTEMP/";
 //char* raiz=".";
+/*std::vector<std::tuple<Key, std::function<void(Key)>, bool>> Input::controlTeclasPulsadas;
+Input* Input::instancia = NULL;/**/

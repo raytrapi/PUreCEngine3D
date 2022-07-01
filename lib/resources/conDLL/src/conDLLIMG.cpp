@@ -44,9 +44,19 @@ std::tuple<float*, int, int, unsigned int, modules::graphics::TextureImg::FORMAT
 	unsigned int canales=png_get_channels(png_ptr, info_ptr);
 		/*
 		1 - PNG_COLOR_TYPE_GRAY or PNG_COLOR_TYPE_PALETTE
-2 - PNG_COLOR_TYPE_GRAY_ALPHA
-3 - PNG_COLOR_TYPE_RGB
-4 - PNG_COLOR_TYPE_RGB_ALPHA or PNG_COLOR_TYPE_RGB+filler byte */
+		2 - PNG_COLOR_TYPE_GRAY_ALPHA
+		3 - PNG_COLOR_TYPE_RGB
+		4 - PNG_COLOR_TYPE_RGB_ALPHA or PNG_COLOR_TYPE_RGB+filler byte 
+		5 - PNG_COLOR_MASK_PALETTE
+		6 - PNG_COLOR_MASK_COLOR
+		7 - PNG_COLOR_MASK_ALPHA
+		PARA PNG
+		0: Gray (1 channel)
+		2: RGB  (3 channels)
+		3: color palette (1 channel)
+		4: Gray-alpha (2 channels)
+		6: RGBA (4 channels)
+		*/
 	unsigned char bit_depth = png_get_bit_depth(png_ptr, info_ptr);
 	LOG_DBG("Colores % - %", canales, color_type);
 	int number_of_passes = png_set_interlace_handling(png_ptr);
@@ -70,12 +80,15 @@ std::tuple<float*, int, int, unsigned int, modules::graphics::TextureImg::FORMAT
 	int b = 0;
 	for (int y = 0; y < alto; y++) {
 		for (int x = 0; x < ancho; x++) {
+			if ((x == 0 && y == 0) || (x==110 && y== 76)) {
+				DBG("Color RGBA [%,%] %,%,%,%", x,y,
+					(int)row_pointers[y][(x * 4) + 0], 
+					(int)row_pointers[y][(x * 4) + 1], 
+					(int)row_pointers[y][(x * 4) + 2], 
+					(int)row_pointers[y][(x * 4) + 3]);
+			}
 			for (int j = 0; j < 4; j++) {
 				raw[b+j] = (float)((float)row_pointers[alto - y - 1][(x*4)+j]/255.f); //
-				if ((x == 0 && y == 0) || (x == 148 && y==143)) {
-					LOG_DBG("Color %", (int)row_pointers[y][(x * 4) + j]);
-					LOG_DBG("Color %", raw[b + j]);
-				}
 			}
 			b += 4;
 		}
@@ -86,4 +99,6 @@ std::tuple<float*, int, int, unsigned int, modules::graphics::TextureImg::FORMAT
 	LOG_DBG("La imgaen es de %x%", ancho, alto);
 	return { raw,ancho,alto,ancho * alto * 4,modules::graphics::TextureImg::RGBA };
 }
+/*std::vector<std::tuple<Key, std::function<void(Key)>, bool>> Input::controlTeclasPulsadas;
+Input* Input::instancia;/**/
 REGISTRAR_MODULO(ResourcesDirect);

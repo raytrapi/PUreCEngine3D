@@ -1,6 +1,22 @@
 #include "component.h"
 
-Component::Component() { DBG("Creo componente"); }
+Component::Component() { }
 Component::~Component() {
-	DBG("borro componente");
+	DBG("borro componente Generico");
+	if (nombre != NULL) {
+		delete[] nombre;
+		nombre = NULL;
+	}
+}
+
+void Component::setName(std::string name) {
+	if (nombre != NULL) {
+		delete[] nombre;
+		nombre = NULL;
+	}
+	nombre = new char[name.length()+1];
+	for (int i = 0; i < name.length(); i++) {
+		nombre[i] = name[i];
+	}
+	nombre[name.length()] = '\0';
 }

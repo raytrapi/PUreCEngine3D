@@ -1,5 +1,5 @@
 #include "mesh.h"
-
+#include "../../../components/modulos/renderables/renderable.h"
 renderable::Mesh::Mesh(){
 }
 
@@ -17,7 +17,7 @@ float renderable::Mesh::getSize() {
 * Get the number of all components to the mesh
 * Obtenemos el tamaño total de los componentes de la malla
 **/
-int renderable::Mesh::getAllSize() {
+/*int renderable::Mesh::getAllSize() {
 	return numCoordenadas;
 }
 
@@ -29,27 +29,39 @@ float* renderable::Mesh::getNormals() {
 }
 float* renderable::Mesh::getColors() {
 	return colores;
-}
+}*/
 int* renderable::Mesh::getIndexs() {
 	return indices;
 }
-int renderable::Mesh::getVertexNumber() {
-	return numeroVertices;
+
+
+
+
+
+void renderable::Mesh::setFaces(std::vector<std::vector<int>*>* faces, std::vector<float**>* vectors, std::vector<float*>* color, std::vector<float**>* normals, float** uvs, renderable::Object::MODE_COLOR mode) {
+	setTriangles(vectors, color, normals, uvs, mode);
+	caras = new std::vector<std::vector<const float*>>;
+	for (int i = 0; i < faces->size(); i++) {
+		
+		std::vector<const float*> ultimo = std::vector<const float*>();
+		for (int j = 0; j < faces->operator[](i)->size(); j++) {
+			ultimo.push_back(new float[]{ vertices[j * 3],vertices[(j * 3) + 1],vertices[(j * 3) + 2] });
+		}
+		caras->push_back(ultimo);
+	}
+
 }
 
-
-
-
 void renderable::Mesh::setTriangles(std::vector<float **>*triangulos,std::vector<float*>* colors, std::vector<float**>* normals, float** uvs, renderable::Object::MODE_COLOR mode) {
-	borrar();
+	borrarMesh();
 	modoColor = mode;
 	
 	numeroVertices = triangulos->size()*3;
-	numCoordenadas = numeroVertices * 11; //3+3+3+2 (3 coordenadas + 3 normales + 3 color + 2 uv
+	numCoordenadas = numeroVertices * 12; //3+3+4+2 (3 coordenadas + 3 normales + 4 color + 2 uv
 	int numComponentes = numeroVertices * 3;
 	vertices = new float[numComponentes];
 	normales= new float[numComponentes];
-	colores = new float[numComponentes];
+	colores = new float[numeroVertices * 4];
 	this->uvs = new float[numeroVertices * 2]; //Solo hay dos componentes por uv
 	int iMalla = 0;
 	int iNormales = 0;
@@ -101,13 +113,14 @@ void renderable::Mesh::setTriangles(std::vector<float **>*triangulos,std::vector
 		//LOG_DBG("Longitud del array %", sizeof(colors));
 		if (colors->size() > i) {
 			for (int iC = 0; iC < 3; iC++) {
-				for (int jC = 0; jC < 3; jC++) {
+				for (int jC = 0; jC < 4; jC++) {
 					colores[iColores++] = colors->operator[](i)[jC];
 				}
+				
 			}
 		} else {
 			for (int iC = 0; iC < 3; iC++) {
-				for (int jC = 0; jC < 3; jC++) {
+				for (int jC = 0; jC < 4; jC++) {
 					colores[iColores++] = 1.0f;
 				}
 			}
@@ -129,6 +142,12 @@ void renderable::Mesh::setTriangles(std::vector<float **>*triangulos,std::vector
 		}
 		
 	}
+	cambio = true;
+
+	RenderableComponent* renderizador = getRenderable();
+	if (renderizador) {
+		renderizador->setUpdated(true);
+	}/**/
 }
 
 void renderable::Mesh::setObject(std::vector<float*>* vertex, std::vector<int>* indexes, std::vector<float**>* normals, float** color) {
@@ -156,4 +175,8 @@ void renderable::Mesh::setObject(std::vector<float*>* vertex, std::vector<int>* 
 			}
 		}
 	}
+}
+
+void renderable::Mesh::loadOBJ(const char* file) {
+	
 }

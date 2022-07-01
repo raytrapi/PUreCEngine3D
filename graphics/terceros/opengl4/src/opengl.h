@@ -1,11 +1,13 @@
-#ifndef __MOTORGL
-#define __MOTORGL
-#define GL_GLEXT_PROTOTYPES
+#ifndef __MOTORGL_4
+#define __MOTORGL_4
 
-#include <glad/gl.h>
-//#include <gl/GLU.h>
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
+
+
+#define MAX_VERTEX_BUFFER 512 * 1024
+#define MAX_ELEMENT_BUFFER 128 * 1024
+
+
+
 
 #include "../../imagenes/imagen.h"
 #include "../../imagenes/png.h"
@@ -13,7 +15,8 @@
 #include "../src/renderable/pixel.h"
 #include "../src/renderable/cube.h"
 #include "../src/renderable/img.h"
-
+#include "../src/renderable/line.h"
+#include "../src/renderable/text.h"
 
 
 
@@ -21,11 +24,11 @@
 #include "../../utilidades/global/mouse.h"
 #include "../../utilidades/global/input.h"
 
-
 #include <entity.h>
 #include <camera.h>
 #include <renderable.h>
 #include "entitygl4.h"
+#include "imgui/interface.h"
 //#include <utilidades.h>
 #include <log.h>
 #include <module.h>
@@ -39,19 +42,10 @@
 
 #include <map>
 
-
-#define NK_IMPLEMENTATION
-#define NK_INCLUDE_FIXED_TYPES
-#define NK_INCLUDE_FONT_BAKING
-#define NK_INCLUDE_DEFAULT_FONT
-#define NK_INCLUDE_DEFAULT_ALLOCATOR
-#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
-#define NK_INCLUDE_STANDARD_VARARGS
-#include <nuklear.h>
-
-#define NK_GLFW_GL2_IMPLEMENTATION
-#include <nuklear_glfw_gl2.h>
-
+#define GLAD_GL_IMPLEMENTATION
+#include <glad/gl.h>
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
 
 
 #if defined(_MSC_VER)
@@ -60,8 +54,11 @@
 #endif
 
 #include <math.h>
+//extern class Input;
+
 class  MotorGL:public modules::graphics::Graphic {
 private:
+		
 		
 		GLFWwindow* window;
 
@@ -69,8 +66,7 @@ private:
 		std::map<Entity*, EntityGL4*> misEntidades;
 
 		//std::vector<GLuint> shaders;
-		static Input input;
-		static Mouse raton;
+		
 		void inicializarLuz();
 		void renderizarCubo(renderable::Cube* cube);
 		void renderizarImagen(renderable::Img* img);
@@ -197,21 +193,31 @@ private:
 			0.00f, 0.00f, -2/(f2-n2), -(f2+n2)/(f2-n2),
 			0.00f, 0.00f, 0.00f, 1.00f
 		};
+
+		struct nk_context* ctx;
 		struct nk_font_atlas* atlas;
 protected:
-	float* points;
+	float* points=NULL;
 	bool derecha = true;
-
+	//InterfaceGL* interfaz = NULL;
+	
 	void SetData();
 
+	void updateEntityLINE(RenderableComponent* render, EntityGL4* entidad, Entity* entity, TYPE_OPERATION type);
 	void updateEntityIMG(RenderableComponent* render, EntityGL4* entidad, Entity* entity, TYPE_OPERATION type);
 	void updateEntityCUBE(RenderableComponent* render, EntityGL4* entidad, Entity* entity, TYPE_OPERATION type);
 	void updateEntityMESH(RenderableComponent* render, EntityGL4* entidad, Entity* entity, TYPE_OPERATION type);
+	void updateEntityTEXT(RenderableComponent* render, EntityGL4* entidad, Entity* entity, TYPE_OPERATION type);
+	void iniciar();
+	void destruir();
 public:
 	MotorGL();
 	~MotorGL();
-	void renderizar();
-	void renderizar(void *);
+	void preRender();
+	void render();
+	void render(void *);
+	void renderInterface();
+	void postRender();
 	bool inicializar(void * contexto, double ancho, double alto);
 	char* nombre() { return (char*)"OPENGL 4"; };
 		
@@ -236,7 +242,10 @@ public:
 
 	void changeCamera(Camera* camera);
 	void resizeCamera();
-	bool addTexture(float* image, unsigned int length, int width, int height, unsigned int& idTexture, modules::graphics::TextureImg::FORMAT_COLOR typeColor);
+	bool addTexture(float* image, unsigned int length, int width, int height, int& idTexture, modules::graphics::TextureImg::FORMAT_COLOR typeColor);
 	static void closeWindow(GLFWwindow* window);
+	//void renderNewViewPort(std::vector<Entity*> entidades, float x = -1.f, float y = 1.f, float width = 2.f, float height = 2.f);
+	Entity* drawLine(float* vertex, unsigned countVertex, float r, float g, float b, float a, unsigned width = 1);
+	Entity* drawLineLoop(float* vertex, unsigned countVertex, float r, float g, float b, float a, unsigned width = 1);
 };
-#endif // !__MOTORGL
+#endif // !__MOTORGL_4

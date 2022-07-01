@@ -1,7 +1,10 @@
 #include "motor.h"
-
+#include "../../components/src/entity.h"
+//#include "../../vendors/glfw/nuklear_glfw_gl4.h"
+#include "../general.h"
 void modules::graphics::Graphic::addEntity(void* entity) {
-	int noEncontre = true;
+	/*int noEncontre = true;
+	std::vector<Entity*> entities = Entity::getEntities();
 	for (auto itr = entities.begin(); itr != entities.end() && noEncontre; itr++) {
 		if (entity == (*itr)) {
 			noEncontre = false;
@@ -9,39 +12,36 @@ void modules::graphics::Graphic::addEntity(void* entity) {
 	}
 	if (noEncontre) {
 		entities.push_back(entity);
-	}
+	}/**/
 	updateEntity(entity);
 }
 
 void modules::graphics::Graphic::removeEntity(void* entity) {
+	/*std::vector<Entity*> entities = Entity::getEntities();
 	for (auto itr = entities.begin(); itr != entities.end(); itr++) {
 		if (entity == (*itr)) {
 			entities.erase(itr);
-			delete (*itr);
+			//delete (*itr);
 			return;
 		}
-	}
+	}/**/
 }
 
 void modules::graphics::Graphic::removeEntities() {
-	bool seguir = true;
+	/*bool seguir = true;
 	for (auto itr = entities.begin(); itr != entities.end() && seguir; itr++) {
 		
 		seguir = false;
-		entities.erase(itr);
+		//entities.erase(itr);
 		delete (*itr);
 	}
+	entities.clear();/**/
 }
 void modules::graphics::Graphic::removeAll() {
 	removeEntities();
 	removeAllFocus();
 }
-void modules::graphics::Graphic::updateEntities(modules::graphics::Graphic::TYPE_OPERATION type) {
-	for (auto itr = entities.begin(); itr != entities.end(); itr++) {
-		updateEntity((*itr),type);
-		
-	}
-}
+
 void modules::graphics::Graphic::addOnFocus(void(*callback)(bool)) {
 	onFocus.push_back(callback);
 }
@@ -128,11 +128,14 @@ modules::graphics::Material::Material(const modules::graphics::Material &m) {
 	for (int i = 0; i < m.textures.size(); i++) {
 		textures.push_back(new Texture(*m.textures[i]));
 	}
-
+	
 }
 modules::graphics::Material::~Material() {
+	//DBG_F("Destruyo el material");
 	for (int i = 0; i < textures.size(); i++) {
 		if (textures[i] != NULL) {
+
+			//TODO: TENEMOS QUE LIBERAR LA TEXTURA DE LA MEMORIA DE LA TARJETA GRÁFICA
 			delete textures[i];
 		}
 	}
@@ -214,3 +217,6 @@ void modules::graphics::TextureImg::chargeImage(float* image, unsigned int lengh
 	this->length = length;
 	
 };
+
+//std::vector<std::tuple<Key, std::function<void(Key)>, bool>> Input::controlTeclasPulsadas;
+//Input* Input::instancia;

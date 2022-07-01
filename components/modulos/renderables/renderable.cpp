@@ -1,16 +1,20 @@
+#include "..\..\..\graphics\src\renderable\object.h"
 #include "renderable.h"
 #include "entity.h"
+void renderable::Object::setRenderable(RenderableComponent* render) {
+	renderizador = render;
+}
 RenderableComponent::RenderableComponent(renderable::Object* obj) {
 	objeto = obj;
-
+	objeto->setRenderable(this);
 };
 	
 RenderableComponent::~RenderableComponent() {
-	utiles::Log::debug("Borro render");
 	if (objeto) {
 		delete objeto;
 		objeto = NULL; 
 	}
+	//DBG("Borro Render");
 	
 }
 
@@ -30,7 +34,7 @@ void RenderableComponent::setPosition(float x, float y, float z) {
 	pX = x;
 	pY = y;
 	pZ = z;
-	transformacion[3] = pX+global->position()->x;
+	transformacion[3] = pX + global->position()->x;
 	transformacion[7] = pY + global->position()->y;
 	transformacion[11] =  pZ + global->position()->z;
 }
@@ -173,6 +177,22 @@ void RenderableComponent::update() {
 	transformacion[3] = pX + global->position()->x;
 	transformacion[7] = pY + global->position()->y;
 	transformacion[11] = pZ + global->position()->z;
+}
+
+void RenderableComponent::setUpdated(bool update) {
+	actualizar = update;
+	if (actualizar) {
+		entidad->setRenderUpdatable();
+	}
+}
+
+std::vector<std::vector<const float*>>* RenderableComponent::getFaces() {
+	return objeto->getFaces();
+}
+
+
+std::vector<std::vector<const float*>>* renderable::Object::getFaces() {
+	return caras;
 }
 
 

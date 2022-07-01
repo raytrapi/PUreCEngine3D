@@ -5,25 +5,31 @@
     #include "windows/ventana.h"
 #endif
 
+#include "../utilidades/global/input.h"
 #include "../modules/graphic/motor.h"
+#include "../modules/graphic/interface.h"
 #include "../modules/tape/tape.h"
 #include "../modules/resources/resource.h"
+#include "../modules/audio/audio.h"
 #include "../utilidades/timer/timer.h"
 #include "../utilidades/log/log.h"
+#include "../graphics/src/log/logEntity.h"
 
 #include "cargaDLLs.h"
 
+
 #include "../utilidades/global/screen.h"
-#include "../utilidades/global/input.h"
 #include "../utilidades/global/mouse.h"
 #include "../graphics/src/renderable/renderable.h"
 #include "../components/src/entity.h"
 
 #include <filesControl.h>
 #include <compile.h>
-#include <watchdog.h>
+#include <watchdog.h> 
 
 #include <thread>
+
+#include <locale>
 
 
 #include "proyectos/proyecto.h"
@@ -54,13 +60,20 @@ const char* extDLL = "dll";
 const char* extDLL = "so";
 #endif // WIN32
 
+
+//#define NK_IMPLEMENTATION
+//#include "nuklear.h"
+
 int recargarCartucho = 0;
 modules::Tape* cartucho = 0;
 modules::graphics::Graphic* motorGrafico = 0;
 modules::resources::Resource* recursos = 0;
+modules::Audio* audio = 0;
 std::string carpertaProyecto = "";
 std::string proyecto = "";
-
+Input input;
+Global global;
+modules::graphics::Interface *interfaz;
 static void cargarCartucho(char * ruta) {
    
 #ifdef WIN32
@@ -71,14 +84,14 @@ static void cargarCartucho(char * ruta) {
       std::filesystem::remove(pdb);
    }/**/
 #endif // WIN32 
-
-utiles::Log::debug(ruta);
+   DBG(ruta);
    if (std::filesystem::exists(ruta)) {
       CargaDLL::cargar(ruta);
       //cartucho=
 
       cartucho = CargaDLL::cogerModulo<modules::Tape>(Module::TAPE);
       if (cartucho) {
+          //cartucho->setInput(&input);
          recargarCartucho = 1;
          Screen::setDimension(cartucho->getScreenWidth(), cartucho->getScreenHeight());
          Module::set(Module::MODULES_TYPE::TAPE, cartucho);
@@ -91,6 +104,57 @@ utiles::Log::debug(ruta);
    }
 
 }
+std::string rutaTape = "";
+void reiniciarTape();
+void compilarTape(bool conReinicio = false) {
+    if (global.compileState != StateCompile::COMPILING) {
+        global.compileState = StateCompile::COMPILING;
+        Compile::compileProject(Proyecto::cogerRutaCompilacionProyecto(), Compile::NINJA, [&]() {
+            utiles::Log::debug("Codigo Compilado");
+            //Ahora tenemos que analizar si todo se ha compilado bien
+            Compile::checkCompiled(Proyecto::cogerRutaCompilacionProyecto());
+            if (conReinicio) {
+                if (global.compileState == StateCompile::COMPILED) {
+                    reiniciarTape();
+                }
+            }/**/
+        });
+    }
+}
+void reiniciarTape() {
+    std::string ruta = rutaTape;
+    if (cartucho) {
+
+        if (!cartucho->isStoping()) {
+
+            cartucho->onEnd([&, ruta]() {
+
+                modules::Tape* miCartucho = cartucho;
+                utiles::Log::debug("Fichero descargado");
+                //utiles::Watchdog::setTimeOut([ruta] {
+                char* miRuta = NULL;
+                int longitud = 0;
+                while (ruta[longitud++] != 0) {};
+                miRuta = new char[longitud];
+                for (int i = 0; i < longitud; i++) {
+                    miRuta[i] = ruta[i];
+                }
+                CargaDLL::liberarModulo(Module::TAPE);
+                //Borramos las entidades
+                Entity::destroy();
+                cargarCartucho(miRuta);
+                delete miCartucho;
+                //cartucho = 0;
+
+             //}, 10);
+
+            });
+            cartucho->sendStop();
+        }
+    }else {
+        cargarCartucho((char *)ruta.c_str());
+    }
+}
 void cargarEscena() {
    //utiles::Log::debug(path);
    
@@ -99,11 +163,8 @@ void cargarEscena() {
 
    //TODO: Esto solo es para Ninja
    modules::Tape::load(Proyecto::cogerRutaCodigoProyecto(), cartucho, []() {
-      Compile::compileProject(Proyecto::cogerRutaCompilacionProyecto(), Compile::NINJA, [&]() {
-         utiles::Log::debug("Codigo Compilado");
-         //Ahora tenemos que analizar si todo se ha compilado bien
-         Compile::checkCompiled(Proyecto::cogerRutaCompilacionProyecto());
-      });
+      
+      compilarTape();
       /*if (cartucho) {
          if (!cartucho->isStoping()) {
             cartucho->sendStop();
@@ -128,41 +189,13 @@ void cargarEscena() {
 
    std::string ruta = "";
    ruta+= Proyecto::cogerRutaCompilacionProyecto()+std::string("/") + Proyecto::cogerNombreProyecto() + std::string(".") + std::string(extDLL);
+   rutaTape = ruta;
    if (std::filesystem::exists(ruta)) {
       std::filesystem::remove(ruta);
    }
    FileControl::fileChangeTime(ruta.c_str(), [&](char * ruta) {
 
-      if (cartucho) {
-         
-         if (!cartucho->isStoping()) {
-            
-            cartucho->onEnd([&,ruta]() {
-               modules::Tape* miCartucho = cartucho;
-               utiles::Log::debug("Fichero descargado");
-               //utiles::Watchdog::setTimeOut([ruta] {
-                  char* miRuta = NULL;
-                  int longitud = 0;
-                  while (ruta[longitud++] != 0) {};
-                  miRuta = new char[longitud];
-                  for (int i = 0; i < longitud; i++) {
-                     miRuta[i] = ruta[i];
-                  }
-                  CargaDLL::liberarModulo(Module::TAPE);
-                  //Borramos las entidades
-                  Entity::destroy();
-                  cargarCartucho(miRuta);
-                  delete miCartucho;
-                  //cartucho = 0;
-
-               //}, 10);
-               
-            });
-            cartucho->sendStop();
-         } 
-      } else {
-         cargarCartucho(ruta);
-      }
+       reiniciarTape();
       /*if (cartucho) {
          cartucho->stop();
          delete cartucho;
@@ -172,74 +205,165 @@ void cargarEscena() {
 
 }
 
-void run() {
-   bool recargando = false;
-   //Input input;
-   while (motorGrafico && motorGrafico->isOpen()) {
-      Time::update();
-      //input.resetKeyPress();
-      if (recargarCartucho > 0 && cartucho && cartucho->isRunning()) {
-         //std::vector<void*>* renderizables = NULL;
-
-         if (cartucho) {
-            if (recargarCartucho == 1) {
-               recargarCartucho = 2;
-               try {
-                  if (!cartucho->isStoping()) {
-                     utiles::Log::debug("Comenzamos el cartucho de juego");
-                     cartucho->start();
-                     Entity::startCodes();
-                  }
-               } catch (std::exception e) {
-                  utiles::Log::error("Se ha producido una excepcion");
-                  utiles::Log::debug(e.what());
-               }
-            } else {
-               try {
-                  if (cartucho->isRunning()) {
-                     if (cartucho->isOrderStop()) {
-                        utiles::Log::debug("Se está comenzando la detención");
-                        recargarCartucho = 0;
-                        cartucho->stop();
-                        /*delete cartucho;
-                        cartucho = NULL;*/
-                     } else {
+void bucleJuego(bool* jugando, bool* renderizando, modules::graphics::Graphic* motorGrafico, Entity * entidades=NULL) {
+    *renderizando = false;
+    Time::update();
+    global.deltaTime = Time::deltaTime();
+    //input.resetKeyPress();
+    if (recargarCartucho > 0 && cartucho!=NULL && cartucho->isRunning() && !cartucho->isStoping()) {
+        //std::vector<void*>* renderizables = NULL;
+        if (cartucho) {
+            if (recargarCartucho != 1) {
+                try {
+                    if (!cartucho->isOrderStop()) {
+                        input.checkKeysPress();
                         //TODO: Corregir para evitar que si hay un código lento el resto se vea comprometido
-                        // ¿Lanzar en hilos?
-                        Entity::preUpdateCode();
-                        //cartucho->preUpdate();
-
-                        Entity::updateCode();
+                        if (entidades == NULL) {
+                            //Entity::preUpdateCode();
+                            //Entity::updateCode();
+                        }else {
+                            entidades->preUpdateCode();
+                            entidades->updateCode();
+                        }
                         cartucho->update();
+                        //Sleep(150);
+                        //while (*renderizando) {
+                        //}
+                    }
+                }
+                catch (std::exception e) {
+                    utiles::Log::error("Se ha producido una excepcion");
+                    utiles::Log::debug(e.what());
+                    cartucho->stop();
+                }
+            }
+        }
+    }
+    *renderizando = true;
+}
 
-                     }
-                  }
-                  //std::thread game([]() {cartucho->update();});
-                  //game.join();
-               } catch (std::exception e) {
-                  utiles::Log::error("Se ha producido una excepcion");
-                  utiles::Log::debug(e.what());
-                  cartucho->stop();
-               }
-            }
-         }
+void run(bool*jugando, bool* renderizando,modules::graphics::Graphic *motorGrafico,Entity * entidades=NULL) {
+   
+    int tiempo = 0;
+    float fps = -1;
+   while (motorGrafico && motorGrafico->isOpen()) {
+      /*tiempo += Time::deltaTime();
+      while (tiempo >= 1) {
+          tiempo -= 1;
+          if (motorGrafico->getGlobal()->fps == 0) {
+              motorGrafico->getGlobal()->fps=fps;
+          }else {
+              motorGrafico->getGlobal()->fps = (fps + motorGrafico->getGlobal()->fps) / 2.0f;
+          }
+          DBG("FPS %", motorGrafico->getGlobal()->fps);
+          fps = -1;
       }
-      if (motorGrafico) {
-         if (cartucho && cartucho->isRunning()) {
-            motorGrafico->renderizar(Renderable::getRenderable());
-         }
-         if (motorGrafico->isEnd()) {
-            if (cartucho) {
-               cartucho->setEnd();
-            }
-         }/**/
-      }
+      fps++;/**/
+      /*if (Time::deltaTime() < (1000 / 60)) {
+         std::this_thread::sleep_for(std::chrono::duration<double,std::milli>( (1000 / 60) - Time::deltaTime()));
+      }/**/
+      //if (fps < 60) {
+        bucleJuego(jugando,renderizando,motorGrafico, entidades);
+	    	
+      //}
+      //Sleep(10);// ((1.0f / 30.0f) - Time::deltaTime()) * 1000);
    }
+   
+   (*jugando) = false;
+}
+
+void pintadoJuego(bool * jugando, bool * renderizando, bool sinHilo =true) {
+    Entity* entidades = new Entity();
+    entidades->setGraphic(motorGrafico);
+    std::thread* hiloJuego;
+    if (!sinHilo) {
+        hiloJuego=new std::thread(run, jugando, renderizando, motorGrafico, entidades);
+    }
+    std::thread* compilador = NULL;
+    while (*jugando && motorGrafico && motorGrafico->isOpen()) {//motorGrafico && motorGrafico->isOpen()) {
+        //run(&jugando, motorGrafico);
+        if (motorGrafico) {
+            if (recargarCartucho > 0 && cartucho && cartucho->isRunning()) {
+                if (cartucho) {
+                    if (recargarCartucho == 1) {
+
+                        try {
+                            if (!cartucho->isStoping()) {
+
+                                DBG("Comenzamos el cartucho de juego");
+                                cartucho->start();
+                                entidades->startCodes(0, &input);
+                            }
+                            recargarCartucho = 2;
+                        }
+                        catch (std::exception e) {
+                            utiles::Log::error("Se ha producido una excepcion");
+                            utiles::Log::debug(e.what());
+                        }
+                    }else {
+                        try {
+                            if (cartucho->isRunning() && cartucho->isOrderStop()) {
+                                utiles::Log::debug("Se está comenzando la detención");
+                                input.resetAllKeysPress();
+                                recargarCartucho = 0;
+                                cartucho->stop();
+                                entidades->destroy();
+                            }
+                            else if(sinHilo) {
+                                bucleJuego(jugando, renderizando, motorGrafico,entidades);
+                            }
+                        }catch (std::exception e) {
+                            utiles::Log::error("Se ha producido una excepcion");
+                            utiles::Log::debug(e.what());
+                            cartucho->stop();
+                        }
+                    }
+                }
+            }
+        
+            motorGrafico->preRender();
+            if (cartucho && cartucho->isRunning()) {
+                // if (nk_begin(&ctx, "Game", nk_rect(10, 10, 300, 300), NK_WIDGET_VALID)) {
+                //*renderizando = true;
+                //while (!(*renderizando)) {};
+                motorGrafico->render(Renderable::getRenderable());
+                //*renderizando = false;
+                //Sleep(10);
+                // }
+                // nk_end(&ctx);
+               //motorGrafico->renderizarTexto
+            }
+            motorGrafico->renderInterface();
+            motorGrafico->postRender();
+            if (global.compileState == StateCompile::NEEDCOMPILE) {
+                compilador = new std::thread(compilarTape, true);
+                //compilador.
+            }
+            else {
+                if (compilador != NULL) {
+                    compilador = NULL;
+                }
+            }
+            if (motorGrafico->isEnd()) {
+                if (cartucho) {
+                    cartucho->setEnd();
+                }
+            }/**/
+        }
+    }
+    if (compilador != NULL) {
+        compilador->join();
+    }
+    if (!sinHilo) {
+        hiloJuego->join();
+    }
+    
 }
 
 bool procesarParametros(int numeroArgumentos, char** argumentos);
 void main(int numeroArgumentos, char** argumentos) {
 
+   std::setlocale(LC_ALL, "es_ES.UTF-8");
 
    if (numeroArgumentos > 1) {
       if (!procesarParametros(numeroArgumentos, argumentos)) {
@@ -256,20 +380,32 @@ void main(int numeroArgumentos, char** argumentos) {
    };
    delete[] parametros;
    /**/
-
-
+   //Creamos un LOG de Entidades
+   
+   DBG("--------------------------");
    CargaDLL::cargar("./modulos", "./");
 
    bool correcto = true;
-
+   utiles::LogEntity* logEntity=NULL;
    if (CargaDLL::hayModulos(Module::GRAPHIC) > 0) {
       motorGrafico = CargaDLL::cogerModulo<modules::graphics::Graphic>(Module::GRAPHIC, "OPENGL 4");
       Module::set(Module::MODULES_TYPE::GRAPHIC, motorGrafico);
+	  //interfaz=
+      //Como tenemos gráficos cambiamos de log
+      motorGrafico->setGlobal(&global);
+      motorGrafico->setInput(input);
+      
    }/**/
    //Ahora cargamos la librería de recursos
    if (CargaDLL::hayModulos(Module::RESOURCES) > 0){
       recursos = CargaDLL::cogerModulo<modules::resources::Resource>(Module::RESOURCES, "RESOURCES WITH LOAD FILES");
       Module::set(Module::RESOURCES, recursos);
+   }
+
+   //TODO: MOVER A LA PARTE DE JUEGO
+   if (CargaDLL::hayModulos(Module::AUDIO) > 0) {
+      audio = CargaDLL::cogerModulo<modules::Audio>(Module::AUDIO, "Audio OpenAL");//
+      Module::set(Module::AUDIO, audio);
    }
     utiles::Watchdog wd;
     //--------
@@ -288,6 +424,15 @@ void main(int numeroArgumentos, char** argumentos) {
     Screen::setDimension(800, 800);
     if (motorGrafico) {
        motorGrafico->inicializar(0, Screen::getWidth(), Screen::getHeight());
+       utiles::Log* lTemp = motorGrafico->getLog();
+       if (lTemp != NULL) {
+           //DBG("PASAMOS a LOG Gráfico");
+           //logEntity = lTemp;
+           utiles::Log::setInstanceId(motorGrafico->getIdInstanceLog());
+           //DBG("HH");
+           //DBG("------------------------");/**/
+           //utiles::Log::setInstanceId(0);
+       }
        if (Proyecto::estaCargado()) {
           cargarEscena();
        }
@@ -309,6 +454,7 @@ void main(int numeroArgumentos, char** argumentos) {
         Module::set(Module::MODULES_TYPE::GRAPHIC, motorGrafico);
         Renderable::setGraphicEngine(motorGrafico);
         if (cartucho){
+        if (cartucho){
             //cartucho->setGraphic(motorGrafico);
             correcto=motorGrafico->inicializar(0, cartucho->getScreenWidth(), cartucho->getScreenHeight());
             cartucho->start();
@@ -316,7 +462,11 @@ void main(int numeroArgumentos, char** argumentos) {
            correcto = motorGrafico->inicializar(0, 800, 600);
         };
     }/**/
-    run();
+    bool jugando = true;
+    bool renderizando = false;
+    bool recargando = false;
+    pintadoJuego(&jugando, &renderizando,false); //false es con hilo, true sin hilos
+    
     //std::thread game(run);
     /*while (motorGrafico && motorGrafico->isOpen()) {
        //game.join();
@@ -340,6 +490,13 @@ void main(int numeroArgumentos, char** argumentos) {
         motorGrafico->destroy();
         delete motorGrafico;
     }
+    if (recursos) {
+       delete recursos;
+    }
+    if (audio) {
+       delete audio;
+    }
+    utiles::Log::destroy();
 }/**/
 #endif
 
@@ -350,7 +507,7 @@ bool procesarParametros(int numeroArgumentos, char** argumentos) {
    while (pos < numeroArgumentos) {
       char* param = argumentos[pos];
       //C++ no tiene switch para cadenas
-      if (strcmp(param, "-g") == 0) { //Genra un proyecto vacio
+      if (strcmp(param, "-g") == 0) { //Genera un proyecto vacio
          if (pos + 2 >= numeroArgumentos) {
 #ifdef WIN32
             MessageBox(NULL, "Se ha de indicar tanto el nombre como la ruta del proyecto", TEXT("Motor de videojuegos version 1.0"), MB_OK);
@@ -402,3 +559,4 @@ bool procesarParametros(int numeroArgumentos, char** argumentos) {
    }
    return false;
 }
+//Global global;

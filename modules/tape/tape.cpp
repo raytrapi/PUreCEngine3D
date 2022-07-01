@@ -12,7 +12,10 @@ void modules::Tape::load(const char* projectFolderSrc, modules::Tape* tape,std::
       //if (cinta != 0) {
          //utili
       //}
-      callbackLoad();
+      if (callbackLoad != NULL) {
+         callbackLoad();
+         //callbackLoad = NULL;
+      }
       //utiles::Log::debug("Cambio");
    },3000);/**/
    if (existe) {

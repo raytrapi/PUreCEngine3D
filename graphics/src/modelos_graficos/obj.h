@@ -1,16 +1,22 @@
 #ifndef __MODELO_OBJ
 #define __MODELO_OBJ
-#include "modelo.h"
-#include "../components/src/entity.h"
+
+
 #include <filesystem>
 #include <iostream>
 #include <fstream>
 #include <log.h>
+#include "../../components/src/entity.h"
+#include "../../utilidades/utiles/string.h"
+
+//extern class Entity;
+extern class Model;
 namespace renderable {
 	namespace model {
 		class Obj {
 		public:
-			static std::vector<Entity*>* load(std::string fileName, float directionY = -1.0f);
+			static std::vector<Entity*> load(const char* fileName, float directionY = -1.0f);
+			
 		};
 	}
 };

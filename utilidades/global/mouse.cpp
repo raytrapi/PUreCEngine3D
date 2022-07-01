@@ -7,9 +7,9 @@ std::tuple<double, double> Mouse::getPosition(){
 	return { x, y };
 }
 
-void Mouse::setPosition(double x, double y) {
-		this->x = x;
-		this->y = y;
+void Mouse::setPosition(double _x, double _y) {
+		x = _x;
+		y = _y;
 }
 void Mouse::setButtomDown(BUTTOMS buttom, int mod) {
 	botones[buttom] = true;

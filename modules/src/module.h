@@ -17,13 +17,14 @@
 #include <type_traits>
 
 namespace modules {
-	class Tape;
+	extern class Tape;
 	namespace graphics {
-		class Graphic;
+		extern class Graphic;
 	}
 	namespace resources {
-		class Resource;
+		extern class Resource;
 	}
+	extern class Audio;
 }/**/
 
 class EXPORTAR_MODULO Module {
@@ -34,7 +35,9 @@ public:
 		TAPE,
 		PHISICS,
 		CODE,
-		RESOURCES
+		RESOURCES,
+		AUDIO,
+		INTERFACE
 	};
 private:
 	static std::map<MODULES_TYPE, Module*> modulos;
@@ -42,6 +45,8 @@ public:
 
 	virtual char* nombre() = 0;
 	virtual MODULES_TYPE tipo() = 0;
+	virtual void init() {};
+	virtual void destroy() {};
 	template<class T>
 	void debug(T valor);
 
@@ -68,19 +73,24 @@ inline T* Module::get() {
 	}
 	if (std::is_same<T, modules::Tape>::value) {
 		return (T*)modulos[MODULES_TYPE::TAPE];
-	}/**/
+	}
 	if (std::is_same<T, modules::resources::Resource>::value) {
 		return (T*)modulos[MODULES_TYPE::RESOURCES];
-	}/**/
+	}
+	if (std::is_same<T, modules::Audio>::value) {
+		return (T*)modulos[MODULES_TYPE::AUDIO];
+	}
 	return NULL;
 }
 
 #define REGISTRAR_MODULO(classname) \
 	extern "C" Module * crearInstancia() {\
-			return (Module *) new classname();\
+			Module *m=(Module *) new classname();\
+			m->init();\
+			return m;\
 	}\
 	extern "C" void destroy(Module * p) {\
-		if(p) {delete p;};p=NULL;\
+		if(p) {p->destroy();delete p;};p=NULL;\
 	}
 	#ifdef _WIN32
 	extern "C" __declspec(dllexport) Module * crearInstancia();

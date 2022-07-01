@@ -42,7 +42,7 @@ private:
 	bool isChange();
 public:
 	Camera();
-	~Camera();
+	virtual ~Camera();
 	Transform * transform();
 	bool isActive();
 	void setActive(bool active);

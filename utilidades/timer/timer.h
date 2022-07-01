@@ -12,6 +12,8 @@ public:
 	static double deltaTime();
 	static void update();
 	static void reset();
+	static std::chrono::system_clock::time_point time();
+	static double diff(std::chrono::system_clock::time_point previus);
 };
 
 

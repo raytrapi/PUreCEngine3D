@@ -1,7 +1,7 @@
 #include "camera.h"
 
 void Camera::ponerOrto() {
-	proyeccion[0] = 2.f / (derecha - izquierda);
+	/*proyeccion[0] = 2.f / (derecha - izquierda);
 	proyeccion[1] = proyeccion[2] = 0.f;
 	proyeccion[3] = -((derecha+izquierda)/(derecha-izquierda));
 	proyeccion[4] = 0.f;
@@ -12,13 +12,13 @@ void Camera::ponerOrto() {
 	proyeccion[10] = -2.f / (lejos - cerca);
 	proyeccion[11] = -((lejos+cerca) / (lejos-cerca));
 	proyeccion[12] = proyeccion[13] = proyeccion[14] = 0.f;
-	proyeccion[15] = 1;
-	/*proyeccion[0] = 2.f / (derecha - izquierda);
+	proyeccion[15] = 1;/**/
+	proyeccion[0] = 2.f / (derecha - izquierda);
 	proyeccion[1] = proyeccion[2] = proyeccion[3] = 0.f;
-	proyeccion[4] = 2.f / (arriba - abajo);
-	proyeccion[5] = proyeccion[6] = proyeccion[7] = 0.f;
-	proyeccion[8] = -2.f / (lejos - cerca);
-	proyeccion[9] = proyeccion[10] = proyeccion[11] = 0.f;
+	proyeccion[5] = 2.f / (arriba - abajo);
+	proyeccion[4] = proyeccion[6] = proyeccion[7] = 0.f;
+	proyeccion[10] = 2.f / (lejos - cerca);
+	proyeccion[8] = proyeccion[9] = proyeccion[11] = 0.f;
 	proyeccion[12] = -(derecha + izquierda) / (derecha - izquierda);
 	proyeccion[13] = -(arriba + abajo) / (arriba - abajo);
 	proyeccion[14] = -(lejos + cerca) / (lejos - cerca);
@@ -86,7 +86,31 @@ void Camera::ponerPerspectiva() {
 }
 
 void Camera::ponerVista() {
-
+	/* Obtenida de aquí https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/lookat-function
+	 Matrix44f lookAt(const Vec3f& from, const Vec3f& to, const Vec3f& tmp = Vec3f(0, 1, 0)){ 
+		 Vec3f forward = normalize(from - to); 
+		 Vec3f right = crossProduct(normalize(tmp), forward); 
+		 Vec3f up = crossProduct(forward, right); 
+ 
+		 Matrix44f camToWorld; 
+ 
+		 camToWorld[0][0] = right.x; 
+		 camToWorld[0][1] = right.y; 
+		 camToWorld[0][2] = right.z; 
+		 camToWorld[1][0] = up.x; 
+		 camToWorld[1][1] = up.y; 
+		 camToWorld[1][2] = up.z; 
+		 camToWorld[2][0] = forward.x; 
+		 camToWorld[2][1] = forward.y; 
+		 camToWorld[2][2] = forward.z; 
+ 
+		 camToWorld[3][0] = from.x; 
+		 camToWorld[3][1] = from.y; 
+		 camToWorld[3][2] = from.z; 
+ 
+		 return camToWorld; 
+	}
+	*/
 	
 	//TODO: crear método par calcular la dimensión y la normal
 	//float f_t[3] = { eye[0] - target[0], eye[1] - target[1], eye[2] - target[2] };
@@ -96,17 +120,18 @@ void Camera::ponerVista() {
 	distanciaObjetivo= sqrtf(f_t[0] * f_t[0] + f_t[1] * f_t[1] + f_t[2] * f_t[2]);
 	//float normalDistancia = 1.f / distanciaObjetivo;
 	//float f_dimension =  sqrtf(f_t[0]* f_t[0] + f_t[1]* f_t[1]  + f_t[2]*f_t[2]);
+	//FORWARD
 	float axiZ[3] = { f_t[0] / distanciaObjetivo, f_t[1] / distanciaObjetivo, f_t[2] / distanciaObjetivo };
 
 	//float s_t[3] = { f[1] * up[2] - f[2] * up[1], f[2] * up[0] - f[0] * up[2], f[0] * up[1] - f[1] * up[0] };
 	//Producto en cuz de axiZ y Up
-	float s_t[3] = {
+	/*float s_t[3] = {
 		axiZ[1] * up[2] - axiZ[2] * up[1],
 		axiZ[2] * up[0] - axiZ[0] * up[2],
 		axiZ[0] * up[1] - axiZ[1] * up[0]
 	};/**/
-	
-	/*float s_t[3] = {
+	//Producto en cuz de Up y axiZ
+	float s_t[3] = {
 		up[1] * axiZ[2] - up[2] * axiZ[1],
 		up[2] * axiZ[0] - up[0] * axiZ[2],
 		up[0] * axiZ[1] - up[1] * axiZ[0]
@@ -114,15 +139,19 @@ void Camera::ponerVista() {
 	float s_hipo = sqrtf(s_t[0]* s_t[0] + s_t[1]* s_t[1] + s_t[2]* s_t[2]);
 	float s_dimension = (s_hipo != 0) ? s_hipo : 1;
 	//OJO puede ser todo 0;
-	float axiX[3] = { s_t[0] / s_dimension, s_t[1] / s_dimension, s_t[2] / s_dimension };
+	//RIGHT
+	float axiX[3] = { s_t[0] / s_dimension, s_t[1] / s_dimension, s_t[2] / s_dimension }; 
 
 	//float t[3] = { s[1] * f[2] - s[2] * f[1], s[2] * f[0] - s[0] * f[2], s[0] * f[1] - s[1] * f[0] };
-	float axiY[3] = {
+	//Multiplicamos X y Z
+	/*float axiY[3] = {
 		axiX[1] * axiZ[2] - axiX[2] * axiZ[1],
 		axiX[2] * axiZ[0] - axiX[0] * axiZ[2],
 		axiX[0] * axiZ[1] - axiX[1] * axiZ[0]
 	};/**/
-	/*float axiY[3] = {
+	//Multiplicamos Z y X
+	//UP
+	float axiY[3] = {
 		axiZ[1] * axiX[2] - axiZ[2] * axiX[1],
 		axiZ[2] * axiX[0] - axiZ[0] * axiX[2],
 		axiZ[0] * axiX[1] - axiZ[1] * axiX[0]
@@ -142,10 +171,28 @@ void Camera::ponerVista() {
 	vista[9] = axiY[2];
 	vista[10] = -axiZ[2];
 	vista[11] = 0.f;
-	vista[12] = (axiX[0] * -eye[0]) + (axiY[0] * -eye[1]) + (axiZ[0] * eye[2]);
-	vista[13] = (axiX[1] * -eye[0]) + (axiY[1] * -eye[1]) + (axiZ[1] * eye[2]);
-	vista[14] = (axiX[2] * -eye[0]) + (axiY[2] * -eye[1]) + (axiZ[2] * eye[2]);
-	vista[15] = 1.f;
+	vista[12] = (axiX[0] * -eye[0]) + (axiY[0] * -eye[1]) + (axiZ[0] * -eye[2]);
+	vista[13] = (axiX[1] * -eye[0]) + (axiY[1] * -eye[1]) + (axiZ[1] * -eye[2]);
+	vista[14] = (axiX[2] * -eye[0]) + (axiY[2] * -eye[1]) + (axiZ[2] * -eye[2]);
+	vista[15] = 1.f;/**/
+	/*vista[0] = axiX[0];
+	vista[1] = axiY[0];
+	vista[2] = axiZ[0];
+	vista[3] = 0.f;
+	vista[4] = axiX[1];
+	vista[5] = axiY[1];
+	vista[6] = axiZ[1];
+	vista[7] = 0.f;
+	vista[8] = axiX[2];
+	vista[9] = axiY[2];
+	vista[10] = axiZ[2];
+	vista[11] = 0.f;
+	vista[12] = (axiX[0] * -eye[0]) + (axiY[0] * -eye[1]) + (axiZ[0] * -eye[2]);
+	vista[13] = (axiX[1] * -eye[0]) + (axiY[1] * -eye[1]) + (axiZ[1] * -eye[2]);
+	vista[14] = (axiX[2] * -eye[0]) + (axiY[2] * -eye[1]) + (axiZ[2] * -eye[2]); 
+	vista[15] = 1.f;/**/
+
+	
 }
 void Camera::ponerVista2() {
 
@@ -229,11 +276,14 @@ void Camera::actualizarProyeccion() {
 
 Camera::Camera() {
 	//transformada = new Transform();
+	DBG("CONSTRUCTOR cámara");
+
 	graphic = Module::get<modules::graphics::Graphic>();
 	
 }
 
 Camera::~Camera() {
+	DBG("Borro cámara");
 	//delete transformada;
 }
 
@@ -309,11 +359,11 @@ void Camera::setLookAt(float eyeX, float eyeY, float eyeZ, float targetX, float 
 	this->target[2] = targetZ;
 	this->up[0] = upX;
 	this->up[1] = upY;
-	this->up[2] = upZ;
+	this->up[2] = upZ; 
 
-	float dX = eye[0] - target[0];
-	float dY = eye[1] - target[1];
-	float dZ = eye[2] - target[2];
+	float dX = eye[0] -target[0];
+	float dY = eye[1] -target[1];
+	float dZ = eye[2] -target[2];
 	distanciaObjetivo = sqrtf(dX * dX + dY * dY + dZ * dZ);
 	
 

@@ -4,11 +4,14 @@
 
 #include "../src/module.h"
 #include "../graphic/motor.h"
+
 #include <vector>
 #include "../../utilidades/files/filesControl.h"
 #include <string>
 #include <functional>
 #include "../../components/src/entity.h"
+#include "../../utilidades/global/input.h"
+#include "../../utilidades/global/mouse.h"
 
 namespace modules {
 
@@ -26,9 +29,21 @@ namespace modules {
 		static Tape* cinta;
 		bool detener = false;
 		bool deteniendo = false;
-
+		modules::graphics::Graphic* graphic=NULL;
+		/**
+		* Se ejecuta cuando hemos terminado de liberar la función.
+		*/
 		std::function<void()>callback=NULL;
+		/*Input* input = NULL;
+		Mouse* mouse = NULL;/**/
 	public:
+		Tape() {
+			graphic = Module::get<modules::graphics::Graphic>();
+		}
+
+		/*void setInput(Input* i) { input = i; };
+		void setMouse(Mouse* m) { mouse = m; };/**/
+
 		//void setGraphic(modules::graphics::Grafico* graphic) { Graphic = graphic; };
 		virtual void update() {};
 		virtual void start() {};
@@ -37,15 +52,17 @@ namespace modules {
 			ejecutando = false;
 			deteniendo = true;
 			detener = false;
-			modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
-			if (g) {
-				g->removeAll();
-				
-			}
+			//modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
 			
-			destroy();
+			DBG("Intentamos destruir");
+			destroy(); 
+			if (graphic!=NULL) {
+				graphic->removeAll();
+
+			}
+			//DBG("Hay error en la destrucción");
 			//deteniendo = false;
-			if (callback) {
+			if (callback!=NULL) {
 				callback();
 			}
 		}

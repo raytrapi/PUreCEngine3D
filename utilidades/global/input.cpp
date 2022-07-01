@@ -11,7 +11,7 @@ bool Input::isKeyDown(Key key) {
             if (k.estaPulsada()) {//teclas.find(map) != teclas.end() &&
                return true;
             }
-         }
+         } 
          break;
       default:
          return (teclas.find(key) != teclas.end() && teclas[key].estaPulsada());
@@ -24,8 +24,11 @@ bool Input::isKeyUp(Key key) {
 }
 bool Input::isKeyPress(Key key) { //TODO: Hacer que sea un evento onKeyPress
     return presionadas.find(key) != presionadas.end();
-    
 }
+void Input::onKeyPress(Key key, std::function<void(Key)> f) {
+    //DBG("dir %", this);
+    controlTeclasPulsadas.push_back({ key,f,false });
+};
 Key Input::traducirTecla(unsigned int key) {
     Key k = (Key) key;
     return k;
@@ -86,6 +89,23 @@ void Input::setKeyUp(unsigned int key, long extra) {
 void Input::resetKeyPress() {
     presionadas.clear();
 }
+
+void  Input::checkKeysPress() {
+    for (int i = 0; i < controlTeclasPulsadas.size(); i++) {
+        auto control = controlTeclasPulsadas[i];
+		if (isKeyDown(std::get<0>(control))) {
+            if (!std::get<2>(control)) {
+                std::get<2>(controlTeclasPulsadas[i]) = true;
+				std::get<1>(control)(std::get<0>(control));
+            }
+		} else {
+            if (std::get<2>(control)) {
+                std::get<2>(controlTeclasPulsadas[i]) = false;
+            }
+		}
+	}/**/
+	
+};
 /*void Input::onPress(void(*f)(Key)) {
     eventosKeyPress.push_back(f);
 }/**/
@@ -97,4 +117,5 @@ std::map<Key, std::vector<Key>> Input::mapeadas = {
    {Key::DOWN,{Key::S}},
    {Key::LEFT,{Key::A}}
   };
+
 //std::vector<void (*)(Key)> Input::eventosKeyPress;

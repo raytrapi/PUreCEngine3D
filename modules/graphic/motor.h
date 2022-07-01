@@ -1,9 +1,16 @@
+#pragma once
 #ifndef _MOTORGRAFICO
 #define _MOTORGRAFICO
 
 
 #include "../src/module.h"
 #include "../../components/modulos/shader/types.h"
+#include "../../utilidades/log/log.h"
+#include "../../utilidades/global/screen.h"
+#include "../../utilidades/global/global.h"
+#include "../../utilidades/global/input.h"
+#include "../../utilidades/global/mouse.h"
+#include "interface.h"
 //#include "../../components/src/entity.h"
 #include <list>
 #include <vector>
@@ -13,7 +20,11 @@
 //#include "../../graphics/src/renderable/object.h"
 
 
+
+
+
 extern class Camera;
+extern class Entity;
 namespace modules {
 	namespace graphics {
 		struct EXPORTAR_MODULO TextureImg {
@@ -64,7 +75,7 @@ namespace modules {
 			unsigned int getIdTexture() { return idTexture; };
 		private:
 			TextureImg* texture=NULL;
-			unsigned int idTexture;
+			int idTexture =-1;
 		};
 		struct EXPORTAR_MODULO Material {
 			enum TYPE {
@@ -105,6 +116,11 @@ namespace modules {
 			std::vector<Texture*> textures;
 			
 		};
+
+
+
+
+		
 		class EXPORTAR_MODULO Graphic:public Module {
 			//std::list<void*>elementosRenderizar;
 			//TODO: Ver si aceleramos el pintado si procesamos nosotros la capa.
@@ -114,13 +130,25 @@ namespace modules {
 			
 		protected:
 			void setEnd() { end = true; };
-			std::vector<void*> entities;
+			//std::vector<void *> entities;
 			static bool open;
 			bool stopping = false;
-			double ancho=1;
-			double alto=1;
+			//double ancho=1;
+			//double alto=1;
+			virtual void iniciar() {};
+			virtual void destruir() {};
+			//bool mostrarGizmo = false;
+			utiles::Log* gestorLog=NULL;
+			int idInstanciaLog = 0;
+			Global *global=NULL;
+			Interface *interfaz=NULL;
+			Input *input;
+			Mouse *mouse;
 		public:
+			
+			Input *getInput() { return input; };
 			static std::vector<void(*)(bool)> onFocus;
+			
 			static std::vector<Tape*> onFocusTapes;
 			enum TYPE_ENTITY {
 				NONE,
@@ -135,20 +163,50 @@ namespace modules {
 				ALL,
 				MOVE
 			};
-			
+			void init() final {
+				iniciar();
+			}
+			void destroy() final {
+				destruir();
+			}
+			void setInput(Input& i) {
+				input = &i;
+			}
+			void setMouse(Mouse& m) {
+				mouse = &m;
+			}/**/
+			void setInterface(Interface* i) { interfaz = i; if (global != NULL) { interfaz->setGlobal(global); } };
+			void setGlobal(Global* g) {
+				global = g; 
+				if (interfaz != NULL) { interfaz->setGlobal(g); } 
+			};
+			Global* getGlobal() {
+				return global;
+			}
+
+			utiles::Log* getLog() { return gestorLog; };
+			void setLog(utiles::Log* log) {
+				gestorLog = log; idInstanciaLog = utiles::Log::getNumberInstances()-1;
+			};
+			int getIdInstanceLog() {
+				return idInstanciaLog;
+			}
 			
 			/*~Grafico() {
 				//Renderable::clearRenderable();
 			};/**/
-			virtual void destroy() {};
-			virtual void renderizar() = 0;
-			virtual void renderizar(void *) = 0;
+			virtual void preRender() = 0;
+			virtual void render() = 0;
+			virtual void render(void *) = 0;
+			virtual void renderInterface() = 0;
+			virtual void postRender() = 0;
+			//virtual void renderNewViewPort(std::vector<Entity*> entidades, float x = -1.f, float y = 1.f, float width = 2.f, float height = 2.f) {};
 			//virtual void insertarMapaBits(byte*, double ancho, double alto, double x, double y, double z)=0;
 			virtual bool inicializar(void*, double, double) = 0;
 			Module::MODULES_TYPE tipo() { return Module::MODULES_TYPE::GRAPHIC; };
 			bool isEnd() { return end; };
 			virtual void updateEntity(void* entity, TYPE_OPERATION type=ALL) {};
-			void updateEntities(TYPE_OPERATION type = MOVE);
+			void updateEntities(unsigned stack=0,TYPE_OPERATION type = MOVE);
 			virtual void addEntity(void* entity);
 			virtual void removeEntity(void* entity);
 			virtual void removeEntities();
@@ -161,6 +219,7 @@ namespace modules {
 			virtual int compileShader(int ps) { return 0; };
 			virtual int compileShader(std::vector<short>*, void* entity) { return 0; }; 
 			virtual int compileShader(int ps, void* entity) { return 0; };
+
 
 			void addOnFocus(void(*callback)(bool));
 			void addOnFocus(Tape * juego);
@@ -183,11 +242,18 @@ namespace modules {
 			/// <param name="length">number of floats</param>
 			/// <param name="idTexture">set the value of texture in the GPU</param>
 			/// <returns>true if the textura load in memory</returns>
-			virtual bool addTexture(float* image, unsigned int length, int width, int height, unsigned int& idTexture, TextureImg::FORMAT_COLOR typeColor= TextureImg::FORMAT_COLOR::RGBA)=0;
+			virtual bool addTexture(float* image, unsigned int length, int width, int height, int& idTexture, TextureImg::FORMAT_COLOR typeColor= TextureImg::FORMAT_COLOR::RGBA)=0;
 			std::tuple<double, double> getScreenSize() {
-				return { ancho,alto };
+
+				return { Screen::getWidth(), Screen::getHeight() };
 			}
+			virtual Entity * drawLine(float* vertex, unsigned countVertex, float r, float g, float b, float a,unsigned width =1) = 0;
+			virtual Entity * drawLineLoop(float* vertex, unsigned countVertex, float r, float g, float b, float a, unsigned width = 1) {
+				return drawLine(vertex, countVertex, r, g, b, a, width);
+			};
+			
 		};
+
 
 	}
 }
@@ -196,6 +262,5 @@ namespace modules {
 	Renderable::clearRenderable();
 }
 /**/
-
-
+//std::vector<std::tuple<Key, std::function<void(Key)>, bool>>  Input::controlTeclasPulsadas;
 #endif // 

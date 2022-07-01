@@ -1,19 +1,21 @@
-#include "modelo.h"
-
-std::string utiles::model::Model::trim(std::string cadena) {
+#include "string.h"
+std::string utils::String::trim(std::string cadena) {
+	if (cadena.length() == 0) {
+		return cadena;
+	}
 	int posI = 0;
-	int posF = cadena.length()-1;
+	int posF = cadena.length() - 1;
 
-	while (posI < posF && cadena[posI] == ' ') { 
+	while (posI < posF && cadena[posI] == ' ') {
 		posI++;
-	} 
+	}
 	while (posI > posF && cadena[posF] == ' ') {
 		posF--;
 	}
-	return cadena.substr(posI,posF-posI);
+	return cadena.substr(posI, posF - posI + 1);
 }
 
-std::vector<std::string> utiles::model::Model::split(std::string cadena, char c) {
+std::vector<std::string> utils::String::split(std::string cadena, char c) {
 	// TODO: Insertar una instrucción "return" aquí
 	std::vector<std::string> palabras;
 	std::string palabra = "";

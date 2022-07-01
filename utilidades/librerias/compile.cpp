@@ -1,5 +1,5 @@
 #include "compile.h"
-
+#include "../global/global.h"
 void Compile::buscarCompilador() {
 #ifdef WIN32
 	
@@ -56,7 +56,8 @@ void Compile::leerRegistro(HKEY clave, const char* subClave, bool& valor) {
 }
 
 void Compile::compileProject(const char* project, Types tipo, std::function<void()> callbackEnd) {
-	LOG_DBG("Compilando el código %",project);
+	INFO("Compilando el código %",project);
+	global.compileState = StateCompile::COMPILING;
 	std::string comando;
 	int i;
 	switch (tipo) {
@@ -97,7 +98,7 @@ void Compile::compileProject(const char* project, Types tipo, std::function<void
 			&pi )           // Pointer to PROCESS_INFORMATION structure
 			)
 		{
-			utiles::Log::error("No se puede ejecutar");
+			ERR("No se puede ejecutar");
 			return;
 		}
 		WaitForSingleObject(pi.hProcess, 120000);
@@ -136,6 +137,7 @@ void Compile::compileProject(const char* project, Types tipo, std::function<void
 
 void Compile::generateProject(const char* project, Types tipo,bool generar) {
 	std::string comando;
+	global.compileState = StateCompile::COMPILING;
 	int i;
 	switch (tipo) {
 	case Compile::NINJA:
@@ -194,17 +196,26 @@ const void Compile::checkCompiled(const char* project) {
 	fichero.open(ficheroError.c_str(), std::ios::in);
 	std::string linea;
 	std::regex error("^(.*): error (.*) (.*)$");
+	bool conError = false;
 	if (fichero.is_open()) {
 		while (std::getline(fichero, linea)) {
 			std::cmatch errores;
 			std::regex_match(linea.c_str(), errores, error);
 			if (errores.size() > 0) {
-				LOG_DBG(linea);
+				ERR(linea);
+				conError = true;
+				global.compileState = StateCompile::INCORRECT;
 			}
 		}
+		if (!conError) {
+			global.compileState = StateCompile::COMPILED;
+		}
+	}else {
+		global.compileState =StateCompile::INCORRECT;
 	}
 }
 
 
 std::string Compile::entornoCompilador = "";// "\"u:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Auxiliary/Build/vcvarsall.bat\" x86_amd64";
 std::string Compile::rutaCompilador = "";
+//StateCompile Compile::estado = StateCompile::NOTHING;

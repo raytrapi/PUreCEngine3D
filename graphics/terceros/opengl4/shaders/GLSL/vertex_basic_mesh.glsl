@@ -1,7 +1,7 @@
 #version 400
 layout(location = 0) in vec3 _posicion;
 layout(location = 1) in vec3 _normal;
-layout(location = 2) in vec3 _color;
+layout(location = 2) in vec4 _color;
 layout(location = 3) in vec2 _textura;
 
 
@@ -13,7 +13,7 @@ uniform mat4 projection;
 //out vec2 coordenadaTextura;
 out vec3 normal;
 out vec3 fragPos;
-out vec3 color;
+out vec4 color;
 out vec2 coordenadas_textura;
 
 void main() {

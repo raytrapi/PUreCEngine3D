@@ -14,7 +14,7 @@ MotorGL::~MotorGL() {
     }
 }
 
-void MotorGL::renderizar(void* rederizables) {
+void MotorGL::render(void* rederizables) {
     std::vector<renderable::Object*> objetos = (std::vector<renderable::Object*>) (*(std::vector<renderable::Object*>*)rederizables);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -175,7 +175,7 @@ void MotorGL::renderizarCubo(renderable::Cube* cube) {
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_NORMAL_ARRAY);/**/
 }
-void MotorGL::renderizar() { 
+void MotorGL::render() { 
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     //glColor3f(0.0f, 1.0f, 0.0f);
@@ -531,5 +531,8 @@ BOOL MotorGL::bSetupPixelFormat(HDC hdc) {
 
     return TRUE;
 }
+Entity* MotorGL::drawLine(float* vertex, unsigned countVertex, float r, float g, float b, float a, unsigned width) {
+   return NULL;
+};
 //template inline void EXPORTAR_MOTOR MotorGL::inicializar(HWND, double, double);
 REGISTRAR_MODULO(MotorGL); 

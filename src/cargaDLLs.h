@@ -1,7 +1,8 @@
 #ifndef __CARGA_DLL
 #define __CARGA_DLL
 #include <module.h>
-#include <dll.h>
+#include "..\utilidades\librerias\dll.h"
+//#include "..\utilidades\global\input.h"
 #include <map>
 #include <vector>
 

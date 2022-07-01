@@ -6,7 +6,7 @@
 #include "../motorExport.h"
 namespace renderable {
 	class EXPORTAR_MODULO_GRAFICO Mesh : public Object {
-		int numCoordenadas =0; //Suponemos que normales y colores son por vertice.
+		
 		
 	public:
 
@@ -20,16 +20,18 @@ namespace renderable {
 		float a = 1;
 		void setSize(float length);
 		float getSize();
-		int getAllSize();
-		float* getMesh();
-		float* getNormals();
-		float* getColors();
+		//int getAllSize();
+		//float* getMesh();
+		//float* getNormals();
+		//float* getColors();
 		int* getIndexs();
-		int getVertexNumber();
 		
+		void setFaces(std::vector<std::vector<int>*>* faces, std::vector<float**>* vectors, std::vector<float*>* color, std::vector<float**>* normals = NULL, float** uvs = NULL, renderable::Object::MODE_COLOR mode = renderable::Object::MODE_COLOR::COLOR);
 		void setTriangles(std::vector<float**>* vectors, std::vector<float*>* color, std::vector<float**>* normals=NULL, float** uvs=NULL, renderable::Object::MODE_COLOR mode= renderable::Object::MODE_COLOR::COLOR);
 		void setObject(std::vector<float*>* vectors, std::vector<int>* indexes, std::vector<float**>* normals = NULL, float** color = NULL);
 		
+
+		void loadOBJ(const char* file);
 		//void setTriangles(std::vector<vector3d *>);
 	};
 }

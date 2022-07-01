@@ -47,12 +47,16 @@ class  MotorGL:public modules::graphics::Graphic {
 	public:
 		MotorGL();
 		~MotorGL();
-		void renderizar();
-		void renderizar(void *);
+		void preRender() {};
+		void render();
+		void render(void *);
+		void renderInterface() {};
+		void postRender() {};
 		bool inicializar(void * contexto, double ancho, double alto);
 		char* nombre() { return (char*)"OPENGL 2"; };
 		
 		void ponerCamara(float posX, float posY, float posZ, float targetX, float targetY, float targetZ);
-		bool addTexture(float* image, unsigned int length, int width, int height, unsigned int& idTexture, modules::graphics::TextureImg::FORMAT_COLOR typeColor) { return true; }
+		bool addTexture(float* image, unsigned int length, int width, int height, int& idTexture, modules::graphics::TextureImg::FORMAT_COLOR typeColor) { return true; }
+		Entity* drawLine(float* vertex, unsigned countVertex, float r, float g, float b, float a, unsigned width = 1);
 };
 #endif // !__MOTORGL

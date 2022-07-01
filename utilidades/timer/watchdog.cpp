@@ -17,7 +17,9 @@ namespace utiles {
       int yo = setInterval([yo, callback]() {clearInterval(yo); callback(); }, milliseconds);
       return yo;
    };
-
+   void Watchdog::clearTimeOut(unsigned int id) {
+      clearInterval(id);
+   }
    unsigned int Watchdog::setInterval(std::function<void()> callback, unsigned int milliseconds) {
       //unsigned int id = controles.size();
 
@@ -34,15 +36,22 @@ namespace utiles {
    }
 
    void Watchdog::clearInterval(unsigned int id) {
-      for (auto itr = controles.begin(); itr != controles.end(); itr++) {
-         if (std::get<0>(**itr) == id) {
-            controles.erase(itr);
+      bool sinEncontrar = true;
+      int i = 0;
+      while( i<controles.size() && sinEncontrar) {
+         if (std::get<0>(*controles[i]) == id) {
+            controles.erase(controles.begin()+i);
+            sinEncontrar=false;
          }
+         i++;
+         
       }
       if (controles.empty()) {
          
          ejecutando = false;
-         hilo.join();
+         if (hilo.joinable()) {
+            hilo.join();
+         }
       }
       
    }
@@ -55,12 +64,15 @@ namespace utiles {
          delta = milisegundos > 0 ? milisegundos : 0;
          anterior = actual;
          
-         for (auto itr = controles.begin(); itr != controles.end(); itr++) {
+         for (auto itr = controles.begin(); itr != controles.end(); ) {
             std::get<3>(**itr) += (delta);
             unsigned int fin = std::get<1>(**itr);
             if (fin <= std::get<3>(**itr)) {
                std::get<3>(**itr) = 0;
                std::get<2>(**itr)();
+            }
+            if (itr != controles.end()) {
+               itr++;
             }
          }
          std::this_thread::sleep_for(std::chrono::milliseconds(1));

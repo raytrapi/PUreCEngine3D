@@ -3,7 +3,7 @@
 
 #include "../utiles/utilidades.h"
 #include "screen.h"
-#include "../log/log.h"
+//#include "../log/log.h"
 #include <tuple>
 #include <map>
 
@@ -20,10 +20,10 @@ public:
 	Return the position of mouse in relation of screen
 	*/
 	static std::tuple<double, double> getPosition();
-	void setPosition(double x, double y);
+	static void setPosition(double x, double y);
 	//void setOver(bool over);
-	void setButtomDown(BUTTOMS buttom, int mod);
-	void setButtomUp(BUTTOMS buttom, int mod);
-	bool isButtomPress(BUTTOMS buttom);
+	static void setButtomDown(BUTTOMS buttom, int mod);
+	static void setButtomUp(BUTTOMS buttom, int mod);
+	static bool isButtomPress(BUTTOMS buttom);
 };
 #endif // !_MOUSE

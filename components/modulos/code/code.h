@@ -1,8 +1,10 @@
 #ifndef __CODE
 #define __CODE
 #include <type_traits>
-#include "../src/component.h"
-#include "../src/codeBase.h"
+#include "../../components/src/entity.h"
+#include "../../src/component.h"
+#include "../../src/codeBase.h"
+#include "../../../utilidades/global/input.h"
 
 class EXPORTAR_COMPONENTE Code : public Component {
 	CodeBase* codigoBase = NULL;
@@ -10,11 +12,13 @@ class EXPORTAR_COMPONENTE Code : public Component {
 	
 	
 	CodeBase::TYPE_OPERATION tipo = CodeBase::MOVE;
+	Input* input;
 protected:
 	void refresh(CodeBase::TYPE_OPERATION type = CodeBase::MOVE) { updating = true; tipo = type; };
 public:
+	~Code();
 	template<class T>
-	void linkClass();
+	T* linkClass(void * parent=NULL);
 	void update() {
 		if (codigoBase != NULL) {
 			codigoBase->update();
@@ -43,13 +47,28 @@ public:
 	void setEntity(Entity * e) {
 		codigoBase->setEntity(e);
 	}
+	Input* getInput() {
+		return input;
+	}
+	void setInput(Input*i) {
+		codigoBase->setInput(i); 
+		input = i;
+	}
 };
 template<class T>
-inline void Code::linkClass() {
+inline T* Code::linkClass(void* parent) {
+	modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
 	if (std::is_base_of<CodeBase, T>::value) {
-		codigoBase = new T();
+		T* codigo = new T();
+		codigoBase = (CodeBase *)codigo;
+		DBG("Entidad ... ", entidad);
 		codigoBase->setEntity(entidad);
+		codigoBase->setParent(parent);
+		codigoBase->setInput(g->getInput());
+		codigoBase->setGlobal(g->getGlobal());
+		return (T *)codigoBase;
 	}
+	return NULL;
 };
 #endif // !__CODE
 

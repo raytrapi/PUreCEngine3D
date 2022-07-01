@@ -1,6 +1,7 @@
 #include "shader.h"
-
+#include "../../../modules/graphic/motor.h"
 Shader::~Shader() {
+	//DBG("Borro Shader");
 	if (codigo != 0) {
 		delete[]codigo;
 	}
@@ -32,11 +33,13 @@ int Shader::compileShader() {
 	shadersCompiled.push_back(id); //Guardamos el id ¿Es realemente necesario?
 	//Le indicamos al componente gráfico que tenemos una nueva compilación de shaders
 	//g.getEntity(this)
+	compilado = true;
 	return id;
 }
 int Shader::compileShader(int id) {
 	modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
 	g->compileShader(id,entidad);
+	compilado = true;
 	return id;
 }
 int Shader::addShader(unsigned int id, Graphics::Shader::TYPE_SHADER type) {
