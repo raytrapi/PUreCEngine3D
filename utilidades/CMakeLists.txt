@@ -26,7 +26,7 @@ set_target_properties(globals PROPERTIES
    PUBLIC_HEADER utils/global.h )
 #target_link_libraries( utilidades  ${Boost_LIBRARIES})
 set_property(TARGET globals PROPERTY CXX_STANDARD 20)
-target_link_libraries( globals  ${CONAN_LIBS})
+target_link_libraries( globals  ${CONAN_LIBS} utils)
 #[[if(WIN32)
 	add_custom_command(
     TARGET utilidades POST_BUILD

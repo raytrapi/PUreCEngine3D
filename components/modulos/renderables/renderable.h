@@ -3,12 +3,14 @@
 
 #include "../../src/exportar.h"
 #include "../../src/component.h"
-#include "../../../modules/src/module.h"
+//#include "../../../modules/src/module.h"
+#include "../shader/shader.h"
 #include "../../../graphics/src/renderable/object.h"
+#include "../../../graphics/src/renderable/img.h"
 #include <vector>
-#define M_PI           3.14159265358979323846
-#define M_PI2          1.57079632679489661923
-#define M_2PI          6.28318530717958647692
+#include <type_traits>
+//#include "../../../utilidades/utiles/mathConsts.h"
+
 
 class EXPORTAR_COMPONENTE RenderableComponent : public Component {
 private:
@@ -20,7 +22,7 @@ private:
 	float rY = 0;
 	float rZ = 0;
 	float l;
-	float transformacion[16] = {
+	/*float transformacion[16] = {
 		1.00f, 0.00f, 0.00f, 0.00f,
 		0.00f, 1.00f, 0.00f, 0.00f,
 		0.00f, 0.00f, 1.00f, 0.00f,
@@ -39,9 +41,10 @@ private:
 	float b;
 	float a;
 	bool actualizar = false;
+	bool objetoPropio = false;
 public:
 
-	RenderableComponent(renderable::Object *obj);
+	RenderableComponent(Entity* entity, modules::graphics::Graphic* g,Component*p=NULL);
 	~RenderableComponent();
 	renderable::Object* getRenderable() { return objeto; };
 	void rotateX(float radian);
@@ -63,7 +66,10 @@ public:
 	void setUpdated(bool update);
 	std::vector<std::vector<const float*>>* getFaces();
 	
+	template<class T>
+	T* add(renderable::Object* o=NULL);
 };
+
 
 
 #endif // !_COMP_REND

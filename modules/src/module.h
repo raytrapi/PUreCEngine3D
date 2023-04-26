@@ -33,7 +33,7 @@ public:
 	enum MODULES_TYPE {
 		GRAPHIC,
 		TAPE,
-		PHISICS,
+		PHYSICS,
 		CODE,
 		RESOURCES,
 		AUDIO,

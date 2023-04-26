@@ -28,9 +28,10 @@ namespace utiles {
 			os << std::put_time(std::localtime(&ahora), "%F %T%z") << "\t" << s << std::endl;
 		}
 
-		Entity* entidad = Entity::create<Entity::TYPE::EMPTY>(1);
-		renderable::Text* texto = entidad->addComponent<renderable::Text>();
+		/*Entity* entidad = Entity::create<Entity::TYPE::EMPTY>(1);
+		RenderableComponent* rend = entidad->addComponent<RenderableComponent>();
+		renderable::Text* texto = rend->add<renderable::Text>();
 		texto->setText(os.str().c_str());
-
+		*/
 	}
 }

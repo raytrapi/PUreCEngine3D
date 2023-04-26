@@ -1,16 +1,15 @@
 ﻿{
-   // Consulte https://go.microsoft.com//fwlink//?linkid=834763 para obtener más información sobre este archivo.
-   "configurations": [
-      {
-         "name": "x64-Debug",
-         "generator": "Ninja",
-         "configurationType": "Debug",
-         "inheritEnvironments": [ "msvc_x64_x64" ],
-         "buildRoot": "${projectDir}\\out\\build\\${name}",
-         "installRoot": "${projectDir}\\out\\install\\${name}",
-         "cmakeCommandArgs": "",
-         "buildCommandArgs": "-v",
-         "ctestCommandArgs": ""
-      }
-   ]
+  "configurations": [
+    {
+      "name": "x64-Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [ "msvc_x64" ],
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      
+    }
+  ]
 }

@@ -52,6 +52,7 @@ namespace modules {
 			ejecutando = false;
 			deteniendo = true;
 			detener = false;
+			//Sleep(2000);
 			//modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
 			
 			DBG("Intentamos destruir");
@@ -70,6 +71,7 @@ namespace modules {
 			detener = true;
 			//deteniendo = false;
 		}
+		
 		bool isStoping() { return deteniendo; };
 		bool isOrderStop() { return detener; };
 		

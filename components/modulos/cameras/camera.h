@@ -39,9 +39,9 @@ protected:
 	void ponerVista2();
 	void actualizarProyeccion();
 private:
-	bool isChange();
+	bool isChange(bool reset=true);
 public:
-	Camera();
+	Camera(Entity* e, modules::graphics::Graphic* g, Component* p = NULL) :Component(e, g,p) {};
 	virtual ~Camera();
 	Transform * transform();
 	bool isActive();
@@ -78,11 +78,17 @@ public:
 	float getRotX();
 	float getRotY();
 	float getRotZ();
+	std::tuple<float, float, float> getPosition() {
+		if (transform()) { return transform()->getPosition(); } else { return { 0,0,0 }; }
+	
+	}
 
 	std::tuple<float, float> getNormalizeScreenExtra(double x, double y);
 	std::tuple<float, float> getNormalizeScreen(double x, double y);
 
 	void setRotate(float x, float y, float z);
 	void refresh(int mode=1);
+
+	void transformChanged();
 };
 #endif // !__CAMERA

@@ -21,6 +21,14 @@ void Time::reset() {
 	delta = 0;
 	anterior = std::chrono::system_clock::now();
 }
+void Time::freeze(bool stop) {
+	if (stop) {
+		congelado = std::chrono::system_clock::now();
+	} else {
+		std::chrono::system_clock::time_point actual=std::chrono::system_clock::now();
+		anterior = actual-(congelado-anterior);
+	}
+};
 /**
 * devuelve los microsegundos desde la última operación
 * @return microsegundos
@@ -37,4 +45,5 @@ std::chrono::system_clock::time_point Time::time() {
 }
 
 std::chrono::system_clock::time_point Time::anterior = std::chrono::system_clock::now();
+std::chrono::system_clock::time_point Time::congelado;
 double Time::delta=0;

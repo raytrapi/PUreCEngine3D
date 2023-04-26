@@ -169,10 +169,11 @@ void modules::graphics::Material::setTexture(unsigned int idTexture) {
 	t->setTexture(idTexture);
 	this->textures.push_back(t);
 };
-void modules::graphics::Material::setTexture(float* img, unsigned int length, int width, int height, TextureImg::FORMAT_COLOR formatColor) {
+void modules::graphics::Material::setTexture(float* img, unsigned int length, int width, int height, TextureImg::FORMAT_COLOR formatColor, int repeat, int nearest) {
 	Texture* t = new Texture();
-	t->setTexture(img, length,width,height,formatColor);
+	t->setTexture(img, length,width,height,formatColor, repeat, nearest);
 	this->textures.push_back(t);
+
 };
 modules::graphics::Texture::Texture(const Texture&t) {
 	this->idTexture = t.idTexture;
@@ -183,11 +184,11 @@ modules::graphics::Texture::Texture(const Texture&t) {
 void modules::graphics::Texture::setTexture(unsigned int idTexture){
 	this->idTexture = idTexture;
 }
-void modules::graphics::Texture::setTexture(float* image,  unsigned int length, int width, int height, TextureImg::FORMAT_COLOR formatColor) {
+void modules::graphics::Texture::setTexture(float* image,  unsigned int length, int width, int height, TextureImg::FORMAT_COLOR formatColor, int repeat, int nearest) {
 	this->texture = new TextureImg(image,length, modules::graphics::TextureImg::TYPE::COLOR);
 	//Ahora deberemos cargar la imagen en nuestro sistema para obtener el ID de la textura
 	graphics::Graphic *g= Module::get<modules::graphics::Graphic>();
-	if (g->addTexture(image, length,width,height, this->idTexture,formatColor)) {
+	if (g->addTexture(image, length,width,height, this->idTexture,formatColor,repeat,nearest)) {
 	};
 }
 void modules::graphics::Texture::setImage(float* image, unsigned int length, int width, int height, unsigned  idTexture, TextureImg::FORMAT_COLOR formatColor) {

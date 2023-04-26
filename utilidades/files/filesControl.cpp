@@ -35,7 +35,7 @@ bool FileControl::check(FileControl::EstadoRuta *mod, FileControl::Tipos tipo) {
 			} else {
 				mod->ultimoCambio = std::filesystem::last_write_time(std::filesystem::path(mod->ruta));
 				mod->existe = true;
-				cambio = true;
+				cambio = false; //Al iniciar no cambia // to init not change
 			}
 		} else {
 			if (mod->existe) {
@@ -144,7 +144,7 @@ bool FileControl::folderChangeTime(const char* path, std::function<void(char*)>c
 			}
 			, milliseconds)
 	);
-	return false; //TODO: Comprobar porqué siempre tenemos que devolver falso
+	return true; //TODO: Comprobar porqué siempre tenemos que devolver falso
 }
 
 void FileControl::onFocus(bool focus) {
@@ -160,6 +160,88 @@ void FileControl::onFocus(bool focus) {
 			}
 		}
 	}
+}
+/**
+* Get the last time for de folder or file
+* Obtiene la información de la fecha más reciente de un fichero o carpeta
+*/
+std::filesystem::file_time_type FileControl::getLastTime(const char* path) {
+	//¿Es fichero o carpeta? //Is file o folder?
+	
+	bool esFichero;
+	if (!std::filesystem::exists(std::filesystem::path(path))) {
+		return std::filesystem::file_time_type::min();
+	}
+	if (std::filesystem::is_directory(std::filesystem::path(path))) {
+		esFichero = false;
+	}else {
+		esFichero = true;
+	}
+	//Si es fichero devolvemos su fecha // If is file return its date
+	if (esFichero) {
+		return std::filesystem::last_write_time(std::filesystem::path(path));
+	}
+	//Si es una carpeta devolvemos la fecha más reciente de todos los ficheros // If is folder return the most recent date of all files
+	std::filesystem::file_time_type fecha = std::filesystem::file_time_type::min();
+	for (auto& fichero : std::filesystem::recursive_directory_iterator(std::filesystem::path(path))) {
+		if (fichero.is_regular_file()) {
+			auto t = std::filesystem::last_write_time(fichero.path());
+			if (t > fecha) {
+				fecha = t;
+			}
+		} else {
+			//Lanzamos de forma recursiva //run in recursive mode
+			auto t = getLastTime(fichero.path().string().c_str());
+			if (t > fecha) {
+				fecha = t;
+			}
+		}
+	}
+	return fecha;
+	/*if (carpetas->size() > 0) {
+		//Vaciamos las carpetas
+		for (int i = 0; i < carpetas->size(); i++) {
+			delete carpetas->operator[](i);
+		}
+		carpetas->clear();
+
+	}
+	EstadoRuta* er = new EstadoRuta(path, callback);
+	carpetas->push_back(er);
+	if (registrarTiempo) {
+		if (std::filesystem::exists(std::filesystem::path(er->ruta))) {
+			auto t = std::filesystem::last_write_time(std::filesystem::path(er->ruta));
+			er->ultimoCambio = t;
+			er->existe = true;
+		}
+	}
+	if (subCarpeta) {
+		for (auto& carpeta : std::filesystem::recursive_directory_iterator(std::filesystem::path(path))) {
+			if (carpeta.is_directory()) {
+				std::string stringCarpeta = carpeta.path().string();
+				int longitud = stringCarpeta.size();
+				char* strCarpeta = new char[longitud + 1];
+				for (int i = 0; i < longitud; i++) {
+					strCarpeta[i] = stringCarpeta[i];
+				}
+				strCarpeta[longitud] = '\0';
+				er = new EstadoRuta(strCarpeta, callback);
+				carpetas->push_back(er);
+				if (registrarTiempo) {
+					if (std::filesystem::exists(std::filesystem::path(er->ruta))) {
+						auto t = std::filesystem::last_write_time(std::filesystem::path(er->ruta));
+						er->ultimoCambio = t;
+						er->existe = true;
+					}
+				}
+				//utiles::Log::debug(strCarpeta);
+				delete[] strCarpeta;
+			}
+		}
+	}/**/
+
+	
+	
 }
 bool FileControl::existsFolder(const char* path) {
 	return std::filesystem::is_directory(std::filesystem::path(path));

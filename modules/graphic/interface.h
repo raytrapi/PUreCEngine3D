@@ -13,11 +13,13 @@ namespace modules {
 	namespace graphics {
 		class EXPORTAR_MODULO Interface :public Module {
 		protected:
-			Global* global=NULL;
+			Global* global = NULL;
+			Graphic* graphic = NULL;
 		public:
 			virtual void render() = 0;
 			Module::MODULES_TYPE tipo() { return Module::MODULES_TYPE::INTERFACE; };
 			void setGlobal(Global* g) { global = g; };
+			void setGraphic(Graphic* g) { graphic = g; };
 		};
 	}
 }

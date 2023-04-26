@@ -1,5 +1,6 @@
 #include "camera.h"
-
+#include <constantes.h>
+#include <entity.h>
 void Camera::ponerOrto() {
 	/*proyeccion[0] = 2.f / (derecha - izquierda);
 	proyeccion[1] = proyeccion[2] = 0.f;
@@ -13,15 +14,20 @@ void Camera::ponerOrto() {
 	proyeccion[11] = -((lejos+cerca) / (lejos-cerca));
 	proyeccion[12] = proyeccion[13] = proyeccion[14] = 0.f;
 	proyeccion[15] = 1;/**/
-	proyeccion[0] = 2.f / (derecha - izquierda);
+	float ancho = derecha - izquierda;
+	float alto = arriba - abajo;
+	float profundidad = lejos - cerca;
+	proyeccion[0] = 2.f / ancho;
 	proyeccion[1] = proyeccion[2] = proyeccion[3] = 0.f;
-	proyeccion[5] = 2.f / (arriba - abajo);
-	proyeccion[4] = proyeccion[6] = proyeccion[7] = 0.f;
-	proyeccion[10] = 2.f / (lejos - cerca);
-	proyeccion[8] = proyeccion[9] = proyeccion[11] = 0.f;
-	proyeccion[12] = -(derecha + izquierda) / (derecha - izquierda);
-	proyeccion[13] = -(arriba + abajo) / (arriba - abajo);
-	proyeccion[14] = -(lejos + cerca) / (lejos - cerca);
+	proyeccion[4] = 0.f;
+	proyeccion[5] = 2.f / alto;
+	proyeccion[6] = proyeccion[7] = 0.f;
+	proyeccion[8] = proyeccion[9] = 0.f;
+	proyeccion[10] = -2.f / profundidad;
+	proyeccion[11] = 0.f;
+	proyeccion[12] = -(derecha + izquierda) / ancho;
+	proyeccion[13] = -(arriba + abajo) / alto;
+	proyeccion[14] = -(lejos + cerca) / profundidad;
 	proyeccion[15] = 1.f;/**/
 }
 /*void Camera::ponerOrto() {
@@ -67,9 +73,14 @@ void Camera::ponerPerspectiva() {
 		proyeccion[12] = -2.f * (lejos * cerca) / (lejos - cerca);
 		proyeccion[13] = proyeccion[14] = proyeccion[15] = 0.f;/**/
 	} else {
+		anguloFocal = 75.f * (float)M_PI / 180.f;
 		float const a = 1.f / tanf(anguloFocal / 2.f);
-
-		proyeccion[0] = a / ((derecha-izquierda) / (arriba- abajo));
+		float w = (float)Screen::getWidth();
+		float h = (float)Screen::getHeight();
+		float const aspect_ratio = w / h;
+		//float const a = 1.f / tanf(anguloFocal / 2.f);
+		//proyeccion[0] = a / ((derecha-izquierda) / (arriba- abajo));
+		proyeccion[0] = a / aspect_ratio;
 		proyeccion[1] = proyeccion[2] = proyeccion[3] = 0.f;
 		proyeccion[4] = 0.f;
 		proyeccion[5] = a;
@@ -78,14 +89,35 @@ void Camera::ponerPerspectiva() {
 		proyeccion[11] = -1.f;
 		
 		proyeccion[12] = proyeccion[13] = proyeccion[14] = 0.f;
-		proyeccion[15] = 1.f;
+		proyeccion[15] = 1.f;/**/
+		
+		/*float sensor_width = 36.0; // En mm
+		float fov = 60.0; // En grados
+		float focal_length = sensor_width / (2 * tan(fov / 2));
+		fov= 2.0f * atan(0.5f * (1.0f / focal_length));
+		float f = 1.0f / tan(fov * 0.5f);
+		float const a = 1.f / tanf(anguloFocal / 2.f);
+		float const aspect_ratio = Screen::getWidth() / Screen::getHeight();
+		proyeccion[0] = f/aspect_ratio;
+		proyeccion[1] = proyeccion[2] = proyeccion[3] = 0.f;
+		proyeccion[4] = 0.f;
+		proyeccion[5] = f;
+		proyeccion[6] = proyeccion[7] = proyeccion[8] = proyeccion[9] = 0.f;
+		proyeccion[10] = ((lejos + cerca) / (lejos - cerca));
+		proyeccion[11] = 2*(lejos+cerca)/(lejos-cerca);
+
+		proyeccion[12] = proyeccion[13] = 0.f;
+		proyeccion[14] = 1.f;
+		proyeccion[15] = 0.f;/**/
+		
+		
 		/*proyeccion[12] = proyeccion[13] = 0.f;
 		proyeccion[14] = -((2.f * lejos * cerca) / (lejos - cerca));
 		proyeccion[15] = 0.f;/**/
 	}
 }
 
-void Camera::ponerVista() {
+void Camera::ponerVista2() {
 	/* Obtenida de aquí https://www.scratchapixel.com/lessons/mathematics-physics-for-computer-graphics/lookat-function
 	 Matrix44f lookAt(const Vec3f& from, const Vec3f& to, const Vec3f& tmp = Vec3f(0, 1, 0)){ 
 		 Vec3f forward = normalize(from - to); 
@@ -194,9 +226,9 @@ void Camera::ponerVista() {
 
 	
 }
-void Camera::ponerVista2() {
+void Camera::ponerVista() {
 
-
+	/*
 	//TODO: crear método par calcular la dimensión y la normal
 	float f_t[3] = { eye[0] - target[0], eye[1] - target[1], eye[2] - target[2] };
 	//float f_t[3] = { target[0] - eye[0], target[1] - eye[1], target[2] - eye[2] };
@@ -206,16 +238,16 @@ void Camera::ponerVista2() {
 	float axiZ[3] = { f_t[0] / f_dimension, f_t[1] / f_dimension, f_t[2] / f_dimension };
 
 	//float s_t[3] = { f[1] * up[2] - f[2] * up[1], f[2] * up[0] - f[0] * up[2], f[0] * up[1] - f[1] * up[0] };
-	/*float s_t[3] = {
+	///float s_t[3] = {
 		axiZ[1] * up[2] - axiZ[2] * up[1],
 		axiZ[2] * up[0] - axiZ[0] * up[2],
 		axiZ[0] * up[1] - axiZ[1] * up[0]
-	};/**/
+	};/*
 	float s_t[3] = {
 		up[1] * axiZ[2] - up[2] * axiZ[1],
 		up[2] * axiZ[0] - up[0] * axiZ[2],
 		up[0] * axiZ[1] - up[1] * axiZ[0]
-	};/**/
+	};/*
 	float s_hipo = sqrtf(s_t[0] * s_t[0] + s_t[1] * s_t[1] + s_t[2] * s_t[2]);
 	float s_dimension = (s_hipo != 0) ? s_hipo : 1;
 	//OJO puede ser todo 0;
@@ -226,12 +258,12 @@ void Camera::ponerVista2() {
 		axiX[1] * axiZ[2] - axiX[2] * axiZ[1],
 		axiX[2] * axiZ[0] - axiX[0] * axiZ[2],
 		axiX[0] * axiZ[1] - axiX[1] * axiZ[0]
-	};/**/
+	};/*
 	float axiY[3] = {
 		axiZ[1] * axiX[2] - axiZ[2] * axiX[1],
 		axiZ[2] * axiX[0] - axiZ[0] * axiX[2],
 		axiZ[0] * axiX[1] - axiZ[1] * axiX[0]
-	};/**/
+	};/*
 
 
 	//look_at
@@ -250,7 +282,58 @@ void Camera::ponerVista2() {
 	vista[12] = (axiX[0] * -eye[0]) + (axiX[1] * -eye[1]) + (axiX[2] * -eye[2]); //MAL
 	vista[13] = (axiY[0] * -eye[0]) + (axiY[1] * -eye[1]) + (axiY[2] * -eye[2]); //MAL
 	vista[14] = (axiZ[0] * -eye[0]) + (axiZ[1] * -eye[1]) + (axiZ[2] * -eye[2]); //MAL
-	vista[15] = 1;
+	vista[15] = 1;/**/
+	float dirX = target[0] - eye[0];
+	float dirY = target[1] - eye[1];
+	float dirZ = target[2] - eye[2];
+
+	// Normaliza los vectores de dirección y up
+	float dirLength = std::sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
+	dirX /= dirLength;
+	dirY /= dirLength;
+	dirZ /= dirLength;
+
+	float upLength = std::sqrt(up[0]* up[0] + up[1] * up[1] + up[2] * up[2]);
+	float upX= up[0]/upLength;
+	float upY = up[1]/upLength;
+	float upZ = up[2]/upLength;
+
+	// Calcula el vector lateral
+	float sideX = upY * dirZ - upZ * dirY;
+	float sideY = upZ * dirX - upX * dirZ;
+	float sideZ = upX * dirY - upY * dirX;
+
+	// Normaliza el vector lateral
+	float sideLength = std::sqrt(sideX * sideX + sideY * sideY + sideZ * sideZ);
+	sideX /= sideLength;
+	sideY /= sideLength;
+	sideZ /= sideLength;
+
+	// Calcula el vector up corregido
+	float upSideX = dirY * sideZ - dirZ * sideY;
+	float upSideY = dirZ * sideX - dirX * sideZ;
+	float upSideZ = dirX * sideY - dirY * sideX;
+
+	// Construye la matriz de vista
+	vista[0] = sideX;
+	vista[1] = upSideX;
+	vista[2] = -dirX;
+	vista[3] = 0.0f;
+
+	vista[4] = sideY;
+	vista[5] = upSideY;
+	vista[6] = -dirY;
+	vista[7] = 0.0f;
+
+	vista[8] = sideZ;
+	vista[9] = upSideZ;
+	vista[10] = -dirZ;
+	vista[11] = 0.0f;
+
+	vista[12] = -(sideX * eye[0] + sideY * eye[1] + sideZ * eye[2]);
+	vista[13] = -(upSideX * eye[0] + upSideY * eye[1] + upSideZ * eye[2]);
+	vista[14] = dirX * eye[0] + dirY * eye[1] + dirZ * eye[2];
+	vista[15] = 1.0f;
 }
 void Camera::actualizarProyeccion() {
 	if (ortogonal) {
@@ -274,13 +357,7 @@ void Camera::actualizarProyeccion() {
 	}
 }
 
-Camera::Camera() {
-	//transformada = new Transform();
-	DBG("CONSTRUCTOR cámara");
 
-	graphic = Module::get<modules::graphics::Graphic>();
-	
-}
 
 Camera::~Camera() {
 	DBG("Borro cámara");
@@ -361,9 +438,9 @@ void Camera::setLookAt(float eyeX, float eyeY, float eyeZ, float targetX, float 
 	this->up[1] = upY;
 	this->up[2] = upZ; 
 
-	float dX = eye[0] -target[0];
-	float dY = eye[1] -target[1];
-	float dZ = eye[2] -target[2];
+	float dX = target[0]-eye[0];// eye[0] - target[0];
+	float dY = target[1] - eye[1];//eye[1] -target[1];
+	float dZ = target[2] - eye[2];//eye[2] -target[2];
 	distanciaObjetivo = sqrtf(dX * dX + dY * dY + dZ * dZ);
 	
 
@@ -518,16 +595,47 @@ void Camera::refresh(int modo) {
 	}/**/
 }
 
-bool Camera::isChange() {
+bool Camera::isChange(bool reset) {
 	if (conCambio) {
-		conCambio = false;
+		if (reset) {
+			conCambio = false;
+		}
 		return true;
 	}
 	return false;
 }
-bool modules::graphics::Graphic::isChangeCamera(Camera* camera) {
+void Camera::transformChanged() {
+	DBG((char*)u8"He cambiado la posición, escala o rotación de la cámara");
+	//TODO: Gestionar mivimiento y rotación de la cámara
+	std::tie(eye[0], eye[1], eye[2]) = entidad->transformada->getPosition();
+	auto [rx, ry, rz] = entidad->transformada->getRotator();
+	
+
+	auto [fx, fy, fz, upx,upy,upz] = Transform::calculateForwardVector2(rx, ry, rz, 0,0,1.0, 0, 1.0, 0);
+	target[0] = fx * distanciaObjetivo;
+	target[1] = fy * distanciaObjetivo;
+	target[2] = fz * distanciaObjetivo;
+	up[0] = upx;
+	up[1] = upy;
+	up[2] = upz;
+	float dX = target[0] - eye[0];// eye[0] - target[0];
+	float dY = target[1] - eye[1];//eye[1] -target[1];
+	float dZ = target[2] - eye[2];//eye[2] -target[2];
+	//distanciaObjetivo = sqrtf(dX * dX + dY * dY + dZ * dZ);
+	refresh(3);
+	conCambio = true;
+	graphic->updateEntities(0,graphic->ALL);
+	//Gestionamos los GIZMO
+	//Luces
+	auto luces = Entity::getAllGlobalComponents<LightComponent>();
+	for (auto luz:luces) {
+		luz->updateGizmo();
+	}
+
+}
+bool modules::graphics::Graphic::isChangeCamera(Camera* camera, bool reset) {
 	if (camera != NULL) {
-		return camera->isChange();
+		return camera->isChange(reset);
 	}
 	return false;
 }

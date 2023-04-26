@@ -1,4 +1,5 @@
 #include "input.h"
+#include "screen.h"
 
 bool Input::isKeyDown(Key key) {
    switch (key) {
@@ -22,8 +23,13 @@ bool Input::isKeyDown(Key key) {
 bool Input::isKeyUp(Key key) {
     return (teclas.find(key) != teclas.end() && !teclas[key].estaPulsada());
 }
-bool Input::isKeyPress(Key key) { //TODO: Hacer que sea un evento onKeyPress
-    return presionadas.find(key) != presionadas.end();
+bool Input::isKeyPress(Key key, bool always) { //TODO: Hacer que sea un evento onKeyPress
+   return teclas[key].estaPulsada(always);
+   /*if (always) {
+      return presionadas.find(key) != presionadas.end();
+   } else {
+      return presionadas.find(key) != presionadas.end() && teclas[key].estaPulsada(true);
+   }/**/
 }
 void Input::onKeyPress(Key key, std::function<void(Key)> f) {
     //DBG("dir %", this);
@@ -90,6 +96,15 @@ void Input::resetKeyPress() {
     presionadas.clear();
 }
 
+void Input::setDelayTime(Key key, float time) {
+   teclas[key].setDelay(time);
+};
+void Input::setRepeatTime(Key key, float time) {
+   teclas[key].setRepeat(time);
+};
+void Input::resetTime(Key key) {
+   teclas[key].resetTime();
+};
 void  Input::checkKeysPress() {
     for (int i = 0; i < controlTeclasPulsadas.size(); i++) {
         auto control = controlTeclasPulsadas[i];
@@ -106,16 +121,38 @@ void  Input::checkKeysPress() {
 	}/**/
 	
 };
+
+
+/*********/
+/* RATÓN */
+/*********/
+std::tuple<float, float, float> Input::getMouse3DPosition(float xScreen, float yScreen, bool enEditor) {
+   float x = xMouse - xScreen;
+   float y = yMouse - yScreen;
+   if (x < 0 || x > Screen::ancho || y < 0 || y > Screen::alto) {
+      x = 0;
+      y = 0;
+   }
+   
+   return { x, y,0 };
+}
+void Input::setMousePosition(float x, float y, float width, float height, float xScreen, float yScreen) {
+   xMouse = x;
+   yMouse = y;
+}
+
+
 /*void Input::onPress(void(*f)(Key)) {
     eventosKeyPress.push_back(f);
 }/**/
 std::map<Key, Tecla> Input::teclas;
 std::map<Key, Tecla*> Input::presionadas;
 std::map<Key, std::vector<Key>> Input::mapeadas = { 
-   {Key::UP,{Key::W}},
-   {Key::RIGHT,{Key::D}},
-   {Key::DOWN,{Key::S}},
-   {Key::LEFT,{Key::A}}
+   {Key::UP,{Key::W,Key::ARROW_UP}},
+   {Key::RIGHT,{Key::D, Key::ARROW_RIGHT}},
+   {Key::DOWN,{Key::S, Key::ARROW_DOWN}},
+   {Key::LEFT,{Key::A, Key::ARROW_LEFT}}
   };
-
 //std::vector<void (*)(Key)> Input::eventosKeyPress;
+float Input::xMouse;
+float Input::yMouse;

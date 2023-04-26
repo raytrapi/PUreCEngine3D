@@ -4,9 +4,10 @@
 void renderable::Object::setRenderable(RenderableComponent* render) {
 	renderizador = render;
 }
-RenderableComponent::RenderableComponent(renderable::Object* obj) {
-	objeto = obj;
-	objeto->setRenderable(this);
+RenderableComponent::RenderableComponent(Entity* entity, modules::graphics::Graphic* g, Component* p) {
+	this->entidad = entity;
+	this->graphic = g;
+	
 };
 	
 RenderableComponent::~RenderableComponent() {
@@ -30,40 +31,36 @@ void RenderableComponent::rotateZ(float radian) {
 }
 void RenderableComponent::setPosition(float x, float y, float z) {
 	Transform* global = entidad->transform();
-	actualizar = true;
+	/*actualizar = true;
 	pX = x;
 	pY = y;
 	pZ = z;
 	transformacion[3] = pX + global->position()->x;
 	transformacion[7] = pY + global->position()->y;
-	transformacion[11] =  pZ + global->position()->z;
+	transformacion[11] =  pZ + global->position()->z;/**/
 }
 
 void RenderableComponent::moveX(float x) {
 	pX += x;
-	transformacion[3] = pX;
+	//transformacion[3] = pX;
 }
 
 void RenderableComponent::setRotation(float x, float y, float z) {
 	entidad->setRenderUpdatable();
-	rX = x;
+	/*rX = x;
 	if (rX > M_2PI) {
 		rX = rX-M_2PI ;
 	} else if (rX < 0) {
 		rX = M_2PI + rX;
 	}
 	rY = y;
-	/*if (rY > M_2PI) {
-		rY = rY - M_2PI;
-	} else if (rY < 0) {
-		rY = M_2PI + rY;
-	}*/
+	
 	rZ = z;
 	if (rZ > M_2PI) {
 		rZ = rZ - M_2PI;
 	} else if (rZ < 0) {
 		rZ = M_2PI + rZ;
-	}/**/
+	}
 	double cX = cos(rX);
 	double sX = sin(rX);
 	double cY = cos(rY);
@@ -81,7 +78,7 @@ void RenderableComponent::setRotation(float x, float y, float z) {
 
 	transformacion[8] = sX;
 	transformacion[9] = cY*sX;
-	transformacion[10] = cX*cY;
+	transformacion[10] = cX*cY;/**/
 	//transformacion[3] = 0.25f;
 	//this->entidad->
 	//updateEntityCUBE
@@ -95,7 +92,7 @@ void RenderableComponent::setRotationGimbal(float uX, float uY, float uZ, float 
 	//float SA_1 = 1 - sA;
 	
 
-	transformacion[0] = cA+(uX*uX)*cA_1;
+	/*transformacion[0] = cA + (uX * uX) * cA_1;
 	transformacion[1] = uX*uY*cA_1-uZ*sA;
 	transformacion[2] = uX*uZ*cA_1+uY*sA;
 	transformacion[3] = 0;
@@ -110,7 +107,7 @@ void RenderableComponent::setRotationGimbal(float uX, float uY, float uZ, float 
 	transformacion[12] = 0;
 	transformacion[13] = 0;
 	transformacion[14] = 0;
-	transformacion[15] = 1;
+	transformacion[15] = 1;/**/
 }
 
 float RenderableComponent::getX() {
@@ -139,7 +136,7 @@ float RenderableComponent::getRZ() {
 }
 
 float* RenderableComponent::matrixTrans() {
-	return transformacion; 
+	return entidad->transform()->matrix();
 }
 
 bool RenderableComponent::isUpdatable() {
@@ -154,29 +151,38 @@ bool RenderableComponent::isUpdatable() {
 */
 void RenderableComponent::update() {
 	actualizar = true;
-	Transform* global = entidad->transform();
-	double cX = cos(rX);
-	double sX = sin(rX);
-	double cY = cos(rY);
-	double sY = sin(rY);
-	double cZ = cos(rZ);
-	double sZ = sin(rZ);
+	entidad->transform()->update();
+	/*Transform* transform = entidad->transform();
+	auto [posX, posY, posZ] = transform->getPosition();
+	auto [escX, escY, escZ] = transform->getScale();
+	auto [rotX, rotY, rotZ] = transform->getRotator();
+	rotX *= GRAD_RAD;
+	rotY *= GRAD_RAD;
+	rotZ *= GRAD_RAD;
+	double cX = cos(rotX);
+	double sX = sin(rotX);
+	double cY = cos(rotY);
+	double sY = sin(rotY);
+	double cZ = cos(rotZ);
+	double sZ = sin(rotZ);
 
-	transformacion[0] = cZ * cY;
+	transformacion[0] = cZ * cY * escX;
 	transformacion[1] = -cX * sZ + sY * cZ * sX;
 	transformacion[2] = sX * sZ + sY * cX * cZ;
+	transformacion[3] = posX;
 
 	transformacion[4] = cY * sZ;
-	transformacion[5] = cX * cZ + sY * sZ * sX;
+	transformacion[5] = cX * cZ + sY * sZ * sX * escY;
 	transformacion[6] = -sX * cZ + sY * cX * sZ;
+	transformacion[7] = posY;
 
-	transformacion[8] = sX;
+	transformacion[8] = -sY;
 	transformacion[9] = cY * sX;
-	transformacion[10] = cX * cY;
+	transformacion[10] = cX * cY * escZ;
+	transformacion[11] = posZ;
+	/**/
 
-	transformacion[3] = pX + global->position()->x;
-	transformacion[7] = pY + global->position()->y;
-	transformacion[11] = pZ + global->position()->z;
+
 }
 
 void RenderableComponent::setUpdated(bool update) {

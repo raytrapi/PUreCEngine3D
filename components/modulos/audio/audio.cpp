@@ -1,8 +1,6 @@
 #include "audio.h"
 
-Audio::Audio() {
-   //DBG("+Creamos el componente Audio");
-}
+
 
 Audio::~Audio() {
    //DBG("-Borramos componente Audio");

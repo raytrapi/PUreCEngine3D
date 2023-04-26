@@ -33,6 +33,9 @@ renderable::Line::Line(std::vector<float*> points, float* color, float width, un
 }
 
 renderable::Line::Line(float* points, unsigned countPoints, float* color, float width, unsigned type) {
+    if (points == NULL) {
+        return;
+   }
    ancho = width;
    this->colores = new float[4]; //Guardamos alfa
    for (int i = 0; i < 4; i++) {
@@ -79,10 +82,14 @@ int renderable::Line::getShaderId() {
 }
 
 void renderable::Line::setVertex(float* vertex, unsigned countVertex) {
-   borrarVertex();
+   
+   
    unsigned longitud = countVertex * 3;
-   vertices = new float[longitud];
-   numeroVertices = countVertex;
+   if (countVertex != numeroVertices) {
+      borrarVertex();
+      vertices = new float[longitud];
+      numeroVertices = countVertex;
+   }
    for(int i=0;i<longitud;i++){
       vertices[i] = vertex[i];
    }

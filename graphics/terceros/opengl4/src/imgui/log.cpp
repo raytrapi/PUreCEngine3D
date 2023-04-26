@@ -64,7 +64,7 @@
 		}
 		conScroll = true;
 		delete[]tipo;
-		if (lineas.size() > 10) {
+		if (lineas.size() > 1000) {
 			lineas.erase(lineas.begin());
 		}
 	}

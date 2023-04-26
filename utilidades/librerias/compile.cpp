@@ -5,12 +5,19 @@ void Compile::buscarCompilador() {
 	
 	//PROBAMOS VS19
 	HKEY clave;
-	LONG respuesta = RegOpenKeyEx(HKEY_CLASSES_ROOT, "VisualStudio.DTE.16.0\\CLSID", 0, KEY_READ, &clave);
+	bool noExiste = true;
+	LONG respuesta = RegOpenKeyEx(HKEY_CLASSES_ROOT, "VisualStudio.DTE.17.0\\CLSID", 0, KEY_READ, &clave);
 	bool correcto = respuesta == ERROR_SUCCESS;
 	if (!correcto) {
-		bool noExiste = respuesta == ERROR_FILE_NOT_FOUND;
+		noExiste = respuesta == ERROR_FILE_NOT_FOUND;
 	}
-
+	if (!noExiste) {
+		respuesta = RegOpenKeyEx(HKEY_CLASSES_ROOT, "VisualStudio.DTE.16.0\\CLSID", 0, KEY_READ, &clave);
+		bool correcto = respuesta == ERROR_SUCCESS;
+		if (!correcto) {
+			noExiste = respuesta == ERROR_FILE_NOT_FOUND;
+		}
+	}
 	std::string CLSID = "";
 	leerRegistro(clave, "", CLSID);
 	if (!CLSID.empty()) {
@@ -195,7 +202,7 @@ const void Compile::checkCompiled(const char* project) {
 	ficheroError += "c.txt";
 	fichero.open(ficheroError.c_str(), std::ios::in);
 	std::string linea;
-	std::regex error("^(.*): error (.*) (.*)$");
+	std::regex error("^(.*): error (\\w*):? (.*)\\r?$");
 	bool conError = false;
 	if (fichero.is_open()) {
 		while (std::getline(fichero, linea)) {

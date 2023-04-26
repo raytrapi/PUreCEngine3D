@@ -20,11 +20,12 @@ set(GLAD_GL #"${GLAD_DIR}/include/glad/gl.h"
             
 file(GLOB GRAFICO src/*.cpp src/*/*.cpp)
 add_library(mg_gl4 SHARED ${GRAFICO} ${GLAD_GL}) 
-#add_library(mg_gl4 SHARED ${GRAFICO} )
+#add_library(mg_gl4 SHARED ${GRAFICO} ) 
 
 set_property(TARGET mg_gl4 PROPERTY CXX_STANDARD 20)
-target_link_libraries(mg_gl4 utils globals motor_grafico modules components glfw3 )
-
+target_link_libraries(mg_gl4 utils globals motor_grafico modules components glfw3  )
+ 
+  
 if(WIN32)
 	#target_link_libraries( mg_gl4 OpenGL32.lib Glu32.lib "${CMAKE_CURRENT_SOURCE_DIR}/lib/glfw3.lib")
     target_link_libraries( mg_gl4 OpenGL32.lib Glu32.lib ${CONAN_LIBS} )
@@ -43,17 +44,29 @@ elseif(UNIX)
     )
 endif()
 
-make_directory(${CMAKE_BINARY_DIR}/bin/shaders)
-file(GLOB SHADERS shaders/*/*.glsl)
+#make_directory(${CMAKE_BINARY_DIR}/bin/shaders)
+#file(GLOB SHADERS shaders/*/*.glsl)
+#add_custom_command(
+#    TARGET mg_gl4 POST_BUILD
+#    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#        ${SHADERS}
+#        ${CMAKE_BINARY_DIR}/bin/shaders
+#   )
 add_custom_command(
     TARGET mg_gl4 POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${SHADERS}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory 
+        ${CMAKE_HOME_DIRECTORY}/graphics/terceros/opengl4/shaders/GLSL
         ${CMAKE_BINARY_DIR}/bin/shaders
-   )
+)
 add_custom_command(
     TARGET mg_gl4 POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory 
         ${CMAKE_HOME_DIRECTORY}/resources
         ${CMAKE_BINARY_DIR}/bin/resources
 )
+#add_custom_command(
+#    TARGET mg_gl4 POST_BUILD
+#    COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+#        "${CMAKE_HOME_DIRECTORY}/graphics/terceros/opengl4/src/imgui/imgui.ini"
+#        ${CMAKE_BINARY_DIR}/bin
+#)

@@ -19,7 +19,7 @@ void modules::Tape::load(const char* projectFolderSrc, modules::Tape* tape,std::
       //utiles::Log::debug("Cambio");
    },3000);/**/
    if (existe) {
-      //callbackLoad();
+      callbackLoad();
    }
    
 }

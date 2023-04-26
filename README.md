@@ -20,3 +20,8 @@ Para compilar correctamente el proyecto es necesario descargar la libreria GLFW 
 ### Windows
 #### Visual Studio
 
+## Manuales
+imGUI online https://pthom.github.io/imgui_manual_online/manual/imgui_manual.html
+
+##Librerías de terceros
+OpenFBX - https://github.com/nem0/OpenFBX

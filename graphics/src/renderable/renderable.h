@@ -12,6 +12,7 @@
 class EXPORTAR_MODULO_GRAFICO Renderable {
 	static std::vector<renderable::Object*> renderizables;
 	static modules::graphics::Graphic *motorGrafico;
+	bool activo=true;
 public:
 	~Renderable();
 	template <class T>
@@ -19,7 +20,8 @@ public:
 	static void clearRenderable();
 	static void *getRenderable();
 	static void setGraphicEngine(modules::graphics::Graphic* motorGrafico) { Renderable::motorGrafico = motorGrafico; };
-
+	void setActive(bool active) { activo = active; };
+	bool isActive() { return activo; };
 
 };
 template <class T>

@@ -20,3 +20,9 @@ void Component::setName(std::string name) {
 	}
 	nombre[name.length()] = '\0';
 }
+std::string Component::getName() {
+	if(nombre!=NULL){
+		return std::string(nombre);
+	}
+	return std::string("Componente ");
+};

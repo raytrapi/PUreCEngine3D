@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _MOTORGRAFICO
 #define _MOTORGRAFICO
-
+#define EDITOR
 
 #include "../src/module.h"
 #include "../../components/modulos/shader/types.h"
@@ -10,6 +10,7 @@
 #include "../../utilidades/global/global.h"
 #include "../../utilidades/global/input.h"
 #include "../../utilidades/global/mouse.h"
+#include "../physics/physics.h"
 #include "interface.h"
 //#include "../../components/src/entity.h"
 #include <list>
@@ -25,6 +26,7 @@
 
 extern class Camera;
 extern class Entity;
+extern class LightComponent;
 namespace modules {
 	namespace graphics {
 		struct EXPORTAR_MODULO TextureImg {
@@ -41,6 +43,7 @@ namespace modules {
 				RGB,
 				RGBA
 			};
+			
 			TextureImg() {};
 			TextureImg(const TextureImg&);
 			TextureImg(float* image, unsigned int length, TYPE tipo, int width=0, int height=0, FORMAT_COLOR formatColor=RGB);
@@ -70,7 +73,7 @@ namespace modules {
 				}; 
 			};
 			void setImage(float* image, unsigned int length, int width, int height, unsigned  idTexture, TextureImg::FORMAT_COLOR formatColor = TextureImg::FORMAT_COLOR::RGBA);
-			void setTexture(float*, unsigned int, int width, int height, TextureImg::FORMAT_COLOR formatColor = TextureImg::FORMAT_COLOR::RGBA);
+			void setTexture(float*, unsigned int, int width, int height, TextureImg::FORMAT_COLOR formatColor = TextureImg::FORMAT_COLOR::RGBA, int repeat=0, int nearest=0);
 			void setTexture(unsigned  idTexture);
 			unsigned int getIdTexture() { return idTexture; };
 		private:
@@ -87,7 +90,7 @@ namespace modules {
 			~Material();
 			void setTexture(Texture* t);
 			void setTexture(unsigned int idTexture);
-			void setTexture(float*, unsigned int, int width, int height, TextureImg::FORMAT_COLOR formatColor = TextureImg::FORMAT_COLOR::RGBA);
+			void setTexture(float*, unsigned int, int width, int height, TextureImg::FORMAT_COLOR formatColor = TextureImg::FORMAT_COLOR::RGBA,  int repeat=0, int nearest=0);
 			unsigned int getIdTexture() { if (textures.size() > 0) { return textures[0]->getIdTexture(); } else { return 0; } };
 			std::vector<Texture*>* getTextures() { return &textures; };
 			boolean haveTextures() { return textures.size() > 0; };
@@ -144,6 +147,23 @@ namespace modules {
 			Interface *interfaz=NULL;
 			Input *input;
 			Mouse *mouse;
+			Entity* entity = NULL;
+			engine::Physics* fisicas=NULL;
+			int stackGraphic = 0;  //Indica el stack donde se apilan las entidades //indicate the stack where the entities are stacked
+			int stackLast = 0; //El último stack // the last stack
+			bool stackTemp = false;//Si el stack es temporal //if the stack is temporary
+			unsigned int textureColorBuffer;
+			unsigned int depthBuffer;
+			unsigned int stencilBuffer;
+			unsigned int widthFrameBuffer = 800;
+			unsigned int heightFrameBuffer = 600;
+
+			unsigned int fbo_id = 0;
+			unsigned int texture_id = 0;
+			unsigned int depthBuffer_id = 0;
+			unsigned int rbo_id = 0;
+			unsigned int renderbuffer_id = 0;
+			bool withFrameBuffer=false;
 		public:
 			
 			Input *getInput() { return input; };
@@ -162,6 +182,18 @@ namespace modules {
 			enum TYPE_OPERATION {
 				ALL,
 				MOVE
+			};
+			enum TYPE_SHADOW_MAP {
+				SM_DIRECTIONAL
+			};
+			enum TYPE_TEXTURE2D {
+				TEXT_DEPTH_COMPONENT,
+				TEXT_RGB,
+				TEXT_RGBA
+			};
+			enum TYPE_FRAMEBUFER {
+				FB_FRAMEBUFFER,
+				FB_RENDERBUFFER
 			};
 			void init() final {
 				iniciar();
@@ -183,7 +215,16 @@ namespace modules {
 			Global* getGlobal() {
 				return global;
 			}
-
+			void setEntity(Entity* e) {
+				entity = e;
+				if (fisicas != NULL) {
+					fisicas->setEntities(entity);
+					fisicas->setGlobal(global);
+				}
+			}
+			Entity * getEntity() {
+				return entity;
+			}
 			utiles::Log* getLog() { return gestorLog; };
 			void setLog(utiles::Log* log) {
 				gestorLog = log; idInstanciaLog = utiles::Log::getNumberInstances()-1;
@@ -191,7 +232,20 @@ namespace modules {
 			int getIdInstanceLog() {
 				return idInstanciaLog;
 			}
-			
+			void setFrameBuffer(bool set) { withFrameBuffer = set; }
+			unsigned int getImageFrame() { return textureColorBuffer; }
+			bool changeSizeWindow = false;
+			void setSize(unsigned int w, unsigned int h) {changeSizeWindow = true;widthFrameBuffer = w;heightFrameBuffer = h; Screen::setDimension(w, h); }
+			void setPhysics(engine::Physics* physics) { fisicas = physics; fisicas->setEntities(entity); fisicas->setGlobal(global); };
+			engine::Physics* getPhysics() { return fisicas; };
+
+			void setStack(int s) { stackGraphic = s; };
+			void setStackTemp(int s) { stackTemp = true; stackLast = stackGraphic; stackGraphic = s; }
+			int getStack() {
+				int stack = stackGraphic;
+				if (stackTemp) { stackTemp = false; stackGraphic = stackLast; } return stack;
+			};
+
 			/*~Grafico() {
 				//Renderable::clearRenderable();
 			};/**/
@@ -199,7 +253,8 @@ namespace modules {
 			virtual void render() = 0;
 			virtual void render(void *) = 0;
 			virtual void renderInterface() = 0;
-			virtual void postRender() = 0;
+			virtual void refresh(int mode = 1) = 0; //modo 1= shader 2= update mesh
+			virtual void postRender(bool swap=true) = 0;
 			//virtual void renderNewViewPort(std::vector<Entity*> entidades, float x = -1.f, float y = 1.f, float width = 2.f, float height = 2.f) {};
 			//virtual void insertarMapaBits(byte*, double ancho, double alto, double x, double y, double z)=0;
 			virtual bool inicializar(void*, double, double) = 0;
@@ -231,7 +286,7 @@ namespace modules {
 
 			virtual void changeCamera(Camera* camera) {};//Lamentablemente para evitar ciclos hemos de añadir un puntero, pero realmente será un tipo Camera
 			virtual void resizeCamera() {};
-			bool isChangeCamera(Camera* camera);
+			bool isChangeCamera(Camera* camera, bool reset);
 			//virtual void* 
 			void loadTexture(std::string name, std::string path, TYPE_TEXTURE type = TYPE_TEXTURE::T_NONE);
 			/// <summary>
@@ -242,7 +297,7 @@ namespace modules {
 			/// <param name="length">number of floats</param>
 			/// <param name="idTexture">set the value of texture in the GPU</param>
 			/// <returns>true if the textura load in memory</returns>
-			virtual bool addTexture(float* image, unsigned int length, int width, int height, int& idTexture, TextureImg::FORMAT_COLOR typeColor= TextureImg::FORMAT_COLOR::RGBA)=0;
+			virtual bool addTexture(float* image, unsigned int length, int width, int height, int& idTexture, TextureImg::FORMAT_COLOR typeColor= TextureImg::FORMAT_COLOR::RGBA, int repeat=0, int nearest=0)=0;
 			std::tuple<double, double> getScreenSize() {
 
 				return { Screen::getWidth(), Screen::getHeight() };
@@ -251,12 +306,26 @@ namespace modules {
 			virtual Entity * drawLineLoop(float* vertex, unsigned countVertex, float r, float g, float b, float a, unsigned width = 1) {
 				return drawLine(vertex, countVertex, r, g, b, a, width);
 			};
-			
+			//template<class T>
+			//std::vector<T*>* getComponents();
+			virtual Camera* getActiveCamera() {return NULL;};
+
+
+
+
+			virtual void getFrameBuffer(unsigned int* id) { };
+			virtual void generateTexture2D(unsigned int* id, const unsigned int width, const unsigned int height, TYPE_TEXTURE2D format) {};
+			virtual void generateTexture2DWithFBO(unsigned int* id, const unsigned int width, const unsigned int height, unsigned int depthFBO, TYPE_TEXTURE2D formatTexture, TYPE_FRAMEBUFER formatFB) {};
+			virtual void renderShadowMap(LightComponent *ligth, unsigned int &depthFBO, unsigned int &depthTexture2D, const unsigned int widthTexture2D, const unsigned int heightTexture2D, TYPE_SHADOW_MAP type) {};
+			unsigned int getTextureId() { return texture_id; }
+
+			virtual float getPixel_id(int x, int y) { return 0; };
 		};
 
-
+		
 	}
 }
+
 
 /*inline virtual modulos::graficos::Grafico::~Grafico() {
 	Renderable::clearRenderable();

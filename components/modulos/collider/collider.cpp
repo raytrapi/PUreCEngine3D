@@ -11,7 +11,7 @@
 }/**/
 
 
-std::tuple<float, float> collider::Collider::getNormal2D(float x1, float y1, float x2, float y2) {
+std::tuple<float, float> Collider::getNormal2D(float x1, float y1, float x2, float y2) {
 	float x = -(y2 - y1);
 	float y = x2 - x1;
 	//Normalizamos el valor
@@ -24,11 +24,11 @@ std::tuple<float, float> collider::Collider::getNormal2D(float x1, float y1, flo
 	return { x,y };
 }
 
-float collider::Collider::dotProduct2D(float x1, float y1, float x2, float y2) {
+float Collider::dotProduct2D(float x1, float y1, float x2, float y2) {
 	return (x1 * x2) + (y1 * y2);
 }
 
-std::tuple<float, float> collider::Collider::getMinMax2D(float axisX, float axisY, float* vertex, unsigned numberVertex) {
+std::tuple<float, float> Collider::getMinMax2D(float axisX, float axisY, float* vertex, unsigned numberVertex) {
 	if(numberVertex==0){
 		return { 0, 0 };
 	}
@@ -50,7 +50,7 @@ std::tuple<float, float> collider::Collider::getMinMax2D(float axisX, float axis
 
 
 
-std::tuple<bool, bool> collider::Collider::checkRangesForContainment(float rangeAMin, float rangeAMax, float rangeBMin, float rangeBMax) {
+std::tuple<bool, bool> Collider::checkRangesForContainment(float rangeAMin, float rangeAMax, float rangeBMin, float rangeBMax) {
 	std::tuple<bool, bool> result(true, true);
 	if (rangeAMax > rangeBMax || rangeAMin < rangeBMin) {
 		std::get<0>(result) = false;
@@ -61,7 +61,7 @@ std::tuple<bool, bool> collider::Collider::checkRangesForContainment(float range
 	return result;
 }
 
-float collider::Collider::checkPolygons(float aX, float aY, float* pA, unsigned lengthA, float bX, float bY, float* pB, unsigned lengthB) {
+float Collider::checkPolygons(float aX, float aY, float* pA, unsigned lengthA, float bX, float bY, float* pB, unsigned lengthB) {
 	float distancia = std::numeric_limits<float>::infinity();
 	float offsetX = aX-bX;
 	float offsetY= aY-bY;
@@ -107,27 +107,45 @@ float collider::Collider::checkPolygons(float aX, float aY, float* pA, unsigned 
 	
 }
 
-collider::Collider::Collider() {
+/*Collider::Collider() {
 	
 	cargarEntidad();
 	
-}
-void collider::Collider::cargarEntidad() {
+}/**/
+void Collider::cargarEntidad() {
 	cX = 0;
 	cY = 0;
 	cZ = 0;
 	if (entidad) {
 		RenderableComponent* renderizables = entidad->getComponent<RenderableComponent>();
-		setFaces(renderizables->getFaces());
+		if (renderizables != NULL) {
+			setFaces(renderizables->getFaces());
+		}
 	}
 }
 
-collider::Collider::Collider(Entity* entity) {
-	entidad = entity;
+void Collider::iniciarFisicas() {
+	if (graphic != NULL && fisicas == NULL) {
+		fisicas = graphic->getPhysics();
+	}
+
+	if (fisicas != NULL) {
+		DBG("Tengo fisicas");
+		fisicas->appendCollider(this);
+	} else {
+		DBG("NOOOO Tengo físicas");
+	}/**/
+}
+Collider::Collider(Entity* entity, modules::graphics::Graphic* g, Component* p) {
+	this->entidad = entity;
+	graphic = g;
+	padre = p;
+	fisicas = g->getPhysics();
 	cargarEntidad();
+	iniciarFisicas();
 }
 
-void collider::Collider::setVertices(std::vector<float*>* vertices) {
+void Collider::setVertices(std::vector<float*>* vertices) {
 	cX = cY = cZ = 0;
 	longitud = 0;
 	/*if (vertices != NULL) {
@@ -149,10 +167,19 @@ void collider::Collider::setVertices(std::vector<float*>* vertices) {
 
 }
 
-void collider::Collider::setFaces(std::vector<std::vector<const float*>>* faces) {
+void Collider::setFaces(std::vector<std::vector<const float*>>* faces) {
 	this->caras.clear();
 	cX = cY = cZ = 0;
 	longitud = 0;
+	float longitudAncho = 0;
+	float longitudAlto = 0;
+	float longitudFondo = 0;
+	float puntoLimite[3][2] = {
+		{ 0,0 }, //min - max X
+		{ 0,0 }, //min - max Y
+		{ 0,0 } //min - max Z
+	};
+	
 	if (faces == NULL) { //TODO: Esto es un error hay que evitar que si no hay maya de colisión de como válido al pasar en el 0,0,0
 		this->limites[0] = 0;
 		this->limites[1] = 0;
@@ -164,6 +191,18 @@ void collider::Collider::setFaces(std::vector<std::vector<const float*>>* faces)
 	}
 	for (int i = 0; i < faces->size(); i++) {
 		std::vector<float*> cara;
+		//Primero inicializamos el punto mínimo y máximo de cada eje //First initialize the minimum and maximum point of each axis
+		if (i == 0) {
+			if (faces->operator[](i).size() > 0) {
+				puntoLimite[0][0] = faces->operator[](i)[0][0];
+				puntoLimite[0][1] = faces->operator[](i)[0][0];
+				puntoLimite[1][0] = faces->operator[](i)[0][1];
+				puntoLimite[1][1] = faces->operator[](i)[0][1];
+				puntoLimite[2][0] = faces->operator[](i)[0][2];
+				puntoLimite[2][1] = faces->operator[](i)[0][2];
+			}
+		}
+		
 		for (int j = 0; j < faces->operator[](i).size(); j++) {
 			float* v = (float*)faces->operator[](i)[j];
 			cara.push_back(v);
@@ -171,20 +210,54 @@ void collider::Collider::setFaces(std::vector<std::vector<const float*>>* faces)
 			if (l > longitud) {
 				longitud = l;
 			}
+			l = cX - v[0];
+			if (l > longitudAncho) {
+				longitudAncho = l;
+			}
+			l = cY - v[1];
+			if (l > longitudAlto) {
+				longitudAlto = l;
+			}
+			l = cZ - v[2];
+			if (l > longitudFondo) {
+				longitudFondo = l;
+			}
+			//Comprobamos si cada coordena min max de cada eje es mayor que el punto mínimo y máximo de ese eje 
+			//Check if each coordinate min max of each axis is greater than the minimum and maximum point of that axis
+			if (v[0] < puntoLimite[0][0]) {
+				puntoLimite[0][0] = v[0];
+			}
+			if (v[0] > puntoLimite[0][1]) {
+				puntoLimite[0][1] = v[0];
+			}
+			if (v[1] < puntoLimite[1][0]) {
+				puntoLimite[1][0] = v[1];
+			}
+			if (v[1] > puntoLimite[1][1]) {
+				puntoLimite[1][1] = v[1];
+			}
+			if (v[2] < puntoLimite[2][0]) {
+				puntoLimite[2][0] = v[2];
+			}
+			if (v[2] > puntoLimite[2][1]) {
+				puntoLimite[2][1] = v[2];
+			}
 		}
 		this->caras.push_back(cara);
 	}
 	//El cubo más grande que contiene nuestro objeto
-	this->limites[0] = cX - longitud; // Izquierda
-	this->limites[1] = cX + longitud; // Derecha
-	this->limites[2] = cY - longitud; // Abajo
-	this->limites[3] = cY + longitud; // Arriba
-	this->limites[4] = cZ - longitud; // Fondo
-	this->limites[5] = cZ + longitud; // Frente
+	this->limites[0] = puntoLimite[0][0]; // Izquierda
+	this->limites[1] = puntoLimite[0][1]; // Derecha
+	this->limites[2] = puntoLimite[1][0]; // Abajo
+	this->limites[3] = puntoLimite[1][1]; // Arriba
+	this->limites[4] = puntoLimite[2][1]; // Fondo
+	this->limites[5] = puntoLimite[2][0]; // Frente
 	
+
 }
 
-bool collider::Collider::isCollisionRay(float xOrigin, float yOrigin, float zOrigin, float xTarget, float yTarget, float zTarget) {
+
+bool Collider::isCollisionRay(float xOrigin, float yOrigin, float zOrigin, float xTarget, float yTarget, float zTarget) {
 	bool estamosAliniadosDesdeOrigen = false;
 	bool estamosAliniadosDesdeFinal = false;
 	float** verticesA = new float* [2]{
@@ -231,3 +304,9 @@ bool collider::Collider::isCollisionRay(float xOrigin, float yOrigin, float zOri
 	
 	return true;/**/
 }
+
+void Collider::changePhysics() {
+	if (fisicas != NULL) {
+		fisicas->changeCollider(this);
+	}
+}; 

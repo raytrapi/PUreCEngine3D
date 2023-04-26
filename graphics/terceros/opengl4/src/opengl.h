@@ -61,7 +61,10 @@ private:
 		
 		
 		GLFWwindow* window;
-
+		std::map< GLuint, std::tuple< GLuint, GLuint>> myLight;
+		//GLuint mylightbuffer=0;
+		//GLuint mylightbind = 0;
+		
 		//TODO: Posible fallo si necesitamos representar los elementos en orde
 		std::map<Entity*, EntityGL4*> misEntidades;
 
@@ -75,6 +78,7 @@ private:
 		static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 		static void mouseMove_callback(GLFWwindow* window, double x, double y);
 		static void mouseButtom_callback(GLFWwindow* window, int buttom, int action, int mods);
+		static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 		static void focus(GLFWwindow* window, int focused);
 		
 		Camera* camaraActual=NULL;
@@ -199,6 +203,13 @@ private:
 protected:
 	float* points=NULL;
 	bool derecha = true;
+	unsigned int fbo=0;
+	unsigned int rbo=0;
+
+	
+	
+
+	bool inicializado = false;
 	//InterfaceGL* interfaz = NULL;
 	
 	void SetData();
@@ -208,16 +219,23 @@ protected:
 	void updateEntityCUBE(RenderableComponent* render, EntityGL4* entidad, Entity* entity, TYPE_OPERATION type);
 	void updateEntityMESH(RenderableComponent* render, EntityGL4* entidad, Entity* entity, TYPE_OPERATION type);
 	void updateEntityTEXT(RenderableComponent* render, EntityGL4* entidad, Entity* entity, TYPE_OPERATION type);
+	void updateEntityGIZMOLIGTH(LightComponent* render, EntityGL4* entidad, Entity* entity, TYPE_OPERATION type);
+
+	void processShader();
+	void processLightShader(unsigned int id);
+	void processViewProjectionShader(unsigned int id, const float* view, const float* projection, float* model);
 	void iniciar();
 	void destruir();
 public:
 	MotorGL();
 	~MotorGL();
 	void preRender();
+	void renderFinal(unsigned int idShader=0, bool modeId=false);
 	void render();
 	void render(void *);
 	void renderInterface();
-	void postRender();
+	void refresh(int mode = 1); //modo 1= shader 2= update mesh
+	void postRender(bool swap=true);
 	bool inicializar(void * contexto, double ancho, double alto);
 	char* nombre() { return (char*)"OPENGL 4"; };
 		
@@ -242,10 +260,18 @@ public:
 
 	void changeCamera(Camera* camera);
 	void resizeCamera();
-	bool addTexture(float* image, unsigned int length, int width, int height, int& idTexture, modules::graphics::TextureImg::FORMAT_COLOR typeColor);
+	bool addTexture(float* image, unsigned int length, int width, int height, int& idTexture, modules::graphics::TextureImg::FORMAT_COLOR typeColor, int repeat = GL_REPEAT, int nearest = GL_NEAREST);
 	static void closeWindow(GLFWwindow* window);
 	//void renderNewViewPort(std::vector<Entity*> entidades, float x = -1.f, float y = 1.f, float width = 2.f, float height = 2.f);
 	Entity* drawLine(float* vertex, unsigned countVertex, float r, float g, float b, float a, unsigned width = 1);
 	Entity* drawLineLoop(float* vertex, unsigned countVertex, float r, float g, float b, float a, unsigned width = 1);
+	Camera* getActiveCamera() {return camaraActual;};
+
+	void generateTexture2D(unsigned int* id, const unsigned int width, const unsigned int height, TYPE_TEXTURE2D formatTexture);
+	void generateTexture2DWithFBO(unsigned int* id, const unsigned int width, const unsigned int height, unsigned int depthFBO, TYPE_TEXTURE2D formaTexture, TYPE_FRAMEBUFER formatFB);
+	void getFrameBuffer(unsigned int* id);
+	void renderShadowMap(LightComponent* ligth, unsigned int &depthFBO, unsigned int &depthTexture2D, const unsigned int widthTexture2D, const unsigned int heightTexture2D, TYPE_SHADOW_MAP type);
+	float getPixel_id(int x, int y);
+	
 };
 #endif // !__MOTORGL_4

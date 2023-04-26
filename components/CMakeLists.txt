@@ -1,13 +1,14 @@
 include_directories(
    ../utilidades/log
    ../utilidades/global
+   ../utilidades/supervisor/src
    ../modules/graphic
    ../modules/src
    ../graphics/src
    ../vendors/freetype/include
    src
-)    
- 
+)     
+   
 file(GLOB CODIGO modulos/*/*.cpp src/*.cpp) 
 
 add_library(components SHARED ${CODIGO})

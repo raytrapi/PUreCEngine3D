@@ -11,6 +11,7 @@
 #include "../modules/tape/tape.h"
 #include "../modules/resources/resource.h"
 #include "../modules/audio/audio.h"
+#include "../modules/physics/physics.h"
 #include "../utilidades/timer/timer.h"
 #include "../utilidades/log/log.h"
 #include "../graphics/src/log/logEntity.h"
@@ -68,6 +69,7 @@ int recargarCartucho = 0;
 modules::Tape* cartucho = 0;
 modules::graphics::Graphic* motorGrafico = 0;
 modules::resources::Resource* recursos = 0;
+modules::engine::Physics* motorFisico = 0;
 modules::Audio* audio = 0;
 std::string carpertaProyecto = "";
 std::string proyecto = "";
@@ -79,21 +81,22 @@ static void cargarCartucho(char * ruta) {
 #ifdef WIN32
 //Con visual studios falla si hay un PDB, así que lo intentamos quitar
    std::string rutaS = std::string(ruta);
+	
    std::string pdb = rutaS.substr(0, rutaS.size() - 3) + std::string("pdb");
    if (std::filesystem::exists(pdb)) {
       std::filesystem::remove(pdb);
    }/**/
 #endif // WIN32 
-   DBG(ruta);
+   //DBG(ruta);
    if (std::filesystem::exists(ruta)) {
       CargaDLL::cargar(ruta);
       //cartucho=
 
       cartucho = CargaDLL::cogerModulo<modules::Tape>(Module::TAPE);
       if (cartucho) {
-          //cartucho->setInput(&input);
+          //cartucho->setInput(&input); 
          recargarCartucho = 1;
-         Screen::setDimension(cartucho->getScreenWidth(), cartucho->getScreenHeight());
+         //Screen::setDimension(cartucho->getScreenWidth(), cartucho->getScreenHeight());
          Module::set(Module::MODULES_TYPE::TAPE, cartucho);
          //if (motorGrafico) {
             ////motorGrafico->inicializar(0, cartucho->getScreenWidth(), cartucho->getScreenHeight());
@@ -115,42 +118,44 @@ void compilarTape(bool conReinicio = false) {
             Compile::checkCompiled(Proyecto::cogerRutaCompilacionProyecto());
             if (conReinicio) {
                 if (global.compileState == StateCompile::COMPILED) {
-                    reiniciarTape();
+                   global.reloadTape = true;
+                    
                 }
             }/**/
         });
     }
 }
 void reiniciarTape() {
-    std::string ruta = rutaTape;
+   std::string ruta = rutaTape;
     if (cartucho) {
+       
+          if (!cartucho->isStoping()) {
 
-        if (!cartucho->isStoping()) {
-
-            cartucho->onEnd([&, ruta]() {
+             cartucho->onEnd([&, ruta]() {
 
                 modules::Tape* miCartucho = cartucho;
-                utiles::Log::debug("Fichero descargado");
-                //utiles::Watchdog::setTimeOut([ruta] {
-                char* miRuta = NULL;
-                int longitud = 0;
-                while (ruta[longitud++] != 0) {};
-                miRuta = new char[longitud];
-                for (int i = 0; i < longitud; i++) {
-                    miRuta[i] = ruta[i];
-                }
-                CargaDLL::liberarModulo(Module::TAPE);
-                //Borramos las entidades
-                Entity::destroy();
-                cargarCartucho(miRuta);
-                delete miCartucho;
-                //cartucho = 0;
+             //utiles::Log::debug("Fichero descargado");
+             //utiles::Watchdog::setTimeOut([ruta] {
+             char* miRuta = NULL;
+             int longitud = 0;
+             while (ruta[longitud++] != 0) {};
+             miRuta = new char[longitud];
+             for (int i = 0; i < longitud; i++) {
+                miRuta[i] = ruta[i];
+             }
+             CargaDLL::liberarModulo(Module::TAPE);
+             //Borramos las entidades
+             Entity::destroy();
+             cargarCartucho(miRuta);
+             delete miCartucho;
+             //cartucho = 0;
 
-             //}, 10);
+          //}, 10);
 
-            });
-            cartucho->sendStop();
-        }
+             });
+             cartucho->sendStop();
+          }
+       
     }else {
         cargarCartucho((char *)ruta.c_str());
     }
@@ -163,8 +168,23 @@ void cargarEscena() {
 
    //TODO: Esto solo es para Ninja
    modules::Tape::load(Proyecto::cogerRutaCodigoProyecto(), cartucho, []() {
-      
-      compilarTape();
+      //Obtenemos la fecha de la ultima modificacion del fichero con FileControl::getLastTime //get last modification date with FileControl::getLastTime
+      std::filesystem::file_time_type fechaMasReciente = FileControl::getLastTime(Proyecto::cogerRutaCodigoProyecto());
+      //Obtenemos la fecha de la dll generada  //Get the date of the dll generated
+      rutaTape = Proyecto::cogerRutaCompilacionProyecto() + std::string("/") + Proyecto::cogerNombreProyecto() + std::string(".") + std::string(extDLL);
+		std::filesystem::file_time_type fechaDLL = FileControl::getLastTime(rutaTape.c_str());
+	
+		//Sacamos en Debug la fecha de la dll y la fecha mas reciente del fichero //Debug the date of the dll and the most recent file
+		DBG("Fecha DLL: " + std::to_string(fechaDLL.time_since_epoch().count()));
+        DBG("Fecha Mas Reciente: " + std::to_string(fechaMasReciente.time_since_epoch().count()));
+  
+		//Si fechaDLL es más antigua que fechaMasReciente compilamos //If fechaDLL is older than fechaMasReciente we compile
+      if (fechaDLL < fechaMasReciente) {
+         compilarTape(true);
+      } else {
+		   //Cargamos el cartucho //Load the tape
+		   //cargarCartucho((char *)rutaTape.c_str());
+      }
       /*if (cartucho) {
          if (!cartucho->isStoping()) {
             cartucho->sendStop();
@@ -190,30 +210,31 @@ void cargarEscena() {
    std::string ruta = "";
    ruta+= Proyecto::cogerRutaCompilacionProyecto()+std::string("/") + Proyecto::cogerNombreProyecto() + std::string(".") + std::string(extDLL);
    rutaTape = ruta;
-   if (std::filesystem::exists(ruta)) {
-      std::filesystem::remove(ruta);
-   }
-   FileControl::fileChangeTime(ruta.c_str(), [&](char * ruta) {
+   //if (std::filesystem::exists(ruta)) {
+   //   std::filesystem::remove(ruta);
+   //}
+   
+   /* //OJO CON ESTO
+   FileControl::fileChangeTime(ruta.c_str(), [&](char* ruta) {
 
        reiniciarTape();
-      /*if (cartucho) {
-         cartucho->stop();
-         delete cartucho;
-         cartucho = 0;
-      }/**/
-   }, 1000);
+     
+   }, 1000);/**/
 
 }
 
-void bucleJuego(bool* jugando, bool* renderizando, modules::graphics::Graphic* motorGrafico, Entity * entidades=NULL) {
+void bucleJuego(bool* jugando, bool* renderizando, modules::graphics::Graphic* motorGrafico, Entity * entidades=NULL, modules::engine::Physics* motorFisicas=NULL, bool *hayMuertos=NULL) {
     *renderizando = false;
     Time::update();
-    global.deltaTime = Time::deltaTime();
+    //global.deltaTime = Time::deltaTime();
     //input.resetKeyPress();
+    
     if (recargarCartucho > 0 && cartucho!=NULL && cartucho->isRunning() && !cartucho->isStoping()) {
+       
         //std::vector<void*>* renderizables = NULL;
         if (cartucho) {
             if (recargarCartucho != 1) {
+               
                 try {
                     if (!cartucho->isOrderStop()) {
                         input.checkKeysPress();
@@ -222,8 +243,20 @@ void bucleJuego(bool* jugando, bool* renderizando, modules::graphics::Graphic* m
                             //Entity::preUpdateCode();
                             //Entity::updateCode();
                         }else {
-                            entidades->preUpdateCode();
-                            entidades->updateCode();
+									   //¿Ejecutamos esto con una frecuencia determinada? 
+                              //¿Sería interesante que esté en un hilo aparte?
+                              if (motorFisicas != NULL) {
+										   motorFisicas->update();
+                              }
+
+                              entidades->preUpdateCode();
+									   //Ejecutar las físicas
+                            
+                              
+                           entidades->updateCode();
+                           if (hayMuertos) {
+                              *hayMuertos=entidades->updateLifeTime();
+                           }
                         }
                         cartucho->update();
                         //Sleep(150);
@@ -240,9 +273,10 @@ void bucleJuego(bool* jugando, bool* renderizando, modules::graphics::Graphic* m
         }
     }
     *renderizando = true;
+    //Sleep(2000);
 }
 
-void run(bool*jugando, bool* renderizando,modules::graphics::Graphic *motorGrafico,Entity * entidades=NULL) {
+void run(bool*jugando, bool* renderizando,modules::graphics::Graphic *motorGrafico,Entity * entidades=NULL, modules::engine::Physics* motorFisicas = NULL, bool* hayMuertos = NULL) {
    
     int tiempo = 0;
     float fps = -1;
@@ -263,7 +297,19 @@ void run(bool*jugando, bool* renderizando,modules::graphics::Graphic *motorGrafi
          std::this_thread::sleep_for(std::chrono::duration<double,std::milli>( (1000 / 60) - Time::deltaTime()));
       }/**/
       //if (fps < 60) {
-        bucleJuego(jugando,renderizando,motorGrafico, entidades);
+
+      if(global.executing== StateExecuting::PLAY && !global.paused){
+        bucleJuego(jugando,renderizando,motorGrafico, entidades,motorFisicas,hayMuertos);
+      } else {
+         if (global.executing == StateExecuting::PLAY && global.paused) {
+            global.executing = StateExecuting::PAUSED;
+            Time::freeze(true);
+         } else if(global.executing == StateExecuting::PAUSED && !global.paused){
+            global.executing = StateExecuting::PLAY;
+            Time::freeze(false);
+         }
+      }
+     
 	    	
       //}
       //Sleep(10);// ((1.0f / 30.0f) - Time::deltaTime()) * 1000);
@@ -272,29 +318,43 @@ void run(bool*jugando, bool* renderizando,modules::graphics::Graphic *motorGrafi
    (*jugando) = false;
 }
 
-void pintadoJuego(bool * jugando, bool * renderizando, bool sinHilo =true) {
-    Entity* entidades = new Entity();
+
+void pintadoJuego(bool * jugando, bool * renderizando, bool sinHilo =true, Entity* entidades=NULL, modules::engine::Physics* motorFisicas = NULL) {
     entidades->setGraphic(motorGrafico);
     std::thread* hiloJuego;
+    bool hayMuertos=false;
     if (!sinHilo) {
-        hiloJuego=new std::thread(run, jugando, renderizando, motorGrafico, entidades);
+        hiloJuego=new std::thread(run, jugando, renderizando, motorGrafico, entidades, motorFisicas,&hayMuertos);
     }
+    bool primeraVez = true;
+    motorGrafico->init();
     std::thread* compilador = NULL;
     while (*jugando && motorGrafico && motorGrafico->isOpen()) {//motorGrafico && motorGrafico->isOpen()) {
+       if (global.executing == StateExecuting::STOPING) {
+          global.executing = StateExecuting::RELOADING;
+          reiniciarTape();
+       }
         //run(&jugando, motorGrafico);
         if (motorGrafico) {
-            if (recargarCartucho > 0 && cartucho && cartucho->isRunning()) {
+            if (recargarCartucho > 0 && cartucho && cartucho->isRunning() && !primeraVez) {
                 if (cartucho) {
                     if (recargarCartucho == 1) {
 
                         try {
                             if (!cartucho->isStoping()) {
-
-                                DBG("Comenzamos el cartucho de juego");
-                                cartucho->start();
-                                entidades->startCodes(0, &input);
+                               //Tenemos que borrar las entidades
+                               entidades->clear();
+                              DBG("Comenzamos el cartucho de juego");
+                              cartucho->start();
+                              //Ahora aplicamos las físicas la primera vez
+                              if (motorFisicas!=NULL) {
+                                 motorFisicas->init();
+                              }
+                              //DBG("kk");
+                              entidades->startCodes(0, &input);
                             }
-                            recargarCartucho = 2;
+                            recargarCartucho = 2; 
+                            global.executing = StateExecuting::STOP;
                         }
                         catch (std::exception e) {
                             utiles::Log::error("Se ha producido una excepcion");
@@ -306,11 +366,30 @@ void pintadoJuego(bool * jugando, bool * renderizando, bool sinHilo =true) {
                                 utiles::Log::debug("Se está comenzando la detención");
                                 input.resetAllKeysPress();
                                 recargarCartucho = 0;
+                                entidades->stopCodes();
                                 cartucho->stop();
-                                entidades->destroy();
+                                //entidades->destroy();
                             }
                             else if(sinHilo) {
-                                bucleJuego(jugando, renderizando, motorGrafico,entidades);
+                               // bucleJuego(jugando, renderizando, motorGrafico,entidades,motorFisicas);
+                               if (global.executing == StateExecuting::PLAY && !global.paused) {
+                                  bucleJuego(jugando, renderizando, motorGrafico, entidades, motorFisicas, &hayMuertos);
+                               } else {
+                                  if (global.executing == StateExecuting::PLAY && global.paused) {
+                                     global.executing = StateExecuting::PAUSED;
+                                     Time::freeze(true);
+                                  } else if (global.executing == StateExecuting::PAUSED && !global.paused) {
+                                     global.executing = StateExecuting::PLAY;
+                                     Time::freeze(false);
+                                  } else {
+                                     Time::reset();
+                                     if (global.reloadTape) {
+                                        global.executing = StateExecuting::RELOADING;
+                                        reiniciarTape();
+                                        global.reloadTape = false;
+                                     }
+                                  }
+                               }
                             }
                         }catch (std::exception e) {
                             utiles::Log::error("Se ha producido una excepcion");
@@ -320,13 +399,15 @@ void pintadoJuego(bool * jugando, bool * renderizando, bool sinHilo =true) {
                     }
                 }
             }
-        
+            primeraVez = false;
             motorGrafico->preRender();
+            bool conRendeJuego = false;
             if (cartucho && cartucho->isRunning()) {
                 // if (nk_begin(&ctx, "Game", nk_rect(10, 10, 300, 300), NK_WIDGET_VALID)) {
                 //*renderizando = true;
                 //while (!(*renderizando)) {};
                 motorGrafico->render(Renderable::getRenderable());
+                conRendeJuego = true;
                 //*renderizando = false;
                 //Sleep(10);
                 // }
@@ -334,7 +415,12 @@ void pintadoJuego(bool * jugando, bool * renderizando, bool sinHilo =true) {
                //motorGrafico->renderizarTexto
             }
             motorGrafico->renderInterface();
-            motorGrafico->postRender();
+            motorGrafico->postRender(conRendeJuego);
+            if (hayMuertos) {
+               //Destruimos los muertos
+               entidades->destroyDead();
+               hayMuertos = false;
+            }
             if (global.compileState == StateCompile::NEEDCOMPILE) {
                 compilador = new std::thread(compilarTape, true);
                 //compilador.
@@ -350,6 +436,25 @@ void pintadoJuego(bool * jugando, bool * renderizando, bool sinHilo =true) {
                 }
             }/**/
         }
+        if (global.executing == StateExecuting::RELOAD_PROJECT) {
+           //Cargamos el proyecto
+           if (Proyecto::cargarProyecto(global.folderProject.c_str())) {
+               if (Proyecto::estaCargado()) {
+                  cargarEscena();
+               }
+               reiniciarTape();
+               global.reloadTape = false;
+               global.executing = StateExecuting::RELOADING;
+           } else {
+              global.executing = StateExecuting::STOPING;
+           }
+
+        }
+        /*if (global.reloadTape) {
+           reiniciarTape();
+           global.reloadTape = false;
+           global.executing = StateExecuting::RELOADING;
+        }/**/
     }
     if (compilador != NULL) {
         compilador->join();
@@ -361,10 +466,14 @@ void pintadoJuego(bool * jugando, bool * renderizando, bool sinHilo =true) {
 }
 
 bool procesarParametros(int numeroArgumentos, char** argumentos);
+
+
+/****************************************************************************/
 void main(int numeroArgumentos, char** argumentos) {
-
-   std::setlocale(LC_ALL, "es_ES.UTF-8");
-
+   Entity* entidades = new Entity();
+   //std::setlocale(LC_ALL, "es_ES.UTF-8");
+   std::setlocale(LC_ALL, "en_EN.UTF-8");
+   Screen::setDimension(2000, 1000);
    if (numeroArgumentos > 1) {
       if (!procesarParametros(numeroArgumentos, argumentos)) {
          return;
@@ -382,7 +491,7 @@ void main(int numeroArgumentos, char** argumentos) {
    /**/
    //Creamos un LOG de Entidades
    
-   DBG("--------------------------");
+   //DBG("--------------------------");
    CargaDLL::cargar("./modulos", "./");
 
    bool correcto = true;
@@ -394,12 +503,26 @@ void main(int numeroArgumentos, char** argumentos) {
       //Como tenemos gráficos cambiamos de log
       motorGrafico->setGlobal(&global);
       motorGrafico->setInput(input);
+      motorGrafico->setEntity(entidades);
+      motorGrafico->setFrameBuffer(true);
       
    }/**/
    //Ahora cargamos la librería de recursos
    if (CargaDLL::hayModulos(Module::RESOURCES) > 0){
       recursos = CargaDLL::cogerModulo<modules::resources::Resource>(Module::RESOURCES, "RESOURCES WITH LOAD FILES");
       Module::set(Module::RESOURCES, recursos);
+   }
+   //Cargamos la librería de físicas
+   if (CargaDLL::hayModulos(Module::PHYSICS) > 0) {
+       //motorFisico = CargaDLL::cogerModulo<modules::engine::Physics>(Module::PHYSICS, "Physics JOLT");
+       motorFisico = CargaDLL::cogerModulo<modules::engine::Physics>(Module::PHYSICS);
+       if (motorFisico == NULL) {
+          DBG("No se ha podido cargar el módulo de físicas");
+       }
+       Module::set(Module::PHYSICS, motorFisico);
+       if (motorGrafico) {
+           motorGrafico->setPhysics(motorFisico);
+       }
    }
 
    //TODO: MOVER A LA PARTE DE JUEGO
@@ -421,7 +544,7 @@ void main(int numeroArgumentos, char** argumentos) {
     };
     //delete[] parametros;/**/
 
-    Screen::setDimension(800, 800);
+    
     if (motorGrafico) {
        motorGrafico->inicializar(0, Screen::getWidth(), Screen::getHeight());
        utiles::Log* lTemp = motorGrafico->getLog();
@@ -433,9 +556,9 @@ void main(int numeroArgumentos, char** argumentos) {
            //DBG("------------------------");/**/
            //utiles::Log::setInstanceId(0);
        }
-       if (Proyecto::estaCargado()) {
-          cargarEscena();
-       }
+       //if (Proyecto::estaCargado()) {
+       //   cargarEscena();
+       //}
        //motorGrafico->addOnFocus(fileControl::onFocus);
        
        
@@ -465,8 +588,8 @@ void main(int numeroArgumentos, char** argumentos) {
     bool jugando = true;
     bool renderizando = false;
     bool recargando = false;
-    pintadoJuego(&jugando, &renderizando,false); //false es con hilo, true sin hilos
     
+    pintadoJuego(&jugando, &renderizando,true,entidades, motorFisico); //false es con hilo, true sin hilos
     //std::thread game(run);
     /*while (motorGrafico && motorGrafico->isOpen()) {
        //game.join();
@@ -485,6 +608,8 @@ void main(int numeroArgumentos, char** argumentos) {
         cartucho->stop();
         delete cartucho;
     }
+    //Activamos el log de disco //Active log of disc
+    utiles::Log::setInstanceId(0);
     Entity::destroy();
     if (motorGrafico) {
         motorGrafico->destroy();
@@ -496,6 +621,10 @@ void main(int numeroArgumentos, char** argumentos) {
     if (audio) {
        delete audio;
     }
+    if (motorFisico) {
+        delete motorFisico;
+    }
+    delete entidades;
     utiles::Log::destroy();
 }/**/
 #endif
@@ -537,9 +666,12 @@ bool procesarParametros(int numeroArgumentos, char** argumentos) {
             return false;
          }
          //carpertaProyecto = std::string();
-         if (!Proyecto::cargarProyecto(argumentos[pos + 1])) {
-            return false;
-         }
+         //if (!Proyecto::cargarProyecto(argumentos[pos + 1])) {
+         //   return false;
+        // } else {
+            global.folderProject = std::string(argumentos[pos + 1]);
+            global.executing = StateExecuting::RELOAD_PROJECT;
+         //}
          
          pos += 2;
          return true;

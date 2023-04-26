@@ -1,9 +1,12 @@
 [requires]
 libpng/1.6.37
 glfw/3.3.7
-#nuklear/4.06.1
-imgui/cci.20220207+1.87.docking
+#imgui/1.89.2
+imgui/cci.20230105+1.89.2.docking
 openal/1.21.1
+joltphysics/2.0.1
+
+#nuklear/4.06.1
 #libmp3lame/3.100
 #msdfgen/1.9.1
 [options]

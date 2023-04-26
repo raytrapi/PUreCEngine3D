@@ -1,12 +1,27 @@
 #include "box2dCollider.h"
-namespace collider {
+#include "../renderable/line.h"
+//namespace collider {
 	
-	Box2dCollider::Box2dCollider(Entity* object) {
+	Box2dCollider::Box2dCollider(Entity* entity, modules::graphics::Graphic* g, Component * p):Collider(entity,g,p) {
+		borrarVertices();
+		vertices = new float[12]{
+			limites[0], limites[3], limites[5],
+			limites[1], limites[3], limites[5],
+			limites[1], limites[2], limites[5],
+			limites[0], limites[2], limites[5]
+		};
+		verticesExpandidos = new float[12];
+		for (int i = 0; i < 12; i++) {
+			verticesExpandidos[i] = vertices[i];
+		}/**/
 		tipo = TYPE::BOX_2D;
 		//if (graphic == NULL) {
 		//	graphic = Module::get<modules::graphics::Graphic>();
 		//}
-
+		if (graphic != NULL) {
+			showGizmo();
+				
+		}
 	}
 	void Box2dCollider::borrarVertices() {
 
@@ -24,6 +39,7 @@ namespace collider {
 	}
 
 	void Box2dCollider::whenChargeEntity() {
+		borrarVertices();
 		vertices = new float[12]{
 			0,0,0, //sup-izq (top-left)
 			0,0,0, //sup-der (top-right)
@@ -115,6 +131,33 @@ namespace collider {
 		for (int i = 0; i < 12; i++) {
 			verticesExpandidos[i] = vertices[i];
 		}/**/
+		//Modificamos el gizmo y el gizmoExtendido //change the gizmo and the gizmoExtended
+		renderable::Line* linea = (renderable::Line*)gizmo->getComponent<RenderableComponent>()->getRenderable();
+		linea->setVertex(vertices, 4);
+		linea = (renderable::Line*)gizmoExpandido->getComponent<RenderableComponent>()->getRenderable();
+		linea->setVertex(verticesExpandidos, 4);
+		changePhysics();
+		//TODO: Mirar si esto lo podemos mejorar
+		/*if (gizmo) {
+			if (graphic->getGlobal()->showGizmoCollider) {
+				renderable::Line* linea = (renderable::Line*)gizmo->getComponent<RenderableComponent>()->getRenderable();
+				linea->setVertex(vertices, 4);
+			}
+			
+		}else{
+			if (graphic != NULL) {
+
+				showGizmo();
+				
+			}
+		}
+		if (gizmoExpandido) {
+			if (graphic->getGlobal()->showGizmoColliderExpand) {
+				renderable::Line* linea = (renderable::Line*)gizmoExpandido->getComponent<RenderableComponent>()->getRenderable();
+				linea->setVertex(verticesExpandidos, 4);
+
+			}
+		}/**/
 	}
 
 	void Box2dCollider::setBox(float width, float height) {
@@ -133,6 +176,7 @@ namespace collider {
 		for (int i = 0; i < 12; i++) {
 			verticesExpandidos[i] = vertices[i];
 		}/**/
+		changePhysics();
 	}
 
 	void Box2dCollider::setVertex(float* vec1, float* vec2, float* vec3, float* vec4) {
@@ -170,7 +214,7 @@ namespace collider {
 			//DBG("VT [%,%][%,%]", target->vertices[0], target->vertices[1], target->vertices[6], target->vertices[7]);
 			
 			if (
-				target!=NULL && 
+				target!=NULL && target->vertices!=NULL && 
 				vertex[0] < target->vertices[6] &&
 				vertex[3] > target->vertices[0] &&
 				vertex[1] > target->vertices[7] &&
@@ -183,10 +227,13 @@ namespace collider {
 	}
 
 	
-	std::vector<Hit> Box2dCollider::getCollisions() {
+	std::vector<collider::Hit> Box2dCollider::getCollisions() {
 		return getCollisions(cX, cY, cZ);
 	}
-	std::vector<Hit> Box2dCollider::getCollisionsExpanding(float x, float y, float z) {
+	std::vector<collider::Hit> Box2dCollider::getCollisionsExpanding(float x, float y, float z) {
+		cX = entidad->getTransform()->position()->x;
+		cY = entidad->getTransform()->position()->y;
+		cZ = entidad->getTransform()->position()->z;
 		/*vertices[0] = ((cX < x) ? cX : x) - ancho_2;
 		vertices[9] = vertices[0];
 		vertices[3] = ((cX > x) ? cX : x) + ancho_2;
@@ -198,21 +245,29 @@ namespace collider {
 		vertices[10] = vertices[7];*/
 		float xI = (x < cX ? x : cX);
 		float xD = (x > cX ? x : cX);
-		float yS = (y > cY ? y : cY);
-		float yI = (y < cY ? y : cY);
+		float yS = (y > cY ? y-cY : 0);
+		float yI = (y < cY ? (cY-y) : 0);
 
-		verticesExpandidos[0] = xI + vertices[0];
-		verticesExpandidos[1] = yS + vertices[1];
-		verticesExpandidos[3] = xD + vertices[3];
-		verticesExpandidos[4] = yS + vertices[4];
-		verticesExpandidos[6] = xD + vertices[6];
-		verticesExpandidos[7] = yI + vertices[7];
-		verticesExpandidos[9] = xI + vertices[9];
-		verticesExpandidos[10] = yI + vertices[10];
-		
+		/*xI = 0;
+		xD = 0;
+		yS = 0;
+		yI = 0;/**/
+		if (vertices != NULL) {
+			//verticesExpandidos[0] = xI + vertices[0];
+			verticesExpandidos[1] = yS + vertices[1];
+			//verticesExpandidos[3] = xD + vertices[3];
+			verticesExpandidos[4] = yS + vertices[4];
+			//verticesExpandidos[6] = xD + vertices[6];
+			verticesExpandidos[7] = vertices[7]-yI;
+			//verticesExpandidos[9] = xI + vertices[9];
+			verticesExpandidos[10] = vertices[10]-yI;
+
+			renderable::Line* linea = (renderable::Line*)gizmoExpandido->getComponent<RenderableComponent>()->getRenderable();
+			linea->setVertex(verticesExpandidos, 4);
+		}
 		return obtenerObjetosColision();
 	}
-	std::vector<Hit> Box2dCollider::getCollisions(float x, float y, float z) {
+	std::vector<collider::Hit> Box2dCollider::getCollisions(float x, float y, float z) {
 		/*float tX = cX;
 		float tY = cY;
 		float tZ = cZ;/**/
@@ -227,56 +282,75 @@ namespace collider {
 		verticesExpandidos[10] = y + vertices[10];
 		return obtenerObjetosColision();
 	}
-	std::vector<Hit> Box2dCollider::obtenerObjetosColision() {
-		std::vector<Hit> exitos;
-		if (gizmoExpandido == NULL) {
+	std::vector<collider::Hit> Box2dCollider::obtenerObjetosColision() {
+		std::vector<collider::Hit> exitos;
+		if (verticesExpandidos == NULL) {
 			return exitos;
 		}
+		//cX = entidad->getTransform()->position()->x;
+		//cY = entidad->getTransform()->position()->y;
+		//cZ = entidad->getTransform()->position()->z;
+		float xDif = (verticesExpandidos[3] - verticesExpandidos[0]) / 2.0f;
+		float yDif = (verticesExpandidos[1] - verticesExpandidos[7])/2.0f;
+		float verticesExpandidos2[12];
+		verticesExpandidos2[0] = cX-xDif;
+		verticesExpandidos2[1] = cY+yDif;
+		verticesExpandidos2[2] = verticesExpandidos[2];
+		
+		verticesExpandidos2[3] = cX + xDif;
+		verticesExpandidos2[4] = verticesExpandidos2[1];
+		verticesExpandidos2[5] = verticesExpandidos[5];
+		
+		verticesExpandidos2[6] = verticesExpandidos2[0];
+		verticesExpandidos2[7] = cY-yDif;
+		verticesExpandidos2[8] = verticesExpandidos[8];
+		
+		verticesExpandidos2[9] = verticesExpandidos2[3];
+		verticesExpandidos2[10] = verticesExpandidos2[7];
+		verticesExpandidos2[11] = verticesExpandidos[110];
+		
+		
 		//return exitos;
-		renderable::Line* lineas = gizmoExpandido->getComponent<renderable::Line>();
-		if (lineas != NULL) {
-			lineas->setVertex(verticesExpandidos, 4);
-			////DBG("block 1");
-			if(graphic->getGlobal()->showGizmoColliderExpand){
-				gizmoExpandido->setUpdatingRender(true);
+		/*if (graphic->getGlobal()->showGizmoColliderExpand) {
+			if(gizmoExpandido==NULL){
+				crearGizmoExpandido();
 			}
-			////DBG("block 2");
-			/*if (x != cX || y != cY || z != cZ) {
-				cX = x;
-				cY = y;
-				cZ = z;
-				recalcular();
-			}/**/
-			for (auto it = Entity::entidades[Entity::defaultStack].begin(); it != Entity::entidades[Entity::defaultStack].end(); it++) {
-				if ((*it)->isActive()) {
-					std::vector<Collider*>* colisiones = (*it)->getComponents<Collider>();
-					//DBG("block 3");
-					if (colisiones != NULL) {
-						for (auto itC = colisiones->begin(); itC != colisiones->end(); itC++) {
-							//DBG("block 4");
-							if ((*itC != this) && haveCollision((*itC), verticesExpandidos)) {
-								//TODO: Aquí suponemos que es un boxCollider
-								//DBG("block 4.5");
-								Hit exito = obtenerObjetoColisionCaja(this, (Box2dCollider*)(*itC));
-								exitos.push_back(exito);
-							}
-							//DBG("block 5");
+			renderable::Line* lineas = gizmoExpandido->getComponent<renderable::Line>();
+			if (lineas != NULL) {
+				lineas->setVertex(verticesExpandidos, 4);
+
+				gizmoExpandido->setUpdatingRender(true);
+
+				////DBG("block 2");
+			
+			}
+		}/**/
+		for (auto it = Entity::entidades[Entity::defaultStack].begin(); it != Entity::entidades[Entity::defaultStack].end(); it++) {
+			if ((*it)->isActive()) {
+				std::vector<Collider*>* colisiones = (*it)->getComponents<Collider>();
+				if (colisiones != NULL) {
+					for (auto itC = colisiones->begin(); itC != colisiones->end(); itC++) {
+						if ((*itC != this) && haveCollision((*itC), verticesExpandidos2)) {
+							//TODO: Aquí suponemos que es un boxCollider
+							collider::Hit exito = obtenerObjetoColisionCaja(this, (Box2dCollider*)(*itC), verticesExpandidos2);
+							exitos.push_back(exito);
 						}
+						//DBG("block 5");
 					}
 				}
+			}
 
-			}/**/
-			/*if (x != tX || y != tY || z != tZ) {
-				cX = tX;
-				cY = tY;
-				cZ = tZ;
-				recalcular();
-			}/**/
-		}
+		}/**/
+		/*if (x != tX || y != tY || z != tZ) {
+			cX = tX;
+			cY = tY;
+			cZ = tZ;
+			recalcular();
+		}/**/
 		return exitos;
 	}
-	Hit Box2dCollider::obtenerObjetoColisionCaja(Box2dCollider* principal, Box2dCollider* secundario) {
-		Hit exito;
+	collider::Hit Box2dCollider::obtenerObjetoColisionCaja(Box2dCollider* principal, Box2dCollider* secundario, float* vertexMain) {
+		collider::Hit exito;
 		exito.object = secundario;
 		exito.distance = std::numeric_limits<float>::infinity();
 		unsigned j = 0; //Cuenta el vertice i
@@ -285,14 +359,14 @@ namespace collider {
 		float distanciaY = principal->cY - secundario->cY;
 		
 		for (unsigned i = 0; i < 4 && exito.collision; i++) {
-			auto [ejeX,ejeY]= getNormal2D(principal->verticesExpandidos[j], principal->verticesExpandidos[j+1],
-				principal->verticesExpandidos[k], principal->verticesExpandidos[k+1]);
+			auto [ejeX,ejeY]= getNormal2D(vertexMain[j], vertexMain[j+1],
+				vertexMain[k], vertexMain[k+1]);
 			j += 3;
 			k += 3;
 			if (k > 9) {
 				k = 0;
 			}
-			auto [minA, maxA] = getMinMax2D(ejeX, ejeY, verticesExpandidos, 4);
+			auto [minA, maxA] = getMinMax2D(ejeX, ejeY, vertexMain, 4);
 			auto [minB, maxB] = getMinMax2D(ejeX, ejeY, secundario->vertices, 4);
 			float desplazamiento= dotProduct2D(ejeX, ejeY ,distanciaX,distanciaY);
 			minA+=desplazamiento;
@@ -321,25 +395,44 @@ namespace collider {
 			}
 			
 		}
-		float distanciaYVertices = principal->vertices[1] - principal->verticesExpandidos[1] + principal->vertices[7] - principal->verticesExpandidos[7];
+		float distanciaYVertices = principal->vertices[1] - vertexMain[1] + principal->vertices[7] - vertexMain[7];
 		//TODO: Corregir calculo de centro expandido cuando la caja esté rotada
 		exito.sX = (exito.vX * exito.distance);
 		exito.sY = (exito.vY * exito.distance)+distanciaYVertices;
 	
 		return exito;
 	}
-	void Box2dCollider::showGizmo(bool show) {
-		if (show) {
+	void Box2dCollider::crearGizmo()	{
+		graphic->setStackTemp(1);
+		gizmo = graphic->drawLineLoop(vertices, 4, 0.f, 0.8f, 0.f, 0.8f, 1);
+		//gizmo->setOnTop(true);
+		gizmo->setParent(entidad);
+		gizmo->setGraphic(graphic);
+		gizmo->setActive(graphic->getGlobal()->showGizmoCollider);
+	}
+	void Box2dCollider::crearGizmoExpandido(){
+		graphic->setStackTemp(1);
+		gizmoExpandido = graphic->drawLineLoop(verticesExpandidos, 4, 1.f, 0.0f, 1.f, 0.8f, 1);
+		//gizmo->setOnTop(true);
+		gizmoExpandido->setParent(entidad);
+		gizmoExpandido->setGraphic(graphic);
+		gizmoExpandido->setActive(graphic->getGlobal()->showGizmoColliderExpand);
+	}
+	void Box2dCollider::showGizmo() {
+		//if (show) {
+			RenderableComponent* rend = entidad->getComponent<RenderableComponent>();
+			renderable::Object* padre = rend->getRenderable();
 			if (gizmo == NULL) {
-				DBG("Creamos el GIZMO");
+				//DBG("Creamos el GIZMO");
 				if (graphic) {
-					gizmo = graphic->drawLineLoop(vertices, 4, 0.f, 0.8f, 0.f, 0.8f, 1);
-					gizmo->setParent(entidad);
-					gizmoExpandido = graphic->drawLineLoop(verticesExpandidos, 4, 1.f, 0.0f, 1.f, 0.8f, 1);
-					
+					crearGizmo();
+					//gizmo->setParent()
 				}
 			}
-		} else {
+			if (gizmoExpandido == NULL) {
+				crearGizmoExpandido();
+			}
+		/* } else {
 			if (gizmo != NULL) {
 				DBG("Borramos el GIZMO");
 				gizmo->removeParent();
@@ -349,6 +442,36 @@ namespace collider {
 				graphic->removeEntity(gizmoExpandido);
 				gizmoExpandido = NULL;
 			}
-		}
+		}/**/
 	}
-}
+
+
+	/**
+	* Función para refrescar los collider //Funtion to refresh the collider
+	*
+	*/
+	void Box2dCollider::refresh()	{
+		//Cogeremos la lineas y las activaremos o desactivaremos en función de la variable global
+
+		if (gizmo == NULL) {
+			crearGizmo();
+		}
+		//Obtener una referencia al renderable de la entidad //Get a reference to the renderable of the entity
+		RenderableComponent* rend = gizmo->getComponent<RenderableComponent>();
+		bool show = graphic->getGlobal()->showGizmoCollider;
+		gizmo->setUpdatingRender(true);
+		gizmo->setActive(show);
+		rend->setActive(show);
+		if (gizmoExpandido == NULL) {
+			//Creamos el gizmo Expandido
+			crearGizmoExpandido();
+		}
+		//Obtener una referencia al renderable de la entidad //Get a reference to the renderable of the entity
+		rend = gizmoExpandido->getComponent<RenderableComponent>();
+		gizmoExpandido->setActive(graphic->getGlobal()->showGizmoColliderExpand);
+		rend->setActive(graphic->getGlobal()->showGizmoColliderExpand);
+		gizmoExpandido->setUpdatingRender(true);
+		
+	}
+
+//}

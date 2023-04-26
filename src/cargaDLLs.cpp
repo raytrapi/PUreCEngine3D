@@ -122,7 +122,9 @@ void CargaDLL::addLibreria(Module::MODULES_TYPE tipo, const char* ruta, const ch
 				(*itr)->reiniciar();
 			}
 		}
-
+		if (noExiste) {
+			libreriasDisponibles[tipo]->push_back(new Libreria(ruta, nombre, tiempo));
+		}
 	}
 	
 }
@@ -130,7 +132,7 @@ void CargaDLL::addLibreria(Module::MODULES_TYPE tipo, const char* ruta, const ch
 bool CargaDLL::cargar(const char* carpeta, const char * raiz) {
 
 	std::filesystem::path ruta=std::filesystem::current_path();
-	utiles::Log::debug(ruta.string());
+	//utiles::Log::debug(ruta.string());
 	
 
 	if(!std::filesystem::exists(carpeta)){
@@ -141,6 +143,7 @@ bool CargaDLL::cargar(const char* carpeta, const char * raiz) {
 	utilidades::Libreria<Module> dll(raiz);
 	bool correcto = true;
 	for (auto& p : std::filesystem::directory_iterator(carpeta)) {
+		//DBG("Fichero %", p.path());
 		correcto &=cargarDLL(p.path(), raizLibrerias);
 	
 	}

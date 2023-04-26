@@ -11,7 +11,7 @@ protected:
 
 private:
 public:
-	Audio();
+
 	~Audio();
 	Transform * transform();
 	bool play(const char* file);

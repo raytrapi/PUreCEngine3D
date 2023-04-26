@@ -17,7 +17,7 @@ namespace renderable {
 		unsigned tipo = 1;
 		
 	public:
-		Line(std::vector<float*> points, float* color, float width = 1.f, unsigned style=1);
+		Line(std::vector<float*> points = {}, float* color = NULL, float width = 1.f, unsigned style = 1);
 		Line(float* points, unsigned countPoints, float* color, float width = 1.f, unsigned style = 1);
 		~Line();
 		Object::TYPE getType() { return Object::TYPE::LINE; };

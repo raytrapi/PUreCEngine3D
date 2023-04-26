@@ -16,7 +16,7 @@ namespace renderable {
 		class Obj {
 		public:
 			static std::vector<Entity*> load(const char* fileName, float directionY = -1.0f);
-			
+			static std::vector<Entity*> load2(const char* fileName, float directionY = -1.0f);
 		};
 	}
 };

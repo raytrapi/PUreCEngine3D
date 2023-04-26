@@ -36,3 +36,8 @@ out/
 .vs/
 sandbox/
 recursos/
+vendors/glad
+vendors/glfw
+vendors/JoltPhysics
+vendors/openal-soft
+vendors/OpenFBX

@@ -51,7 +51,8 @@ class  MotorGL:public modules::graphics::Graphic {
 		void render();
 		void render(void *);
 		void renderInterface() {};
-		void postRender() {};
+		void refresh(int mode) {};
+		void postRender(bool swap = true) {};
 		bool inicializar(void * contexto, double ancho, double alto);
 		char* nombre() { return (char*)"OPENGL 2"; };
 		

@@ -13,7 +13,7 @@ namespace renderable {
 			0.0f, 0.0f, 1.0f, 1.0f,
 			1.0f, 1.0f, 1.0f, 1.0f,
 		};/**/
-		void crearCubo(float l);
+		void crearCubo(float l = 1.0f, float r = 1.0f, float g = 1.0f, float b = 1.0f, float a = 1.0f);
 	public:
 		Cube();
 		Object::TYPE getType() { return Object::TYPE::CUBE; };

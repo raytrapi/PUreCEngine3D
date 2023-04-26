@@ -7,6 +7,7 @@
 #include "../../../utilidades/global/input.h"
 
 class EXPORTAR_COMPONENTE Code : public Component {
+	friend class InterfaceGL;
 	CodeBase* codigoBase = NULL;
 	bool updating = false;
 	
@@ -16,6 +17,7 @@ class EXPORTAR_COMPONENTE Code : public Component {
 protected:
 	void refresh(CodeBase::TYPE_OPERATION type = CodeBase::MOVE) { updating = true; tipo = type; };
 public:
+	Code(Entity* e, modules::graphics::Graphic* g, Component* p = NULL) :Component(e, g,p) {};
 	~Code();
 	template<class T>
 	T* linkClass(void * parent=NULL);
@@ -54,6 +56,8 @@ public:
 		codigoBase->setInput(i); 
 		input = i;
 	}
+	TYPE_COMPONENT componentType() { return CODE; };
+	
 };
 template<class T>
 inline T* Code::linkClass(void* parent) {
@@ -61,11 +65,13 @@ inline T* Code::linkClass(void* parent) {
 	if (std::is_base_of<CodeBase, T>::value) {
 		T* codigo = new T();
 		codigoBase = (CodeBase *)codigo;
-		DBG("Entidad ... ", entidad);
+		codigoBase->init();
+		//DBG("Entidad ... ", entidad);
 		codigoBase->setEntity(entidad);
 		codigoBase->setParent(parent);
 		codigoBase->setInput(g->getInput());
 		codigoBase->setGlobal(g->getGlobal());
+		codigoBase->setGraphic(g);
 		return (T *)codigoBase;
 	}
 	return NULL;

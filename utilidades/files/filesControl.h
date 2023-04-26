@@ -62,7 +62,8 @@ public:
 	static bool existsFolder(const char* path);
 	static bool createFolder(const char* path);
 	static bool stopTimers();
-
+	static std::filesystem::file_time_type getLastTime(const char* path);
+	
 };
 
 

@@ -2,7 +2,7 @@
 #define __BOX_COLLIDER
 #include "../../../components/modulos/collider/collider.h"
 #include "../../../components/src/entity.h"
-namespace collider {
+//namespace collider {
 	class EXPORTAR_UTILIDADES Box2dCollider : public Collider {
 	private:
 		//float* verticesOrigen = NULL;
@@ -18,12 +18,14 @@ namespace collider {
 		float ancho_2;
 		float alto_2;
 		//TODO: Posible punto de obtimizaciòn
-		std::vector<Hit> obtenerObjetosColision();
+		std::vector<collider::Hit> obtenerObjetosColision();
 		//TODO: Mejorara quizás con un puntero
-		Hit obtenerObjetoColisionCaja(Box2dCollider* principal, Box2dCollider *secundario);
+		collider::Hit obtenerObjetoColisionCaja(Box2dCollider* principal, Box2dCollider *secundario, float* vertexMain);
+		void crearGizmo();
+		void crearGizmoExpandido();
 	public:
 
-		Box2dCollider(Entity* object = NULL);
+		Box2dCollider(Entity * entity, modules::graphics::Graphic* g, Component* p=NULL);
 		~Box2dCollider();
 		void setBox(float x, float y, float width, float height);
 		void setBox(float width, float height);
@@ -33,7 +35,7 @@ namespace collider {
 
 		
 
-		std::vector<Hit> getCollisions();
+		std::vector<collider::Hit> getCollisions();
 		
 		/**
 		* Get object that collision
@@ -44,10 +46,12 @@ namespace collider {
 		* @param z float
 		* @return std::vector<Hit> colección de objetos con los que se colisiona ordenados por distancia de menor a mayos
 		**/
-		std::vector<Hit> getCollisionsExpanding(float x, float y, float z);
-		std::vector<Hit> getCollisions(float x, float y, float z);
-		void showGizmo(bool show);
+		std::vector<collider::Hit> getCollisionsExpanding(float x, float y, float z);
+		std::vector<collider::Hit> getCollisions(float x, float y, float z);
+		void showGizmo();
+
+		void refresh();
 
 	};
-};
+//};
 #endif // !__BOX_COLLIDER

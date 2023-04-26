@@ -6,11 +6,12 @@
 #include "../motorExport.h"
 namespace renderable {
 	class EXPORTAR_MODULO_GRAFICO Mesh : public Object {
-		
+		void borrarCaras();
 		
 	public:
 
 		Mesh();
+		~Mesh();
 
 		void setMesh(float* mesh, float* normals = NULL, float* colors=NULL);
 		Object::TYPE getType() { return Object::TYPE::MESH; };

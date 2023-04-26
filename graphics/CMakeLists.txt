@@ -23,9 +23,9 @@ file(GLOB RENDERIZABLES src/renderable/object.cpp
 )
 file(GLOB CARGAMODELOS src/modelos_graficos/model.cpp src/modelos_graficos/obj.cpp src/modelos_graficos/fbx.cpp ../vendors/OpenFBX/src/ofbx.cpp ../vendors/OpenFBX/src/miniz.c)
 file(GLOB COLLIDER src/collider/*.cpp)
-file(GLOB EXTRA src/log/logEntity.cpp)
-# terceros/*/*.cpp
-add_library(motor_grafico SHARED  ${RENDERIZABLES} ${GRAFICO} ${CARGAMODELOS} ${COLLIDER} ${EXTRA})
+#file(GLOB EXTRA src/log/logEntity.cpp)
+# terceros/*/*.cpp 
+add_library(motor_grafico SHARED  ${RENDERIZABLES} ${GRAFICO} ${CARGAMODELOS} ${COLLIDER} )
 set_property(TARGET motor_grafico PROPERTY CXX_STANDARD 20) 
 target_link_libraries(motor_grafico  ${CONAN_LIBS} utils modules components freetype)
 set_target_properties(motor_grafico PROPERTIES

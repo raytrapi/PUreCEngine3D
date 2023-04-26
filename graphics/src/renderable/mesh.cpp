@@ -1,8 +1,23 @@
 #include "mesh.h"
+#include <algorithm>
 #include "../../../components/modulos/renderables/renderable.h"
 renderable::Mesh::Mesh(){
 }
+renderable::Mesh::~Mesh() {
+	borrarCaras();
+}
 
+void renderable::Mesh::borrarCaras() {
+	if (caras != NULL) {
+		for (auto cara : *caras) {
+			for (auto vec : cara) {
+				delete[]vec;
+			}
+		}
+		delete caras;
+	}
+	caras = NULL;
+}
 void renderable::Mesh::setMesh(float* mesh, float* normals, float *colors) {
 	ponerMesh(mesh, normals,colors);
 }
@@ -54,10 +69,12 @@ void renderable::Mesh::setFaces(std::vector<std::vector<int>*>* faces, std::vect
 
 void renderable::Mesh::setTriangles(std::vector<float **>*triangulos,std::vector<float*>* colors, std::vector<float**>* normals, float** uvs, renderable::Object::MODE_COLOR mode) {
 	borrarMesh();
-	modoColor = mode;
 	
+	modoColor = mode;
+	float cara[4] = { 0,0,0,0 };
+	float zMin = 0;
 	numeroVertices = triangulos->size()*3;
-	numCoordenadas = numeroVertices * 12; //3+3+4+2 (3 coordenadas + 3 normales + 4 color + 2 uv
+	numCoordenadas = numeroVertices * 12; //3+3+4+2 (3 coordenadas + 3 normales + 4 color + 2 uv 
 	int numComponentes = numeroVertices * 3;
 	vertices = new float[numComponentes];
 	normales= new float[numComponentes];
@@ -71,9 +88,32 @@ void renderable::Mesh::setTriangles(std::vector<float **>*triangulos,std::vector
 	for (int i = 0; i < triangulos->size(); i++) {
 		//No comprobamos que efectivamente existan al menos 3 coordenadas para acelerar el proceso de carga.
 		float** vertice = triangulos->operator[](i);
+		if (i == 0) {
+			zMin = vertice[0][2];
+			cara[1] = cara[3] = vertice[0][0];
+			cara[0] = cara[2] = vertice[0][1];
+
+		}
 		for (int iV = 0; iV < 3; iV++) {
 			for (int iC = 0; iC < 3; iC++) {
 				vertices[iMalla++] = vertice[iV][iC];
+				if (iC == 0) {
+					if (vertice[iV][iC] > cara[1]) {
+						cara[1] = vertice[iV][iC];
+					}else if (vertice[iV][iC] < cara[3]) {
+						cara[3] = vertice[iV][iC];
+					}
+				}else if (iC == 1) {
+					if (vertice[iV][iC] > cara[0]) {
+						cara[0] = vertice[iV][iC];
+					} else if (vertice[iV][iC] < cara[2]) {
+						cara[2] = vertice[iV][iC];
+					}
+				} else {
+					if (zMin > vertice[iV][iC]) {
+						zMin = vertice[iV][iC];
+					}
+				}
 			}
 		}
 		float normal[3] = { 0.f,0.f,1.f };
@@ -85,7 +125,7 @@ void renderable::Mesh::setTriangles(std::vector<float **>*triangulos,std::vector
 			}
 		} else {
 
-			normal[0] = (vertice[0][1] - vertice[1][1]) * (vertice[0][2] + vertice[1][2]) +
+			/*normal[0] = (vertice[0][1] - vertice[1][1]) * (vertice[0][2] + vertice[1][2]) +
 				(vertice[1][1] - vertice[2][1]) * (vertice[1][2] + vertice[2][2]) +
 				(vertice[2][1] - vertice[0][1]) * (vertice[2][2] + vertice[0][2]);
 			normal[1] = (vertice[0][2] - vertice[1][2]) * (vertice[0][0] + vertice[1][0]) +
@@ -94,6 +134,49 @@ void renderable::Mesh::setTriangles(std::vector<float **>*triangulos,std::vector
 			normal[2] = (vertice[0][0] - vertice[1][0]) * (vertice[0][1] + vertice[1][1]) +
 				(vertice[1][0] - vertice[2][0]) * (vertice[1][1] + vertice[2][1]) +
 				(vertice[2][0] - vertice[0][0]) * (vertice[2][1] + vertice[0][1]);
+			/*normales[iNormales++] = normal[0];
+			normales[iNormales++] = normal[1];
+			normales[iNormales++] = normal[2];
+			normales[iNormales++] = normal[0];
+			normales[iNormales++] = normal[1];
+			normales[iNormales++] = normal[2];
+			normales[iNormales++] = normal[0];
+			normales[iNormales++] = normal[1];
+			normales[iNormales++] = normal[2];/**/ 
+			//Nuevo calculo
+			/*normal[0] = ((vertice[1][2] - vertice[0][2]) * (vertice[2][1] - vertice[0][1])) -
+							((vertice[1][1] - vertice[0][1]) * (vertice[2][2] - vertice[0][2]));
+			normal[1] = ((vertice[1][0] - vertice[0][0]) * (vertice[2][2] - vertice[0][1])) -
+							((vertice[1][2] - vertice[0][2]) * (vertice[2][0] - vertice[0][0]));
+			normal[2] = ((vertice[1][1] - vertice[0][1]) * (vertice[2][0] - vertice[0][0])) -
+							((vertice[1][0] - vertice[0][0]) * (vertice[2][1] - vertice[0][1]));/**/
+			//Normalizo
+			/*float length = std::sqrtf(normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]);
+			normal[0] /= length; 
+			normal[1] /= length;
+			normal[2] /= length;/**/
+			float ux = vertice[1][0] - vertice[0][0];
+			float uy = vertice[1][1] - vertice[0][1];
+			float uz = vertice[1][2] - vertice[0][2];
+
+			// Calcular el vector V
+			float vx = vertice[2][0] - vertice[0][0];
+			float vy = vertice[2][1] - vertice[0][1];
+			float vz = vertice[2][2] - vertice[0][2];
+
+			// Calcular el producto cruz de U y V para obtener la normal
+			/*normal[0] = uy * vz - uz * vy;
+			normal[1] = uz * vx - ux * vz;
+			normal[2] = ux * vy - uy * vx;/**/
+			normal[0] = vy * uz - vz * uy;
+			normal[1] = vz * ux - vx * uz;
+			normal[2] = vx * uy - vy * ux;/**/
+
+			// Normalizar la normal
+			float magnitud = std::sqrt(normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]);
+			normal[0] /= magnitud;
+			normal[1] /= magnitud;
+			normal[2] /= magnitud;
 			normales[iNormales++] = normal[0];
 			normales[iNormales++] = normal[1];
 			normales[iNormales++] = normal[2];
@@ -148,6 +231,17 @@ void renderable::Mesh::setTriangles(std::vector<float **>*triangulos,std::vector
 	if (renderizador) {
 		renderizador->setUpdated(true);
 	}/**/
+
+	//Creamos la única cara que tendremos
+	borrarCaras();
+	
+	caras = new std::vector<std::vector<const float*>>();
+	std::vector<const float*> caraV = std::vector<const float*>();
+	caraV.push_back(new float[] { cara[3], cara[0], zMin });
+	caraV.push_back(new float[] { cara[1], cara[0], zMin });
+	caraV.push_back(new float[] { cara[1], cara[2], zMin });
+	caraV.push_back(new float[] { cara[3], cara[2], zMin });
+	caras->push_back(caraV);
 }
 
 void renderable::Mesh::setObject(std::vector<float*>* vertex, std::vector<int>* indexes, std::vector<float**>* normals, float** color) {

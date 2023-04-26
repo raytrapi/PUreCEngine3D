@@ -10,8 +10,16 @@
 #define M_PI           3.14159265358979323846
 #define M_PI2          1.57079632679489661923
 #define M_2PI          6.28318530717958647692
+//namespace compon {
+namespace modules {
+	namespace engine {
+		extern class Physics;
+	}
+}
+
 namespace collider {
 	extern struct Hit;
+}
 	class EXPORTAR_COMPONENTE Collider : public Component {
 	public:
 		enum TYPE {
@@ -21,10 +29,8 @@ namespace collider {
 		/// <summary>
 		/// Representa el cubo que contiene el objeto
 		/// </summary>
-		float limites[6];
-		float longitud = 0;
 		//std::vector<float *> vertices;
-
+		
 		unsigned numeroVertices;
 		std::vector<std::vector<float*>> caras;
 		bool esCopia = false;
@@ -32,10 +38,13 @@ namespace collider {
 		//virtual void whenChargeEntity();
 		void cargarEntidad();
 		
-
+		//Almacenamos las físicas para que sea más rápido acceder a ellas
+		modules::engine::Physics* fisicas = NULL;
 		static float checkPolygons(float aX, float aY, float* pA, unsigned lengthA, float bX, float bY, float* pB, unsigned lengthB);
 
 	protected:
+		float limites[6];
+		float longitud = 0;
 		float cX, cY, cZ;
 
 		static std::tuple <float, float> getNormal2D(float x1, float y1, float x2, float y2);
@@ -46,9 +55,12 @@ namespace collider {
 		friend class Transform;
 		virtual void recalcular();
 		TYPE tipo;
+
+		void iniciarFisicas();
+		void changePhysics();
 	public:
-		Collider();
-		Collider(Entity* entity);
+		//Collider();
+		Collider(Entity* entity, modules::graphics::Graphic* g, Component * p=NULL);
 		Collider(Collider& c) {
 			//esCopia = true;
 			cX = c.cX;
@@ -60,10 +72,11 @@ namespace collider {
 			for (int i = 0; i < c.numeroVertices; i++) {
 				vertices[i] = new float[3]{ c.vertices[i][0],c.vertices[i][1],c.vertices[i][2] };
 			}*/
-
+			iniciarFisicas();
 		}
 		void setVertices(std::vector<float*>* vertices);
 		void setFaces(std::vector< std::vector<const float*>>* faces);
+		virtual void refresh()=0 ;
 		friend std::ostream& operator<<(std::ostream& os, Collider& c) {
 			os << "Centro (" << c.cX << ", " << c.cY << ", " << c.cZ << ") Radio " << c.longitud;
 			return os;
@@ -79,12 +92,13 @@ namespace collider {
 		TYPE getType() { return tipo; }
 		virtual bool haveCollision(Collider* object) = 0;
 
-		virtual std::vector<Hit> getCollisions() = 0;
-		virtual std::vector<Hit> getCollisionsExpanding(float x, float y, float z) = 0;
-		virtual std::vector<Hit> getCollisions(float x, float y, float z) = 0;
+		virtual std::vector<collider::Hit> getCollisions() = 0;
+		virtual std::vector<collider::Hit> getCollisionsExpanding(float x, float y, float z) = 0;
+		virtual std::vector<collider::Hit> getCollisions(float x, float y, float z) = 0;
 		
 
 	};
+namespace collider{
 	struct EXPORTAR_COMPONENTE Hit {
 		Collider* object=NULL;
 		float distance = 0;

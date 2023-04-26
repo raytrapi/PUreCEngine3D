@@ -5,6 +5,7 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
+
 #include "../../src/renderable/object.h"
 #include <entity.h>
 #include <vector>
@@ -16,6 +17,8 @@ struct EntityGL4 {
 	GLenum _mode;
 	GLuint _vao=0; //Array de vertices -> Apunta a un buffer
 	GLuint _vbo=0; //Buffer de vertices
+	GLuint _vao_id = 0; //Array de vertices para Ids
+	GLuint _vbo_id = 0; //Buffer de vertices para Ids
 	GLuint _ebo=0; //Indice de vertices -> Indica como se lee el buffer
 	std::vector<GLuint> _texts; //Texturas
 	std::vector<std::tuple<GLuint,int,int,void*, GLenum>> _fbos; //Buffer de frames
@@ -27,6 +30,11 @@ public:
 		_object = NULL;
 		//_numeroVertices = object->getVertexNumber();
 	}
+	EntityGL4(GLenum mode, int vertexNumber) {
+		_mode = mode;
+		_object = NULL;
+		_numeroVertices = vertexNumber;
+	};
 	EntityGL4(GLenum mode, renderable::Object* object) {
 		_mode = mode;
 		_object = object;
@@ -55,7 +63,11 @@ public:
 		@return GLuint valor de tipo
 	*/
 	GLuint* getVBO() { return &_vbo; };
+
+	GLuint* getVAO_id() { return &_vao_id; };
+	GLuint* getVBO_id() { return &_vbo_id; };
 	GLuint* getEBO() { return &_ebo; };
+
 	std::vector<std::tuple<GLuint, int, int, void*, GLenum>>* getFBOs() { return &_fbos; };
 	std::vector<GLuint>* getTexts() { return &_texts; };
 	unsigned addText(GLuint idTexture) {
@@ -122,5 +134,23 @@ public:
 		}
 	}
 };
+
+struct LightGL4 {
+	float position[3] = { 0,0,0 };              // Posición de la luz en el espacio //1 más para compesar la structura
+	float ext1;
+	float color[3] = { 0,0,0 };                 // Color de la luz
+	float ext2;
+	float constantAttenuation=0;  // Atenuación constante de la luz
+	float linearAttenuation=0;    // Atenuación lineal de la luz
+	float quadraticAttenuation=0; // Atenuación cuadrática de la luz
+	// Para sombras:
+	int castsShadows=0;           // Indica si la luz emite sombras
+	float shadowMatrix[16] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };   // Matriz de proyección para sombras
+	//sampler2D shadowMap;        // Textura de mapa de sombras
+
+	void setPosition(float x, float y, float z) { position[0] = x; position[1] = y; position[2] = z; };
+	void setColor(float r, float g, float b) { color[0] = r; color[1] = g; color[2] = b; };
+};
+const int NUM_LIGHTS=10;
 
 #endif // !_ENTITY_GL4

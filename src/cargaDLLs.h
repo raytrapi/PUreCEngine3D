@@ -71,7 +71,10 @@ static inline T* CargaDLL::cogerModulo(Module::MODULES_TYPE tipo) {
 template<class T>
 static inline T* CargaDLL::cogerModulo(Module::MODULES_TYPE tipo, const char* nombre) {
 	if (libreriasDisponibles.contains(tipo) && libreriasDisponibles[tipo]->size() > 0) {
+		//DBG("PARA % hay % librerías", tipo, (*(libreriasDisponibles[tipo])).size());
 		for (int i = 0; i < (*(libreriasDisponibles[tipo])).size(); i++) {
+			//DBG("----");
+			//DBG("% == %",nombre, (*(libreriasDisponibles[tipo]))[i]->cogerNombre());
 			if (strcmp(nombre, (*(libreriasDisponibles[tipo]))[i]->cogerNombre()) == 0) {
 				void* ins = (*(libreriasDisponibles[tipo]))[i]->cogerInstancia("./");
 				if (ins != NULL) {

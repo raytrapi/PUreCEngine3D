@@ -2,6 +2,7 @@
 #define _INPUT
 
 #include "../utiles/utilidades.h"
+#include "../timer/timer.h"
 //#include "log.h"
 //#include ""
 #include <string>
@@ -9,12 +10,48 @@
 #include <vector>
 #include <list>
 #include <functional>
+
+extern class Input;
 class Tecla {
 	bool pulsada = false;
+	bool sinEsperar = true;
+	float tiempoPulsada = 0;
+	float tiempoRepeticion = 0.1f;  //Segundos
+	float tiempoEspera = 0.5f; //Segundos
+	friend Input;
+	void setDelay(float t) { tiempoEspera = t; };
+	void setRepeat(float t) { tiempoRepeticion = t; };
+	void resetTime(){ tiempoEspera = 0.5f; tiempoRepeticion = 0.1f;}
 public:
-	bool estaPulsada() { return pulsada; };
-	void pulsar() { pulsada = true; };
-	void soltar() { pulsada = false; };
+	bool estaPulsada(bool always = true) {
+		if (always) { 
+			return pulsada; 
+		} else if (pulsada){
+			if (tiempoPulsada == 0) {
+				tiempoPulsada += Time::deltaTime();
+				return true;
+			} else if ((!sinEsperar && tiempoPulsada >= tiempoRepeticion) || (sinEsperar && tiempoPulsada>=tiempoEspera)) {
+				//tiempoPulsada += Time::deltaTime();
+				if (sinEsperar) {
+					tiempoPulsada -= tiempoEspera;
+					sinEsperar = false;
+				} else {
+					tiempoPulsada -= tiempoRepeticion;
+					//return false;
+				}
+				return true;
+			} else {
+				tiempoPulsada += Time::deltaTime();
+				return false;
+			}
+		} else { 
+			return false; 
+		} 
+	};
+	void pulsar() { 
+		pulsada = true;  };
+	void soltar() { 
+		pulsada = false; tiempoPulsada = 0; sinEsperar =true;};
 };
 enum class EXPORTAR_UTILIDADES Key {
 	
@@ -35,6 +72,8 @@ class EXPORTAR_UTILIDADES Input {
 	static std::map<Key,Tecla*> presionadas;
 	std::vector<std::tuple<Key, std::function<void(Key)>, bool>> controlTeclasPulsadas;
 	//static Input* instancia;
+	static float xMouse;
+	static float yMouse;
 	
 public:
 	/*Input() {
@@ -52,8 +91,11 @@ public:
 	void setInstance(Input* i) { instancia = i; };/**/
 	bool isKeyDown(Key key);
 	bool isKeyUp(Key key);
-	bool isKeyPress(Key key);
+	bool isKeyPress(Key key, bool always=true);
 	void onKeyPress(Key key, std::function<void(Key)>);
+	void setDelayTime(Key key, float time);
+	void setRepeatTime(Key key, float time);
+	void resetTime(Key key);
 	static void setKeyDown(unsigned int key, long extra);
 	static void setKeyUp(unsigned int key, long extra);
 	void resetKeyPress();
@@ -61,6 +103,9 @@ public:
 	void resetAllKeysPress() { 
 		controlTeclasPulsadas.clear(); 
 	}
+	/**Mouse**/
+	std::tuple<float, float, float> getMouse3DPosition(float xScreen=0, float yScreen=0, bool modeEditor = false);
+	static void setMousePosition(float x, float y, float width, float height, float xScreen=0, float yScreen=0);
 	//static void onPress(void (*f)(Key));
 };
 /*Input* Input::instancia;
