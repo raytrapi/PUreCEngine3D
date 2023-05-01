@@ -41,3 +41,4 @@ vendors/glfw
 vendors/JoltPhysics
 vendors/openal-soft
 vendors/OpenFBX
+build/
