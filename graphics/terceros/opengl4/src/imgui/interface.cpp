@@ -149,8 +149,8 @@ void InterfaceGL::render(){
     ImGui::PopStyleVar(2);
     ImGui::Columns(4);
     //Añadimos Frames Por Segundo
-    auto [xM, yM, zM] = graphic->getInput()->getMouse3DPosition(posicionVentana.x, posicionVentana.y+ altoCabecera, true);
-	 ImGui::Text("FPS: %.1f  [%.1f,%.1f]   [%f]", ImGui::GetIO().Framerate, xM,yM,graphic->getPixel_id(xM, yM));
+    //auto [xM, yM, zM] = graphic->getInput()->getMouse3DPosition(posicionVentana.x, posicionVentana.y+ altoCabecera, true);
+	 ImGui::Text("FPS: %.1f  [%.1f,%.1f]", ImGui::GetIO().Framerate);
     ImGui::NextColumn();
     ImGui::Text("DT: %f", global->deltaTime);
     //ImGui::Text("FPS: %f", global->fps);
@@ -399,19 +399,19 @@ void InterfaceGL::render(){
           auto luz = entidadSeleccionada->getComponent<LightComponent>();
           if (luz) {
              ImVec2 ventana = ImGui::GetContentRegionAvail();//GetLargestConsoleWindowSize();
-             if (ventana.x != ventanaJuego.x || ventana.y != ventanaJuego.y) {
+             /*if (ventana.x != ventanaJuego.x || ventana.y != ventanaJuego.y) {
                 ventanaJuego.x = ventana.x;
                 ventanaJuego.y = ventana.y;
                 //graphic->setSize((unsigned int)ventana.x, (unsigned int)ventana.y);
 
-             }
+             }/**/
              //ventana.x += ImGui::GetScrollX();
              //ventana.y += 20;
              ImVec2 posicion = ImVec2(0, 25);
              ImGui::SetCursorPos(ImVec2(posicion.x, posicion.y));
              GLuint texturaId = idTexturaIconos;
              //ImGui::Image((void*)(intptr_t)luz->getTexture(), { ventanaJuego.x ,ventanaJuego.y }, ImVec2(0, 1), ImVec2(1, 0));
-             ImGui::Image((void*)(intptr_t)luz->profundidadTextura2D_DBG, { ventanaJuego.x ,ventanaJuego.y }, ImVec2(0, 1), ImVec2(1, 0));
+             ImGui::Image((void*)(intptr_t)luz->profundidadTextura2D_DBG, { ventana.x ,ventana.y }, ImVec2(0, 1), ImVec2(1, 0));
              
           }
        }
@@ -424,19 +424,11 @@ void InterfaceGL::render(){
        //Miramos si tiene luces
     
    ImVec2 ventana = ImGui::GetContentRegionAvail();//GetLargestConsoleWindowSize();
-   if (ventana.x != ventanaJuego.x || ventana.y != ventanaJuego.y) {
-      ventanaJuego.x = ventana.x;
-      ventanaJuego.y = ventana.y;
-      //graphic->setSize((unsigned int)ventana.x, (unsigned int)ventana.y);
-
-   }
-   //ventana.x += ImGui::GetScrollX();
-   //ventana.y += 20;
    ImVec2 posicion = ImVec2(0, 25);
    ImGui::SetCursorPos(ImVec2(posicion.x, posicion.y));
    //GLuint texturaId = idTexturaIconos;
    //ImGui::Image((void*)(intptr_t)luz->getTexture(), { ventanaJuego.x ,ventanaJuego.y }, ImVec2(0, 1), ImVec2(1, 0));
-   ImGui::Image((void*)(intptr_t)graphic->getTextureId(), {ventanaJuego.x ,ventanaJuego.y}, ImVec2(0, 1), ImVec2(1, 0));
+   ImGui::Image((void*)(intptr_t)graphic->getTextureId(), { ventana.x ,ventana.y}, ImVec2(0, 1), ImVec2(1, 0));
     ImGui::End();
 
     //ACCIONES DE MENU
@@ -517,6 +509,27 @@ void InterfaceGL::mostrarView(){
    GLuint texturaId = idTexturaIconos;
    //ImGui::Image((void*)(intptr_t)idTexturaIconos , { ventanaJuego.x ,ventanaJuego.y }, ImVec2(0, 1), ImVec2(1, 0));
    ImGui::Image((void*)(intptr_t)graphic->getImageFrame(), { ventanaJuego.x ,ventanaJuego.y}, ImVec2(0, 1), ImVec2(1, 0));
+
+#ifdef EDITOR
+   if (ImGui::IsWindowHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left))  {
+      auto [xM, yM, zM] = graphic->getInput()->getMouse3DPosition(posicionVentana.x, posicionVentana.y + altoCabecera, true);
+      int idEntidad = graphic->getPixel_id(xM, yM, 0);
+      //Buscamos la entidad
+      bool noEncontrada = true;
+      auto entidades = Entity::getEntities();
+      auto itrE = entidades.begin();
+      while (itrE != entidades.end() && noEncontrada) {
+         if ((*itrE)->id == idEntidad) {
+            noEncontrada = false;
+            entidadSeleccionada = (*itrE);
+            node_clicked = idEntidad;
+            cambioEntidad = true;
+         }
+         itrE++;
+      }
+   }
+#endif
+
    ImGui::End();
    ImGui::PopStyleVar(2);
 }

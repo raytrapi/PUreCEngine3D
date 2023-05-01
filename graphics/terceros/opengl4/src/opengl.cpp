@@ -68,40 +68,48 @@ void MotorGL::iniciar() {
       glGenTextures(1, &texture_id);
       glBindTexture(GL_TEXTURE_2D, texture_id);
       //glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, widthFrameBuffer, heightFrameBuffer, 0, GL_R32F, GL_UNSIGNED_BYTE, NULL);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthFrameBuffer, heightFrameBuffer, 0, GL_FLOAT, GL_UNSIGNED_BYTE, NULL);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glBindTexture(GL_TEXTURE_2D, 0);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthFrameBuffer, heightFrameBuffer, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);//TODO: Que pasa en los bordes
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_id, 0);
-
+      glBindTexture(GL_TEXTURE_2D, 0);
+      /**/
       glGenRenderbuffers(1, &depthBuffer_id);
       glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer_id);
       glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, widthFrameBuffer, heightFrameBuffer);
       glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer_id);
 
 
-      glGenRenderbuffers(1, &rbo_id);
+      /*glGenRenderbuffers(1, &rbo_id);
       glBindRenderbuffer(GL_RENDERBUFFER, rbo_id);
       glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, widthFrameBuffer, heightFrameBuffer);
 
-      glGenRenderbuffers(1, &renderbuffer_id);
+      /*glGenRenderbuffers(1, &renderbuffer_id);
       glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer_id);
       glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, widthFrameBuffer, heightFrameBuffer);
-      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, renderbuffer_id);
+      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT , GL_RENDERBUFFER, renderbuffer_id);
+      /**/
+
+      glBindRenderbuffer(GL_RENDERBUFFER, 0);
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
    }
 #endif
 }
-float MotorGL::getPixel_id(int x, int y) {
-   float valor = 0;
-   /*glBindFramebuffer(GL_FRAMEBUFFER, fbo_id);
-   glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer_id);
-   glReadBuffer(GL_COLOR_ATTACHMENT0);
-   glReadPixels(x, y, 1, 1, GL_RED, GL_FLOAT, &valor);
-   glBindRenderbuffer(GL_RENDERBUFFER, 0);
+int MotorGL::getPixel_id(int x, int y, int channel) {
+   unsigned char valor[3] = { 0,0,0 };
+   unsigned int ch = GL_RED+channel;
+   
+   glBindFramebuffer(GL_FRAMEBUFFER, fbo_id);
+   //glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer_id);
+   //glReadBuffer(GL_COLOR_ATTACHMENT0);
+   glReadPixels(x, Screen::getHeight()-y, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &valor);
+
+   //glBindRenderbuffer(GL_RENDERBUFFER, 0);
    glBindFramebuffer(GL_FRAMEBUFFER, 0);/**/
-   glBindTexture(GL_TEXTURE_2D, textureColorBuffer);// texture_id);
-   glReadPixels(x, y, 1, 1, GL_RED, GL_FLOAT, &valor);
-   return valor;
+   //glBindTexture(GL_TEXTURE_2D, texture_id);
+   //glReadPixels(x, y, 1, 1, ch, GL_FLOAT, &valor);
+   //return valor[0];
+   return ((valor[2] << 16) | (valor[1] << 8) | valor[0]);
 }
 void MotorGL::destruir() {
    if (points != NULL) {
@@ -156,67 +164,30 @@ void MotorGL::render(void* rederizables) {
    }
     //glViewport(0, 0, Screen::getWidth()/2, Screen::getHeight()/2);
    renderFinal();
-
-    
-    //Añadimos el menú
-    /*nk_glfw3_new_frame();
-    struct nk_rect area = nk_rect(0, Screen::getHeight()+100, Screen::getWidth(), 150);
-     nk_window_set_bounds(ctx, "Log", area);
-    if (nk_begin(ctx, "Log", area,0)) {
-        nk_layout_row_dynamic(ctx, 150, 1);
-        nk_label(ctx, "Hola sdfjaslñ jlfj aslfj sldfjaslñfjañsldfkj sadlfkjslñ fjalñskfj asñlkfjasñdlkfjas dfjsñdlkfjasñlkfj asldfjaslkdfj slkdfjlskfj lsjfñal skdfjslfdjsl kfjsldkfjñs lakdfj slñkfj asñlkdfjasñlkdfjasl kdjf lskfdjsldj lskj ", NK_TEXT_LEFT);
-    }
-	nk_end(ctx);
-    nk_glfw3_render(NK_ANTI_ALIASING_ON);/**/
-    
-    // draw points 0-3 from the currently bound VAO with current in-use shader
-    //glDrawArrays(GL_TRIANGLES, 0, 3);
-    // put the stuff we've been drawing onto the display
-    
-    //glDepthMask(GL_TRUE);
-    //glDisable(GL_DEPTH_TEST);
-
-    /*float* vertices=new float[18];
-    glBufferSubData(0, 0, 18, vertices);
-    if (derecha) {
-        if (vertices[0] < 1) {
-            vertices[0] += 0.1;
-        } else {
-            derecha = false;
-        }
-    } else {
-        if (vertices[0] > -1) {
-            vertices[0] -= 0.1;
-        } else {
-            derecha = true;
-        }
-    }
-    delete[]vertices;*/
-    if (withFrameBuffer) {
-       if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-          DBG("ERROR::FRAMEBUFFER:: No se ha completao el Framebuffer");
-       glBindFramebuffer(GL_FRAMEBUFFER, 0);
-       glBindRenderbuffer(GL_RENDERBUFFER, 0);
-       glBindTexture(GL_TEXTURE_2D, 0);
-    }
+   if (withFrameBuffer) {
+      if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+         DBG("ERROR::FRAMEBUFFER:: No se ha completao el Framebuffer");
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      glBindRenderbuffer(GL_RENDERBUFFER, 0);
+      glBindTexture(GL_TEXTURE_2D, 0);
+   }
 #ifdef EDITOR
     glBindFramebuffer(GL_FRAMEBUFFER, fbo_id);
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glReadBuffer(GL_COLOR_ATTACHMENT0);
     glBindTexture(GL_TEXTURE_2D, texture_id);
-    //glClear(GL_DEPTH_BUFFER_BIT);
-    //glClear(GL_DEPTH_BUFFER_BIT);
     
     if (conCambioTamaño) {
        conCambioTamaño = false;
-       glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, widthFrameBuffer, heightFrameBuffer, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthFrameBuffer, heightFrameBuffer, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
        glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer_id);
        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, widthFrameBuffer, heightFrameBuffer);
-       glBindRenderbuffer(GL_RENDERBUFFER, rbo_id);
-       glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, widthFrameBuffer, heightFrameBuffer);
-       glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer_id);
-       glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, widthFrameBuffer, heightFrameBuffer);
-       glViewport(0, 0, widthFrameBuffer, heightFrameBuffer);
+       //glBindRenderbuffer(GL_RENDERBUFFER, rbo_id);
+       //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, widthFrameBuffer, heightFrameBuffer);
+       //glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer_id);
+       //glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, widthFrameBuffer, heightFrameBuffer);
+       //glViewport(0, 0, widthFrameBuffer, heightFrameBuffer);
+       
     }
     //TODO: AQUÍ controlar que no estemos jugando
     renderFinal(2, true);
@@ -340,13 +311,14 @@ void MotorGL::renderFinal(unsigned int idShader, bool modeId){
             }/**/
             //int shadersCompiledCount = entidades[i].getObject()->getShadersCompiled()->size();
             int shadersCompiledCount = itr->second->getShadersPrograms()->size();
+            unsigned int ps = 0;
             if (shadersCompiledCount > idShader) {
                //for (int j = 0; j < shadersCompiledCount; j++) {
-                  short int ps = itr->second->getShadersPrograms()->operator[](idShader);
+                  ps = itr->second->getShadersPrograms()->operator[](idShader);
                   glUseProgram(ps);
                //}
             } else {
-               return;
+               continue;
             }
 
             GLuint vao = *(itr->second->getVAO());
@@ -381,6 +353,11 @@ void MotorGL::renderFinal(unsigned int idShader, bool modeId){
                }
                break;
             }
+#ifdef EDITOR
+            if (glGetError() != GL_NO_ERROR) {
+               EntityGL4::checkCompileErrors(ps, "PROGRAM");
+            }
+#endif
             glBindVertexArray(0);
             //}
             /*glEnableVertexAttribArray(0);
@@ -714,9 +691,14 @@ const byte* MotorGL::loadShader(const char* path) {
     return (const byte*)textUTF8;
 }/**/
 
-int MotorGL::loadShader(const char* path, Graphics::Shader::TYPE_SHADER type) {
+unsigned int MotorGL::loadShader(const char* path, Graphics::Shader::TYPE_SHADER type) {
+
+   //Buscamos si ya está el shader compilado
+    GLuint s = obtenerShader(path);
+    if (s != 0) {
+       return s;
+    }
     const char* data = (const char*)loadShader(path);
-    GLuint s = 0;
     std::string tipoShader = "GEOMETRY";
     if (data != 0) {
       switch (type) { 
@@ -743,10 +725,44 @@ int MotorGL::loadShader(const char* path, Graphics::Shader::TYPE_SHADER type) {
     if (data) {
         delete[] data;
     }
-    
+    shadersCompilados.push_back({ path,s });
     return (int)s;
 }
-void MotorGL::reloadShader(const char* path, Graphics::Shader::TYPE_SHADER type, int id, int idProgram) {
+GLuint MotorGL::obtenerShader(const char* ruta){
+   for (auto s : shadersCompilados) {
+      if(strcmp(std::get<0>(s),ruta)==0){
+         return std::get<1>(s);
+      }
+   }
+   return 0;
+}
+GLuint MotorGL::obtenerShaderProgram(std::vector < GLuint> shaders) {
+   for (auto ps : shadersProgramsCompilados) {
+      //Averiguamos si ya tenemos un shader
+      bool esValido = true;
+      if (std::get<0>(ps).size() == shaders.size()) {
+         auto itr = std::get<0>(ps).begin();
+         while (esValido && itr != std::get<0>(ps).end()) {
+            bool noEsta = true;
+            auto itr2 = shaders.begin();
+            while(noEsta && itr2!=shaders.end()){
+               noEsta = *itr != *itr2;
+               itr2++;
+            }
+            itr++;
+            esValido = !noEsta;
+         }
+         if (esValido) {
+            return std::get<1>(ps);
+         }
+      }
+   }
+   return 0;
+}
+
+void MotorGL::reloadShader(const char* path, Graphics::Shader::TYPE_SHADER type, unsigned int id, unsigned int idProgram) {
+
+   
    const char* data = (const char*)loadShader(path);
    
    //GLuint s = 0;
@@ -764,19 +780,24 @@ void MotorGL::reloadShader(const char* path, Graphics::Shader::TYPE_SHADER type,
       delete[] data;
    }
 }
-int MotorGL::compileShader(std::vector<short>* ids) {
-    
-    GLuint ps = glCreateProgram();
-    GLuint temporal = 0;
-    for (auto itr = ids->begin(); itr != ids->end(); itr++) {
-       glAttachShader(ps, *itr);
-    }
-    glLinkProgram(ps);
-    DBG("Shader compilado %", ps);
-    return ps;
+unsigned int MotorGL::compileShader(std::vector<unsigned int>* ids) {
+   //Cambiar esto. Los objetos que utilizan distintos valores para el uniform no deberían compatir
+   //GLuint ps = obtenerShaderProgram(*ids);
+   GLuint ps = 0;
+   if (ps == 0) {
+      ps = glCreateProgram();
+      GLuint temporal = 0;
+      for (auto itr = ids->begin(); itr != ids->end(); itr++) {
+         glAttachShader(ps, *itr);
+      }
+      glLinkProgram(ps);
+      shadersProgramsCompilados.push_back({ *ids,ps });
+      //DBG("Shader compilado %", ps);
+   }
+   return ps;
 }
 
-int MotorGL::compileShader(int ps) {
+unsigned int MotorGL::compileShader(unsigned int ps) {
     /*int longitud = object->getShaders()->size();
     GLuint temporal = 0;
     if (longitud > 0) {
@@ -791,8 +812,8 @@ int MotorGL::compileShader(int ps) {
     
     return ps;
 }
-int MotorGL::compileShader(std::vector<short>* shadersId, void* entity) {
-   int id= compileShader(shadersId);
+unsigned int MotorGL::compileShader(std::vector<unsigned int>* shadersId, void* entity) {
+   unsigned int id= compileShader(shadersId);
    /*bool noEncontre = true;
    for (auto itr = misEntidades.begin(); itr != misEntidades.end() && noEncontre; itr++) {
       if (itr->first == entity) {
@@ -807,7 +828,7 @@ int MotorGL::compileShader(std::vector<short>* shadersId, void* entity) {
    }/**/
    return id;
 }
-int MotorGL::compileShader(int ps, void* entity) {
+unsigned int MotorGL::compileShader(unsigned int ps, void* entity) {
    int id = compileShader(ps);
    return id;
 }
@@ -1249,7 +1270,7 @@ void MotorGL::updateEntityMESH(RenderableComponent* render, EntityGL4* entidad, 
             vertices_id[j_id++] = vectorMalla[k];
             vertices_id[j_id++] = vectorMalla[k + 1];
             vertices_id[j_id++] = vectorMalla[k + 2];
-            vertices_id[j_id++] = entity->id+200;
+            vertices_id[j_id++] = entity->id;
 #endif
 
             k += 3;
@@ -1282,7 +1303,7 @@ void MotorGL::updateEntityMESH(RenderableComponent* render, EntityGL4* entidad, 
 
          //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *ebo);
          //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
+          
          //TODO: Modificar para que se adapte al shader que toque
          int parametros = 12;
          glEnableVertexAttribArray(0);

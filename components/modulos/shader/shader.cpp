@@ -17,11 +17,11 @@ namespace graphics {
 		return shadersData.size();
 	}
 
-	const Shader* Shader::getShader(int id) {
+	const Shader* Shader::getShader(unsigned int id) {
 		return shadersData[id];
 	}
 
-	int Shader::loadShader(const char* path, Graphics::Shader::TYPE_SHADER type) {
+	unsigned int Shader::loadShader(const char* path, Graphics::Shader::TYPE_SHADER type) {
 		if (shadersPathId.find(path) == shadersPathId.end()) {
 			int id = Module::get<modules::graphics::Graphic>()->loadShader(path, type);
 			addShader(path, id, type);
@@ -30,13 +30,13 @@ namespace graphics {
 			return shadersPathId[path];
 		}
 	}
-	void Shader::reloadShader(const char* path, Graphics::Shader::TYPE_SHADER type, int idShader, int idProgram) {
+	void Shader::reloadShader(const char* path, Graphics::Shader::TYPE_SHADER type, unsigned int idShader, unsigned int idProgram) {
 		Module::get<modules::graphics::Graphic>()->reloadShader(path, type, idShader, idProgram);
 	}
 
-	int Shader::compileShader() {
+	unsigned int Shader::compileShader() {
 		modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
-		int id = g->compileShader(getShadersId(0), entidad);
+		unsigned int id = g->compileShader(getShadersId(0), entidad);
 		shadersCompiled.push_back(id); //Guardamos el id ¿Es realemente necesario?
 		std::get<1>(shadersStack[0]) = id;
 		//Le indicamos al componente gráfico que tenemos una nueva compilación de shaders
@@ -44,7 +44,7 @@ namespace graphics {
 		compilado = true;
 		return id;
 	}
-	std::vector<short> Shader::compileShaders() {
+	std::vector<unsigned int> Shader::compileShaders() {
 		//std::vector<int> ids;
 		modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
 		int id = g->compileShader(getShadersId(0), entidad);
@@ -60,28 +60,28 @@ namespace graphics {
 		compilado = true;
 		return shadersCompiled;
 	}
-	int Shader::compileShader(int id) {
+	unsigned int Shader::compileShader(unsigned int id) {
 		modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
 		g->compileShader(id, entidad);
 		compilado = true;
 		return id;
 	}
 
-	int Shader::addShader(const char* path, unsigned int id, Graphics::Shader::TYPE_SHADER type) {
+	unsigned int Shader::addShader(const char* path, unsigned int id, Graphics::Shader::TYPE_SHADER type) {
 		int idS = addShader(id, type);
 		if (idS > 0) {
 			shadersPathId[path] = id;
 		}
 		return idS;
 	}
-	int Shader::addShader(const char* path, unsigned int id, Graphics::Shader::TYPE_SHADER type, const byte* data, int count) {
+	unsigned int Shader::addShader(const char* path, unsigned int id, Graphics::Shader::TYPE_SHADER type, const byte* data, int count) {
 		int idS = addShader(id, type,data, count);
 		if (idS > 0) {
 			shadersPathId[path] = id;
 		}
 		return idS;
 	}
-	int Shader::addShader(const char* path, unsigned int id, Graphics::Shader::TYPE_SHADER type, const char* data, int count) {
+	unsigned int Shader::addShader(const char* path, unsigned int id, Graphics::Shader::TYPE_SHADER type, const char* data, int count) {
 		int idS = addShader(id, type, data, count);
 		if (idS > 0) {
 			shadersPathId[path] = id;
@@ -89,13 +89,13 @@ namespace graphics {
 		return idS;
 	};
 
-	int Shader::addShader(unsigned int id, Graphics::Shader::TYPE_SHADER type) {
+	unsigned int Shader::addShader(unsigned int id, Graphics::Shader::TYPE_SHADER type) {
 		shadersId.push_back(id);
 		stackShader(NULL, id, type);
 		return shadersId.size();
 	}
 
-	int Shader::addShader(unsigned int id, Graphics::Shader::TYPE_SHADER type, const byte* data, int count) {
+	unsigned int Shader::addShader(unsigned int id, Graphics::Shader::TYPE_SHADER type, const byte* data, int count) {
 		if (type != Graphics::Shader::TYPE_SHADER::COMPILE) {
 			Shader* s = new Shader(entidad, graphic);
 			s->cargar(id, type, data, count);
@@ -110,14 +110,14 @@ namespace graphics {
 		return 0;
 	}
 
-	int Shader::addShader(unsigned int id, Graphics::Shader::TYPE_SHADER type, const char* data, int count) {
+	unsigned int Shader::addShader(unsigned int id, Graphics::Shader::TYPE_SHADER type, const char* data, int count) {
 		return addShader(id, type, (const byte*)data, count);
 	}/**/
-	void Shader::stackShader(Shader* s, short int id, Graphics::Shader::TYPE_SHADER type) {
+	void Shader::stackShader(Shader* s, unsigned int id, Graphics::Shader::TYPE_SHADER type) {
 		//Organizamos los shaders para que se agrupen en vertex, fragment y geometry
 			//TODO: Esto puede ser lento, habría que revisarlo en el futuro
 		if (shadersStack.size() == 0) {
-			shadersStack[0] = { {type},0,{(short)id } };
+			shadersStack[0] = { {type},0,{(unsigned int)id } };
 		} else {
 			bool existe=false;
 			for (auto shaders : shadersStack) {
@@ -138,23 +138,23 @@ namespace graphics {
 				existe = false;
 			}
 			if (!existe) {
-				shadersStack[shadersStack.size()] = { {type},0,{(short)id } };
+				shadersStack[shadersStack.size()] = { {type},0,{(unsigned int)id } };
 			}
 		}
 	}
 	std::vector<Shader*>* Shader::getShaders() {
 		return &shadersData;
 	}
-	std::vector<short>* Shader::getShadersId(int idStack) {
+	std::vector<unsigned int>* Shader::getShadersId(int idStack) {
 		//return &shadersId;
 		//TODO: Lo idel sería que el sistema compruebe que no estemos accediendo fuera de los elementos del array. Por eficiencia lo dejamos en manos del desarrollador.
 		return &(std::get<2>(shadersStack[idStack]));
 	}
-	std::vector<short int>* Shader::getShadersCompiled() {
+	std::vector<unsigned int>* Shader::getShadersCompiled() {
 		return &shadersCompiled;
 	}
 	
-	void Shader::cargar(short int id, Graphics::Shader::TYPE_SHADER type, const byte*& data, int count) {
+	void Shader::cargar(unsigned int id, Graphics::Shader::TYPE_SHADER type, const byte*& data, int count) {
 		idS = id;
 		tipo = type;
 		codigo = new byte[count];
@@ -169,7 +169,7 @@ namespace graphics {
 		return tipo;
 	}/**/
 
-	short int Shader::getId() {
+	unsigned int Shader::getId() {
 		return idS;
 	}
 //std::map<const char*, short int> Shader::shadersPathId;

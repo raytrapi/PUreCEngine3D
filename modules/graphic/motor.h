@@ -235,7 +235,8 @@ namespace modules {
 			void setFrameBuffer(bool set) { withFrameBuffer = set; }
 			unsigned int getImageFrame() { return textureColorBuffer; }
 			bool changeSizeWindow = false;
-			void setSize(unsigned int w, unsigned int h) {changeSizeWindow = true;widthFrameBuffer = w;heightFrameBuffer = h; Screen::setDimension(w, h); }
+			void setSize(unsigned int w, unsigned int h) {
+				changeSizeWindow = true;widthFrameBuffer = w;heightFrameBuffer = h; Screen::setDimension(w, h); }
 			void setPhysics(engine::Physics* physics) { fisicas = physics; fisicas->setEntities(entity); fisicas->setGlobal(global); };
 			engine::Physics* getPhysics() { return fisicas; };
 
@@ -268,12 +269,12 @@ namespace modules {
 			virtual void removeAll();
 			/*virtual void newEntity(TYPE_ENTITY type, renderable::Object * object) {};*/
 			virtual const byte* loadShader(const char* path) { return 0; };
-			virtual int loadShader(const char* path, Graphics::Shader::TYPE_SHADER type) { return 0; };
-			virtual void reloadShader(const char* path, Graphics::Shader::TYPE_SHADER type,int idShader, int idProgram) { };
-			virtual int compileShader(std::vector<short>*) { return 0; };
-			virtual int compileShader(int ps) { return 0; };
-			virtual int compileShader(std::vector<short>*, void* entity) { return 0; }; 
-			virtual int compileShader(int ps, void* entity) { return 0; };
+			virtual unsigned int loadShader(const char* path, Graphics::Shader::TYPE_SHADER type) { return 0; };
+			virtual void reloadShader(const char* path, Graphics::Shader::TYPE_SHADER type, unsigned int idShader, unsigned int idProgram) { };
+			virtual unsigned int compileShader(std::vector<unsigned int>*) { return 0; };
+			virtual unsigned int compileShader(unsigned int ps) { return 0; };
+			virtual unsigned int compileShader(std::vector<unsigned int>*, void* entity) { return 0; };
+			virtual unsigned int compileShader(unsigned int ps, void* entity) { return 0; };
 
 
 			void addOnFocus(void(*callback)(bool));
@@ -319,7 +320,7 @@ namespace modules {
 			virtual void renderShadowMap(LightComponent *ligth, unsigned int &depthFBO, unsigned int &depthTexture2D, const unsigned int widthTexture2D, const unsigned int heightTexture2D, TYPE_SHADOW_MAP type) {};
 			unsigned int getTextureId() { return texture_id; }
 
-			virtual float getPixel_id(int x, int y) { return 0; };
+			virtual int getPixel_id(int x, int y, int channel=0) { return 0; };
 		};
 
 		

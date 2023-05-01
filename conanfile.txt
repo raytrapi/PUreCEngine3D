@@ -3,6 +3,7 @@ libpng/1.6.37
 glfw/3.3.7
 #imgui/1.89.2
 imgui/cci.20230105+1.89.2.docking
+imguizmo/cci.20210223
 openal/1.21.1
 joltphysics/2.0.1
 
