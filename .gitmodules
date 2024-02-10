@@ -1,6 +1,6 @@
 [submodule "vendors/imgui-node-editor"]
 	path = vendors/imgui-node-editor
 	url = https://github.com/thedmd/imgui-node-editor
-[submodule "freetype"]
+[submodule "vendors/freetype"]
 	path = vendors/freetype
 	url = https://gitlab.freedesktop.org/freetype/freetype.git
