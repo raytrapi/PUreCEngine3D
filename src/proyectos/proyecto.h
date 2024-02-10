@@ -8,6 +8,8 @@
 #include <fstream>
 #include <filesystem>
 #include <compile.h>
+#include "../../utilidades/global/global.h"
+#include "../../components/src/entity.h"
 class Proyecto {
 	static std::map<std::string, std::string> parametros;
 	static std::map<std::string, std::string> conf;
@@ -21,6 +23,7 @@ public:
 	static const char* cogerRutaCompilacionProyecto();
 	static const char* cogerNombreProyecto();
 	static bool estaCargado();
-
+	static void guardarEstado(Global* global);
+	static void restaurarEstado(Global* global);
 };
 #endif // !__PROYECTO

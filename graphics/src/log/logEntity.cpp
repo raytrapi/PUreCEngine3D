@@ -1,6 +1,7 @@
 #include "logEntity.h"
 namespace utiles {
 	void LogEntity::escribirVirtual(std::string& s, utiles::Log::NIVEL nivel) {
+		
 		std::time_t ahora = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 
 

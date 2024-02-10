@@ -6,11 +6,19 @@ void Compile::buscarCompilador() {
 	//PROBAMOS VS19
 	HKEY clave;
 	bool noExiste = true;
-	LONG respuesta = RegOpenKeyEx(HKEY_CLASSES_ROOT, "VisualStudio.DTE.17.0\\CLSID", 0, KEY_READ, &clave);
+	LONG respuesta;
+	/*respuesta = RegOpenKeyEx(HKEY_CLASSES_ROOT, "VisualStudio.DTE.17.6\\CLSID", 0, KEY_READ, &clave);
 	bool correcto = respuesta == ERROR_SUCCESS;
 	if (!correcto) {
 		noExiste = respuesta == ERROR_FILE_NOT_FOUND;
-	}
+	}/**/
+	//if (!noExiste) {
+		respuesta = RegOpenKeyEx(HKEY_CLASSES_ROOT, "VisualStudio.DTE.17.0\\CLSID", 0, KEY_READ, &clave);
+		bool correcto = respuesta == ERROR_SUCCESS;
+		if (!correcto) {
+			noExiste = respuesta == ERROR_FILE_NOT_FOUND;
+		}
+	//}
 	if (!noExiste) {
 		respuesta = RegOpenKeyEx(HKEY_CLASSES_ROOT, "VisualStudio.DTE.16.0\\CLSID", 0, KEY_READ, &clave);
 		bool correcto = respuesta == ERROR_SUCCESS;

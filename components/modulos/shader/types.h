@@ -7,7 +7,8 @@ namespace Graphics {
 			NONE,
 			COMPILE,
 			VERTEX,
-			FRAGMENT
+			FRAGMENT,
+			GEOMETRY
 		};
 	}
 }

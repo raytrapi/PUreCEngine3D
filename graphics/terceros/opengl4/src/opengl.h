@@ -11,12 +11,12 @@
 
 #include "../../imagenes/imagen.h"
 #include "../../imagenes/png.h"
-#include "../src/renderable/object.h"
-#include "../src/renderable/pixel.h"
-#include "../src/renderable/cube.h"
-#include "../src/renderable/img.h"
-#include "../src/renderable/line.h"
-#include "../src/renderable/text.h"
+#include "../../components/modulos/renderables/objects/object.h"//../src/renderable/object.h"
+#include "../../components/modulos/renderables/objects/pixel.h"
+#include "../../components/modulos/renderables/objects/cube.h"
+#include "../../components/modulos/renderables/objects/img.h"
+#include "../../components/modulos/renderables/objects/line.h"
+#include "../../components/modulos/renderables/objects/text.h"
 
 
 
@@ -26,7 +26,7 @@
 
 #include <entity.h>
 #include <camera.h>
-#include <renderable.h>
+#include <renderableComponent.h>
 #include "entitygl4.h"
 #include "imgui/interface.h"
 //#include <utilidades.h>
@@ -59,7 +59,7 @@
 class  MotorGL:public modules::graphics::Graphic {
 private:
 		
-		
+		bool iniciado = false;
 		GLFWwindow* window;
 		std::map< GLuint, std::tuple< GLuint, GLuint>> myLight;
 		//GLuint mylightbuffer=0;
@@ -68,7 +68,7 @@ private:
 		//TODO: Posible fallo si necesitamos representar los elementos en orde
 		std::map<Entity*, EntityGL4*> misEntidades;
 
-		std::vector<std::tuple<const char*, GLuint>> shadersCompilados;
+		std::vector<std::tuple<std::string, GLuint>> shadersCompilados;
 		std::vector< std::tuple<std::vector<GLuint>,GLuint>> shadersProgramsCompilados; //4 GLuint Vertex, Fragment, Geometry,  otro + IDProgram
 
 		//std::vector<GLuint> shaders;
@@ -82,13 +82,14 @@ private:
 		static void mouseMove_callback(GLFWwindow* window, double x, double y);
 		static void mouseButtom_callback(GLFWwindow* window, int buttom, int action, int mods);
 		static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+		static void windowsMove_callback(GLFWwindow* window, int x, int y);
 		static void focus(GLFWwindow* window, int focused);
 		
 		GLuint obtenerShader(const char* ruta);
 		GLuint obtenerShaderProgram(std::vector < GLuint>);
 
 		Camera* camaraActual=NULL;
-
+		modules::resources::Resource* resource = NULL;
 		//TODO: BORRAR
 		/*
 		
@@ -183,6 +184,7 @@ protected:
 	void updateEntityMESH(RenderableComponent* render, EntityGL4* entidad, Entity* entity, TYPE_OPERATION type);
 	void updateEntityTEXT(RenderableComponent* render, EntityGL4* entidad, Entity* entity, TYPE_OPERATION type);
 	void updateEntityGIZMOLIGTH(LightComponent* render, EntityGL4* entidad, Entity* entity, TYPE_OPERATION type);
+	void updateEntityInterface(RenderableComponent* render, EntityGL4* entidad, Entity* entity, TYPE_OPERATION type);
 
 	void processShader();
 	void processLightShader(unsigned int id);
@@ -193,7 +195,10 @@ public:
 	MotorGL();
 	~MotorGL();
 	void preRender();
-	void renderFinal(unsigned int idShader=0, bool modeId=false);
+	void renderFinal(unsigned int idShader=0, bool modeId=false, int pass=0);
+	void renderUserInterface(); // Sería el interfaz del usuario
+	void renderObject(unsigned int vao, unsigned int ebo, unsigned int mode, unsigned int numVertex, unsigned int ps);
+	
 	void render();
 	void render(void *);
 	void renderInterface();
@@ -217,13 +222,16 @@ public:
 	unsigned int loadShader(const char* path, Graphics::Shader::TYPE_SHADER type);
 	void reloadShader(const char* path, Graphics::Shader::TYPE_SHADER type, unsigned int idShader, unsigned int idProgram);
 	unsigned int compileShader(std::vector<unsigned int>* ids);
+
 	unsigned int compileShader(unsigned int ps);
 	unsigned int compileShader(std::vector<unsigned int>*, void* entity);
 	unsigned int compileShader(unsigned int ps, void* entity);
 
+	void removeShader(unsigned int idProgram, std::vector<unsigned int>* ids);
+
 	void changeCamera(Camera* camera);
 	void resizeCamera();
-	bool addTexture(float* image, unsigned int length, int width, int height, int& idTexture, modules::graphics::TextureImg::FORMAT_COLOR typeColor, int repeat = GL_REPEAT, int nearest = GL_NEAREST);
+	bool addTexture(float* image, unsigned int length, int width, int height, unsigned int& idTexture, TextureImg::FORMAT_COLOR typeColor, TYPE_REPEAT repeat = REPEAT, TYPE_FILTERING nearest = NEAREST);
 	static void closeWindow(GLFWwindow* window);
 	//void renderNewViewPort(std::vector<Entity*> entidades, float x = -1.f, float y = 1.f, float width = 2.f, float height = 2.f);
 	Entity* drawLine(float* vertex, unsigned countVertex, float r, float g, float b, float a, unsigned width = 1);
@@ -236,5 +244,13 @@ public:
 	void renderShadowMap(LightComponent* ligth, unsigned int &depthFBO, unsigned int &depthTexture2D, const unsigned int widthTexture2D, const unsigned int heightTexture2D, TYPE_SHADOW_MAP type);
 	int getPixel_id(int x, int y, int channel=0);
 	
+
+	void setMousePosition(float x, float y);
+	std::tuple<unsigned int, int, int, TextureImg::FORMAT_COLOR> loadTexture(std::string path, TYPE_TEXTURE type = TYPE_TEXTURE::T_NONE, TYPE_REPEAT repeat=TYPE_REPEAT::CLAMP);
+
+	void generateRectangleInterface(float* data, unsigned int* vao, unsigned int* vbo, unsigned int* ebo);
+
+	
+
 };
 #endif // !__MOTORGL_4

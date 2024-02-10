@@ -4,7 +4,8 @@
 #include "../motorExport.h"
 #include "../../utilidades/log/log.h"
 #include "../../components/src/entity.h"
-#include "../renderable/text.h"
+//#include "../renderable/text.h"
+#include "../../components/modulos/renderables/objects/text.h"
 #include "../../utilidades/global/input.h"
 namespace utiles {
 	class EXPORTAR_MODULO_GRAFICO LogEntity : public Log {

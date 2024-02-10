@@ -7,7 +7,7 @@ int main(int n, char** ps){
     if(vervose){
         cout<<"Revisando cabeceras"<<endl;
     }
-    if(n>1){
+    if(n>2){
         //Cogemos el directorio
         Procesar::procesarCarpeta(ps[1], ps[2]);
     }else{

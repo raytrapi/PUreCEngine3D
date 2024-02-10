@@ -34,7 +34,7 @@ bool AudioAL::get_available_devices(std::vector<std::string>& devicesVec, ALCdev
 
    return true;
 }
-ALsizei AudioAL::load_wav_file_header(std::ifstream& file, HeaderWAV & header) {
+ALsizei AudioAL::load_wav_file_header(std::ifstream& file, HeaderWAV& header) {
    char buffer[4];
    if (!file.is_open())
       return 0;
@@ -145,7 +145,7 @@ ALsizei AudioAL::load_wav_file_header(std::ifstream& file, HeaderWAV & header) {
    }
    header.subchunk2_size = convert_to_int(buffer, 4);
 
-   /* cannot be at the end of file */
+   /// cannot be at the end of file 
    if (file.eof()) {
       DBG("ERROR AUDIO: reached EOF on the file");
       return false;
@@ -156,7 +156,7 @@ ALsizei AudioAL::load_wav_file_header(std::ifstream& file, HeaderWAV & header) {
    }
 
    return header.subchunk2_size;
-}
+}/**/
 bool AudioAL::load_wav_file_header(std::ifstream& file, std::uint8_t& channels, std::int32_t& sampleRate, std::uint8_t& bitsPerSample, ALsizei& size) {
    size=load_wav_file_header(file, cabecera);
    if (size > 0) {
@@ -255,7 +255,7 @@ bool AudioAL::play(const char* file) {
    
 
 
-	return true;
+	return true;/**/
 }
 void AudioAL::setPosition(float x, float y, float z) {
    pX = x;
@@ -264,12 +264,12 @@ void AudioAL::setPosition(float x, float y, float z) {
    if (fuente) {
       alSource3f(fuente, AL_POSITION, pX, pY, pZ);
       //alSourcePlay(fuente);
-   }
+   }/**/
 }
 void AudioAL::setVolume(float volume) {
    if (fuente) {
       alSourcef(fuente, AL_GAIN, volume);
-   }
+   }/**/
 }
 bool AudioAL::pause() {
    if (estado == AL_PLAYING) {
@@ -283,7 +283,7 @@ bool AudioAL::pause() {
    } else if (estado == AL_PAUSED) {
       resume();
    }
-   return true;
+   return true;/**/
 }
 bool AudioAL::resume() {
    alSourcePlay(fuente);
@@ -291,7 +291,7 @@ bool AudioAL::resume() {
    
    tiempoAnterior = Time::time();
    timeout = utiles::Watchdog::setTimeOut([&] {this->stop(); }, duracion-tiempoEscucha);
-   return false;
+   return false;/**/
 }
 bool AudioAL::stop() {
    DBG("Paramos la música");
@@ -314,7 +314,7 @@ bool AudioAL::stop() {
          return alcCloseDevice(openALDevice);
       }
    }
-   return false;
+   return false;/**/
 }
 
 

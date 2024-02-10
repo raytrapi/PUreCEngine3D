@@ -1,6 +1,6 @@
-PROJECT(Revisor)
-set (CMAKE_CXX_STANDARD 20)
-ADD_EXECUTABLE(supervisor src/main.cpp src/procesar.cpp src/reflexivo.cpp)
+PROJECT(Supervisor)
+set (CMAKE_CXX_STANDARD 23)
+ADD_EXECUTABLE(supervisor src/main.cpp src/procesar.cpp src/reflexivo.cpp )
 
 #add_custom_command(
 #    TARGET supervisor POST_BUILD

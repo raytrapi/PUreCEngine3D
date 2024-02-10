@@ -5,7 +5,7 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
-#include "../renderables/renderable.h"
+#include "../renderables/renderableComponent.h"
 
 	//namespace compon {
 	namespace modules {
@@ -16,7 +16,7 @@
 
 	class EXPORTAR_COMPONENTE LightComponent : public Component {
 	public:
-	
+		std::string serializar();
 	private:
 		bool cargarTextura = true;
 		float matrizGizmo[16];
@@ -27,10 +27,10 @@
 		float a = 1.0;
 		
 
-		float derecha = 1.f;
-		float izquierda = -1.f;
-		float arriba = 1.f;
-		float abajo = -1.f;
+		float derecha = 10.f;
+		float izquierda = -10.f;
+		float arriba = 10.f;
+		float abajo = -10.f;
 		float cerca = 0.001f;
 		float lejos = 350.f;
 		float vista[16] = { 1.f,0.f,0.f,0.f,0.f,1.f,0.f,0.f,0.f,0.f,1.f,0.f,0.f,0.f,0.f,1.f }; 
@@ -48,7 +48,8 @@
 		const unsigned int altoTextura2D = 1024;
 		void calcularVistaProyeccion();
 	protected:
-	
+		int saveState_interno(std::vector<unsigned char>* data, bool withID = false);
+		void restoreState_interno(std::vector<unsigned char>* data = 0, bool withID = false, int pos = -1);
 	public:
 		LightComponent(Entity* entity, modules::graphics::Graphic* g, Component * p=NULL);
 		
@@ -75,6 +76,8 @@
 		const float* getViewProjectMatrix(int view=0);
 		const float* getViewMatrix(int view = 0);
 		const float* getProjectMatrix();
+		std::string getName()override { return "luz"; } ;
+		TYPE_OBJECT_SERIALIZABLES getType() { return TYPE_OBJECT_SERIALIZABLES::SERIALIZABLE_COMPONENTE_LUZ; };
 	};
 
 #endif // !_COMP_LUZ

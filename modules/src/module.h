@@ -96,6 +96,10 @@ inline T* Module::get() {
 	extern "C" __declspec(dllexport) Module * crearInstancia();
 	extern "C" __declspec(dllexport) void destroy(Module*);
 	#endif
+
+#ifdef _WIN32
+	
+#endif
 #endif // !__MODULOS
 
 

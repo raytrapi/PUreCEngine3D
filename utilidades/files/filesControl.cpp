@@ -1,4 +1,5 @@
 #include "filesControl.h"
+#include "..\utiles\pointers.h"
 FileControl::FileControl() {
 	//Ejecutamos cuando cojemos el foco
 }
@@ -9,8 +10,10 @@ FileControl::~FileControl() {
 	carpetasCambio.clear();
 	for (auto itr = ficherosCambio.begin(); itr != ficherosCambio.end(); itr++) {
 		delete (*itr);
-	}
+	} 
 	ficherosCambio.clear();
+	clearUIDs();
+	
 }
 bool FileControl::check(FileControl::EstadoRuta *mod, FileControl::Tipos tipo) {
 	std::filesystem::file_time_type t;
@@ -243,6 +246,61 @@ std::filesystem::file_time_type FileControl::getLastTime(const char* path) {
 	
 	
 }
+const char* FileControl::getFileUID(UID uid) {
+	if (ficherosUID.contains(uid)) {
+		return ficherosUID[uid];
+	}
+	return NULL;
+}
+
+void FileControl::loadUIDs(const char* path) {
+	clearUIDs();
+	auto ruta = std::filesystem::path(path);
+	auto ficheros = std::filesystem::recursive_directory_iterator(ruta, std::filesystem::directory_options::follow_directory_symlink);
+	for (auto fichero : ficheros) {
+		if (fichero.path().extension() == ".pc3d") {
+			auto a = fichero.path().string();
+			auto cFichero = a.c_str();
+			//auto cFichero = fichero.path().string().c_str();
+			auto tipo=GenericFile::getType(cFichero);
+			if (tipo.has_value()) {
+				switch (*tipo) {
+					case TYPE_FILE::FILE_MATERIAL:
+					case TYPE_FILE::FILE_OBJ:
+						{
+							auto uid = GenericFile::getUID(cFichero);
+							if (uid.has_value()) {
+								auto f = new char[strlen(cFichero) + 1]; //Lo hacemos así por la macro
+								f = 0;
+								COPY_CHAR(cFichero, f);
+								ficherosUID[*uid] = f;
+							}
+						}
+						break;
+					
+					default:
+						break;
+				}
+			}
+		}
+	}
+}
+
+void FileControl::clearUIDs() {
+	for (auto fUs : ficherosUID) {
+		delete[] fUs.second;
+	}
+	ficherosUID.clear();
+}
+
+std::vector<std::tuple<UID, const char*>> FileControl::getUIDs() {
+	std::vector<std::tuple<UID, const char*>> resultado;
+	for (auto uid_file : ficherosUID) {
+		resultado.push_back({ uid_file.first,uid_file.second });
+	}
+	return resultado;
+}
+
 bool FileControl::existsFolder(const char* path) {
 	return std::filesystem::is_directory(std::filesystem::path(path));
 }
@@ -261,3 +319,4 @@ std::vector<FileControl::EstadoRuta *> FileControl::carpetasCambio;
 std::vector<FileControl::EstadoRuta *> FileControl::ficherosCambio;
 std::vector<FileControl::EstadoRuta*> FileControl::ficherosCambioTiempo;
 std::vector<unsigned int> FileControl::temporizadores;
+std::map<UID,  char*> FileControl::ficherosUID;

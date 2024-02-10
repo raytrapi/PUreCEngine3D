@@ -1,11 +1,17 @@
 [requires]
-libpng/1.6.37
-glfw/3.3.7
+libpng/1.6.40
+glfw/3.3.8
 #imgui/1.89.2
 imgui/cci.20230105+1.89.2.docking
+#imguizmo/1.83 
 imguizmo/cci.20210223
-openal/1.21.1
 joltphysics/2.0.1
+#joltphysics/3.0.1
+
+#Actualmente como proyectos incluidos
+openal-soft/1.22.2
+#freetype/2.13.2
+
 
 #nuklear/4.06.1
 #libmp3lame/3.100
@@ -14,3 +20,8 @@ joltphysics/2.0.1
 [imports]
 [generators]
 cmake
+#CMakeDeps
+#CMakeToolchain
+
+[layout]
+cmake_layout

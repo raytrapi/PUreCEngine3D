@@ -1,8 +1,9 @@
 #include "box2dCollider.h"
-#include "../renderable/line.h"
+//#include "../renderable/line.h"
+#include "../../components/modulos/renderables/objects/line.h"
 //namespace collider {
 	
-	Box2dCollider::Box2dCollider(Entity* entity, modules::graphics::Graphic* g, Component * p):Collider(entity,g,p) {
+	Box2dCollider::Box2dCollider(Entity* entity, modules::graphics::Graphic* g, Component * p):Collider(entity,g, BOX_2D,p) {
 		borrarVertices();
 		vertices = new float[12]{
 			limites[0], limites[3], limites[5],
@@ -14,7 +15,7 @@
 		for (int i = 0; i < 12; i++) {
 			verticesExpandidos[i] = vertices[i];
 		}/**/
-		tipo = TYPE::BOX_2D;
+		//tipo = TYPE::BOX_2D;
 		//if (graphic == NULL) {
 		//	graphic = Module::get<modules::graphics::Graphic>();
 		//}
@@ -208,7 +209,7 @@
 	}
 
 	bool Box2dCollider::haveCollision(Collider* object, float* vertex) {
-		if (object->getType() == TYPE::BOX_2D) {
+		if (object->getTypeCollider() == TYPE::BOX_2D) {
 			Box2dCollider* target = (Box2dCollider*)object;
 			//DBG("V [%,%][%,%]", vertices[0], vertices[1], vertices[6], vertices[7]);
 			//DBG("VT [%,%][%,%]", target->vertices[0], target->vertices[1], target->vertices[6], target->vertices[7]);
@@ -231,9 +232,9 @@
 		return getCollisions(cX, cY, cZ);
 	}
 	std::vector<collider::Hit> Box2dCollider::getCollisionsExpanding(float x, float y, float z) {
-		cX = entidad->getTransform()->position()->x;
-		cY = entidad->getTransform()->position()->y;
-		cZ = entidad->getTransform()->position()->z;
+		cX = std::get<0>(entidad->getTransform()->getPosition());
+		cY = std::get<1>(entidad->getTransform()->getPosition());
+		cZ = std::get<2>(entidad->getTransform()->getPosition());
 		/*vertices[0] = ((cX < x) ? cX : x) - ancho_2;
 		vertices[9] = vertices[0];
 		vertices[3] = ((cX > x) ? cX : x) + ancho_2;

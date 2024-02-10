@@ -1,0 +1,26 @@
+#ifndef __MATERIAL
+#define __MATERIAL
+
+#include "../motorExport.h"
+#include <expected>
+#include <filesystem>
+#include <iostream>
+#include "../../utilidades/project/serializer/serializer.h"
+#include "../../utilidades/project/serializer/deserializer.h"
+#include <imgui.h>
+
+namespace UI {
+	namespace Components {
+		extern class FileNavigator;
+	}
+}
+class EXPORTAR_MODULO_GRAFICO MaterialFile {
+	friend class UI::Components::FileNavigator;
+
+	static std::expected<bool, int> createFileMaterial(const char* path);
+	bool interfazImGUI(ImGuiContext* imgui);
+	int saveState(std::vector<unsigned char>* data, bool withID = false);
+	void restoreState(std::vector<unsigned char>* data = 0, bool withID = false);
+};
+
+#endif // !__MATERIAL

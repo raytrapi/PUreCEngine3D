@@ -1,7 +1,8 @@
 #ifndef __MODELO_G
 #define __MODELO_G
 #include <log.h>
-#include "../renderable/mesh.h"
+//#include "../renderable/mesh.h"
+#include "../../components/modulos/renderables/objects/mesh.h"
 #include "../motorExport.h"
 #include "obj.h"
 #include "fbx.h"

@@ -18,6 +18,6 @@ std::vector<Entity*> renderable::Model::load(const char* file, float directionY)
 		} else if (extension == "fbx") {
 			return ::renderable::model::Fbx::load(file, directionY);
 		}
-	}
-	return std::vector<Entity*>();
+	}/**/
+	return {};// std::vector<Entity*>();
 }

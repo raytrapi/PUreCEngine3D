@@ -59,5 +59,7 @@ class  MotorGL:public modules::graphics::Graphic {
 		void ponerCamara(float posX, float posY, float posZ, float targetX, float targetY, float targetZ);
 		bool addTexture(float* image, unsigned int length, int width, int height, int& idTexture, modules::graphics::TextureImg::FORMAT_COLOR typeColor) { return true; }
 		Entity* drawLine(float* vertex, unsigned countVertex, float r, float g, float b, float a, unsigned width = 1);
+		std::tuple<unsigned int, int, int, TextureImg::FORMAT_COLOR> loadTexture(std::string path, TYPE_TEXTURE type = TYPE_TEXTURE::T_NONE, TYPE_REPEAT repeat = TYPE_REPEAT::CLAMP) { return { 0,0,0,TextureImg::FORMAT_COLOR::RGBA } }
+};
 };
 #endif // !__MOTORGL

@@ -128,6 +128,7 @@ bool Proyecto::cargarProyecto(const char* ruta) {
    }
 
    configuracion.close();
+   
    return true;
 }
 const char* Proyecto::cogerRutaCodigoProyecto() {
@@ -138,6 +139,62 @@ const char* Proyecto::cogerNombreProyecto() {
 }
 bool Proyecto::estaCargado() {
    return !conf.empty();
+}
+void Proyecto::guardarEstado(Global* global){
+   auto estadoActual = global->getDataState();
+   estadoActual->clear();
+   auto entidadesStack = Entity::getAllEntities();
+   for (auto stack : *entidadesStack) {
+      int i = 0;
+      for (auto entidad : stack.second) {
+         entidad->saveState(estadoActual, true, i++);
+      }
+   }
+   {//Se puede borrar
+      char* resultado = new char[estadoActual->size() + 1];
+      for (int i = 0; i < estadoActual->size(); i++) {
+         char c = estadoActual->operator[](i);
+         resultado[i] = (c != '\0' ? c : '$');
+      }
+      resultado[estadoActual->size()] = '\0';
+      DBG(resultado);
+      delete[] resultado;
+   }
+}
+void Proyecto::restaurarEstado(Global* global){
+   auto estadoActual = global->getDataState();
+   auto entidadesPila = Entity::getAllEntities();
+   Deserializer::setBytes(estadoActual);
+   while (!Deserializer::end()) {
+      void* entidadSalvada = 0;
+      int pos = -1;
+      //int longitudEntidad = 0;
+      //Deserializer::deserialize(&longitudEntidad);
+      //std::vector<unsigned char> datosE;
+      //Deserializer::extract(&datosE, longitudEntidad);
+      //Deserializer::stackBytes(&datosE);
+      {
+         Deserializer::deserialize(&entidadSalvada);
+         Deserializer::deserialize(&pos);
+         bool existeEntidad = false;
+         for (auto entidadPila : *entidadesPila) {
+            for (auto entidad : entidadPila.second) {
+               if (entidad == entidadSalvada) {
+                  existeEntidad = true;
+                  break;
+               }
+            }
+            if (existeEntidad) {
+               break;
+            }
+         }
+         if (!existeEntidad) {
+            entidadSalvada = new Entity(0, pos);
+         }
+         ((Entity*)entidadSalvada)->restoreState(NULL, true);
+      }
+      //Deserializer::unstackBytes();
+   }
 }
 const char* Proyecto::cogerRutaCompilacionProyecto() {
    return conf.contains("pathBuild") ? conf["pathBuild"].c_str() : "";

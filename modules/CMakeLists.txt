@@ -10,7 +10,7 @@ include_directories(
 file(GLOB CODIGO tape/*.cpp resources/*.cpp audio/*.cpp graphic/*.cpp physics/*.cpp)
 
 add_library(modules SHARED src/module.cpp ${CODIGO} )
-set_property(TARGET modules PROPERTY CXX_STANDARD 20)
+set_property(TARGET modules PROPERTY CXX_STANDARD 23)
 
 target_link_libraries( modules  ${CONAN_LIBS} utils globals)
 set_target_properties(modules PROPERTIES
@@ -18,4 +18,4 @@ set_target_properties(modules PROPERTIES
     PUBLIC_HEADER src/modules.h )
 
 make_directory(${CMAKE_BINARY_DIR}/bin/modulos)
-#add_subdirectory("terceros/opengl")
+#add_subdirectory("terceros/opengl") 

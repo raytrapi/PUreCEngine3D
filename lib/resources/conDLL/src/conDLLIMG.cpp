@@ -1,10 +1,10 @@
 #include "conDLLIMG.h"
-
-std::tuple<float*, int, int, unsigned int, modules::graphics::TextureImg::FORMAT_COLOR> ResourcesDirect::loadImage(const char* file) {
+#include "../../../../components/modulos/renderables/resources/texture.h"
+std::tuple<float*, int, int, unsigned int, TextureImg::FORMAT_COLOR> ResourcesDirect::loadImage(const char* file, bool inverse) {
 	//LOG_DBG("Cargamos la image %", file);
 	FILE* fp = fopen(file, "rb");
 	if (!fp) {
-		return {};
+		return { 0,0,0,0,TextureImg::RGBA };
 	}
 
 	png_const_bytep cabecera = new unsigned char(8);
@@ -14,23 +14,23 @@ std::tuple<float*, int, int, unsigned int, modules::graphics::TextureImg::FORMAT
 	bool is_png = !png_sig_cmp(cabecera, 0, cargados);
 	if (!is_png) {
 		fclose(fp);
-		return {};
+		return { 0,0,0,0,TextureImg::RGBA };
 	}
 
 
 	png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
 													NULL, NULL, NULL);
-	if (!png_ptr) return {};
+	if (!png_ptr) return { 0,0,0,0,TextureImg::RGBA };
 	png_infop info_ptr = png_create_info_struct(png_ptr);
 	if (!info_ptr) {
 		png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
 		fclose(fp);
-		return {};
+		return { 0,0,0,0,TextureImg::RGBA };
 	}
 
 	if (setjmp(png_jmpbuf(png_ptr))) {
 		fclose(fp);
-		return {};
+		return { 0,0,0,0,TextureImg::RGBA };
 	}
 
 	png_init_io(png_ptr, fp);
@@ -65,7 +65,7 @@ std::tuple<float*, int, int, unsigned int, modules::graphics::TextureImg::FORMAT
 
 	if (setjmp(png_jmpbuf(png_ptr))) {
 		fclose(fp);
-		return {};
+		return { 0,0,0,0,TextureImg::RGBA };
 	}
 
 	png_bytep* row_pointers = (png_bytep*)malloc(sizeof(png_bytep) * alto);
@@ -80,24 +80,25 @@ std::tuple<float*, int, int, unsigned int, modules::graphics::TextureImg::FORMAT
 	int b = 0;
 	for (int y = 0; y < alto; y++) {
 		for (int x = 0; x < ancho; x++) {
-			if ((x == 0 && y == 0) || (x==110 && y== 76)) {
-				/*DBG("Color RGBA [%,%] %,%,%,%", x, y,
-					(int)row_pointers[y][(x * 4) + 0], 
-					(int)row_pointers[y][(x * 4) + 1], 
-					(int)row_pointers[y][(x * 4) + 2], 
-					(int)row_pointers[y][(x * 4) + 3]);/**/
-			}
 			for (int j = 0; j < 4; j++) {
-				raw[b+j] = (float)((float)row_pointers[alto - y - 1][(x*4)+j]/255.f); //
+				if (inverse) {
+					raw[b+j] = (float)((float)row_pointers[alto - y - 1][(x*4)+j]/255.f); //
+				} else {
+					raw[b + j] = (float)((float)row_pointers[y][(x * 4) + j] / 255.f); //
+				}
 			}
 			b += 4;
 		}
-		free(row_pointers[alto - y-1]);
+		if (inverse) {
+			free(row_pointers[alto - y-1]);
+		} else {
+			free(row_pointers[y]);
+		}
 	}
 	free(row_pointers);
 	fclose(fp);
 	//LOG_DBG("La imagen es de %x%", ancho, alto);
-	return { raw,ancho,alto,ancho * alto * 4,modules::graphics::TextureImg::RGBA };
+	return { raw,ancho,alto,ancho * alto * 4,TextureImg::RGBA };
 }
 /*std::vector<std::tuple<Key, std::function<void(Key)>, bool>> Input::controlTeclasPulsadas;
 Input* Input::instancia;/**/

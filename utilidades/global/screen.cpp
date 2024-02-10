@@ -1,4 +1,5 @@
 #include "screen.h"
+#include "../utiles/handler.h"
 int Screen::getWidth() {
 	return ancho;
 };
@@ -34,6 +35,15 @@ void Screen::setDimension(int width, int height) {
 		escalaAncho = (float)ancho/2.f;
 		escalaAlto = escalaAncho * ((float)alto / (float)ancho);
 	}/**/
+	for (auto f : funciones) {
+		f(ancho, alto);
+	}
+}
+int Screen::onResize(std::function<void(int, int)>function){
+	return Handler::setHandle(&funciones, function);
+}
+void Screen::removeOnResize(int handle){
+	Handler::removeHandle(&funciones, handle);
 }
 int Screen::ancho = 0;
 int Screen::alto = 0;
@@ -41,3 +51,4 @@ float Screen::ancho_2 = 0;
 float Screen::alto_2 = 0;
 float Screen::escalaAncho = 1000.f;
 float Screen::escalaAlto = 1000.f;
+std::vector<std::function<void(int, int)>> Screen::funciones;

@@ -8,8 +8,7 @@
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
       "buildCommandArgs": "-v",
-      "ctestCommandArgs": "",
-      
+      "ctestCommandArgs": ""
     }
   ]
 }

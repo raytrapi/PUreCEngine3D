@@ -5,8 +5,8 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
-#include "../renderables/renderable.h"
-
+#include "../renderables/renderableComponent.h"
+#include "../../../utilidades/project/genericFile.h"
 #define M_PI           3.14159265358979323846
 #define M_PI2          1.57079632679489661923
 #define M_2PI          6.28318530717958647692
@@ -20,10 +20,12 @@ namespace modules {
 namespace collider {
 	extern struct Hit;
 }
-	class EXPORTAR_COMPONENTE Collider : public Component {
+class EXPORTAR_COMPONENTE Collider : public Component {
 	public:
 		enum TYPE {
-			BOX_2D
+			GENERIC,
+			BOX_2D,
+			BOX
 		};
 	private:
 		/// <summary>
@@ -41,7 +43,7 @@ namespace collider {
 		//Almacenamos las físicas para que sea más rápido acceder a ellas
 		modules::engine::Physics* fisicas = NULL;
 		static float checkPolygons(float aX, float aY, float* pA, unsigned lengthA, float bX, float bY, float* pB, unsigned lengthB);
-
+		TYPE tipo;
 	protected:
 		float limites[6];
 		float longitud = 0;
@@ -54,13 +56,20 @@ namespace collider {
 		//float cXCalculada, cYCalculada, cZCalculada;
 		friend class Transform;
 		virtual void recalcular();
-		TYPE tipo;
+		//TYPE tipo;
 
 		void iniciarFisicas();
 		void changePhysics();
+		void addShaders();
+#ifdef EDITOR
+		/*SHADER*/
+		unsigned int shaderV = 0;
+		unsigned int shaderF = 0;
+		unsigned int shaderP = 0;
+#endif
 	public:
 		//Collider();
-		Collider(Entity* entity, modules::graphics::Graphic* g, Component * p=NULL);
+		Collider(Entity* entity, modules::graphics::Graphic* g, TYPE tipo, Component * p=NULL );
 		Collider(Collider& c) {
 			//esCopia = true;
 			cX = c.cX;
@@ -73,9 +82,16 @@ namespace collider {
 				vertices[i] = new float[3]{ c.vertices[i][0],c.vertices[i][1],c.vertices[i][2] };
 			}*/
 			iniciarFisicas();
+			nombre = (char*)"Collider";
+			graphic = c.graphic;
+			addShaders();
+
+
 		}
 		void setVertices(std::vector<float*>* vertices);
 		void setFaces(std::vector< std::vector<const float*>>* faces);
+		void setPosition(float x, float y, float z, bool phisicsChanged=true);
+		std::tuple<float, float, float> getPosition() { return { cX,cY,cZ }; };
 		virtual void refresh()=0 ;
 		friend std::ostream& operator<<(std::ostream& os, Collider& c) {
 			os << "Centro (" << c.cX << ", " << c.cY << ", " << c.cZ << ") Radio " << c.longitud;
@@ -89,13 +105,14 @@ namespace collider {
 
 		}
 		bool isCollisionRay(float xOrigin, float yOrigin, float zOrigin, float xTarget, float yTarget, float zTarget);
-		TYPE getType() { return tipo; }
+		TYPE getTypeCollider() {return tipo;};
 		virtual bool haveCollision(Collider* object) = 0;
 
 		virtual std::vector<collider::Hit> getCollisions() = 0;
 		virtual std::vector<collider::Hit> getCollisionsExpanding(float x, float y, float z) = 0;
 		virtual std::vector<collider::Hit> getCollisions(float x, float y, float z) = 0;
-		
+		TYPE_OBJECT_SERIALIZABLES getType() { return TYPE_OBJECT_SERIALIZABLES::SERIALIZABLE_COMPONENTE_COLLIDER; };
+		unsigned int getShaderProgram() { return shaderP; };
 
 	};
 namespace collider{

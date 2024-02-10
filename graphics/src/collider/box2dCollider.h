@@ -1,5 +1,5 @@
-#ifndef __BOX_COLLIDER
-#define __BOX_COLLIDER
+#ifndef __BOX2D_COLLIDER
+#define __BOX2D_COLLIDER
 #include "../../../components/modulos/collider/collider.h"
 #include "../../../components/src/entity.h"
 //namespace collider {
@@ -34,7 +34,6 @@
 		bool haveCollision(Collider* object, float * vertex);
 
 		
-
 		std::vector<collider::Hit> getCollisions();
 		
 		/**

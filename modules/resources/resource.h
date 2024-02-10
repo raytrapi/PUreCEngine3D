@@ -6,6 +6,7 @@
 #include "../../components/modulos/shader/types.h"
 #include "../graphic/motor.h"
 //#include "../../components/src/entity.h"
+#include "../../components/modulos/renderables/resources/texture.h"
 #include <list>
 #include <vector>
 #include <map>
@@ -22,7 +23,7 @@ namespace modules {
 		class EXPORTAR_MODULO Resource:public Module {
 			public:
 				Module::MODULES_TYPE tipo() { return Module::MODULES_TYPE::RESOURCES; };
-				virtual std::tuple<float*, int, int, unsigned int, modules::graphics::TextureImg::FORMAT_COLOR> loadImage(const char *)=0;
+				virtual std::tuple<float*, int, int, unsigned int, TextureImg::FORMAT_COLOR> loadImage(const char *,bool inverse=true)=0;
 		};
 
 	}

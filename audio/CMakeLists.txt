@@ -6,7 +6,7 @@ include_directories(
 file(GLOB CODIGO src/*.cpp)
  
 add_library(audio ${CODIGO})
-set_property(TARGET audio PROPERTY CXX_STANDARD 20)
+set_property(TARGET audio PROPERTY CXX_STANDARD 23)
 target_link_libraries( audio  ${CONAN_LIBS} utils modules)
 
 

@@ -8,29 +8,40 @@ include_directories(
    ../vendors/freetype/include
    src 
    src/modelos_graficos
+   ../utilidades/project
 ) 
+    
+add_subdirectory("interface") 
+
    
-   
+#file(GLOB RENDERIZABLES src/renderable/object.cpp  
+#   src/renderable/pixel.cpp 
+#   src/renderable/img.cpp 
+#   src/renderable/renderable.cpp 
+#   src/renderable/cube.cpp 
+#   src/renderable/mesh.cpp
+#   src/renderable/line.cpp 
+#   src/renderable/text.cpp
+#)
+#add_library(renderables SHARED  ${RENDERIZABLES} )
+#set_property(TARGET renderables PROPERTY CXX_STANDARD 23) 
+#target_link_libraries(renderables  ${CONAN_LIBS} utils modules)
+#set_target_properties(renderables PROPERTIES
+#	COMPILE_DEFINITIONS EXPORTAR_MODULO_GRAFICO
+#    PUBLIC_HEADER src/motor.h )
+
 file(GLOB GRAFICO terceros/imagenes/*.cpp)
-file(GLOB RENDERIZABLES src/renderable/object.cpp 
-   src/renderable/pixel.cpp 
-   src/renderable/img.cpp 
-   src/renderable/renderable.cpp 
-   src/renderable/cube.cpp 
-   src/renderable/mesh.cpp
-   src/renderable/line.cpp 
-   src/renderable/text.cpp
-)
-file(GLOB CARGAMODELOS src/modelos_graficos/model.cpp src/modelos_graficos/obj.cpp src/modelos_graficos/fbx.cpp ../vendors/OpenFBX/src/ofbx.cpp ../vendors/OpenFBX/src/miniz.c)
-file(GLOB COLLIDER src/collider/*.cpp)
+file(GLOB OTROS src/material/material.cpp)  
+file(GLOB COLLIDER src/collider/*.cpp) 
 #file(GLOB EXTRA src/log/logEntity.cpp)
 # terceros/*/*.cpp 
-add_library(motor_grafico SHARED  ${RENDERIZABLES} ${GRAFICO} ${CARGAMODELOS} ${COLLIDER} )
-set_property(TARGET motor_grafico PROPERTY CXX_STANDARD 20) 
-target_link_libraries(motor_grafico  ${CONAN_LIBS} utils modules components freetype)
+add_library(motor_grafico SHARED   ${GRAFICO} ${COLLIDER}  ${OTROS} ) #${RENDERIZABLES}
+set_property(TARGET motor_grafico PROPERTY CXX_STANDARD 23) 
+target_link_libraries(motor_grafico  ${CONAN_LIBS} utils modules components freetype )
 set_target_properties(motor_grafico PROPERTIES
 	COMPILE_DEFINITIONS EXPORTAR_MODULO_GRAFICO
     PUBLIC_HEADER src/motor.h ) 
+
 
      
 
@@ -58,3 +69,4 @@ endif()]]
  
 #add_subdirectory("terceros/opengl")
 add_subdirectory("terceros/opengl4") 
+ 

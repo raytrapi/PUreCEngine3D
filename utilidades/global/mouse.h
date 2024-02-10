@@ -10,6 +10,7 @@
 class EXPORTAR_UTILIDADES Mouse {
 	static bool encima;
 	static std::map<double, bool> botones;
+	static int botonesBit;
 protected:
 	static double x;
 	static double y;
@@ -25,5 +26,6 @@ public:
 	static void setButtomDown(BUTTOMS buttom, int mod);
 	static void setButtomUp(BUTTOMS buttom, int mod);
 	static bool isButtomPress(BUTTOMS buttom);
+	static int getButtons();
 };
 #endif // !_MOUSE

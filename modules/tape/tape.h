@@ -13,6 +13,8 @@
 #include "../../utilidades/global/input.h"
 #include "../../utilidades/global/mouse.h"
 
+extern class CodeBase;
+
 namespace modules {
 
 	class EXPORTAR_MODULO Tape :public Module {
@@ -34,6 +36,7 @@ namespace modules {
 		* Se ejecuta cuando hemos terminado de liberar la función.
 		*/
 		std::function<void()>callback=NULL;
+		std::vector<std::string> codigosBase;
 		/*Input* input = NULL;
 		Mouse* mouse = NULL;/**/
 	public:
@@ -55,12 +58,9 @@ namespace modules {
 			//Sleep(2000);
 			//modules::graphics::Graphic* g = Module::get<modules::graphics::Graphic>();
 			
-			DBG("Intentamos destruir");
+			//DBG("Intentamos destruir");
 			destroy(); 
-			if (graphic!=NULL) {
-				graphic->removeAll();
-
-			}
+			
 			//DBG("Hay error en la destrucción");
 			//deteniendo = false;
 			if (callback!=NULL) {
@@ -99,11 +99,17 @@ namespace modules {
 		Module::MODULES_TYPE tipo() { return Module::TAPE; };
 		std::vector<void*>* getRenderizables() { return &renders; };
 		static void load(const char* project, modules::Tape* tape, std::function<void()>);
+		std::vector<std::string> listCodeBases();
+		std::vector<std::string>* getClassCodeBase() { return &codigosBase; }
 
+
+		virtual CodeBase* createCodeBase(const char*) { return NULL; };
 	};
 
 }
 
-
+#define TAPE()\
+	public:\
+	CodeBase* createCodeBase(const char*) override;
 
 #endif // 

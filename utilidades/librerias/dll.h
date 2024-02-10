@@ -32,8 +32,31 @@ namespace utilidades {
 		 bool descargar(const char* fichero);
 		 T* cargarClase(void*& hDLL, const char* clase);
 		 T* crearInstancia(const char* fichero);
+
 		 static T* cogerModulo(Module::MODULES_TYPE);
+		 template<class K>
+		 void obtenerFuncion(const char* fichero, const char* funcion, K* param);
 	};
+	template<class T >
+	template<class K >
+	inline void Libreria<T>::obtenerFuncion(const char* fichero, const char* funcion, K* param)	{
+		void* hDLL = cargar(fichero);
+#ifdef WIN32
+		typedef void (WINAPI* PCTOR2)(K* x);
+		PCTOR2 f = (PCTOR2)GetProcAddress((HINSTANCE)hDLL, funcion);
+		if (f != NULL) {
+			f(param);
+		}
+#elif __linux__
+		K* (*f)();
+		*(void**)(&f) = dlsym(hDLL, clase);
+		if (f != NULL) {
+			(*f)(param);
+			//return (*f)();
+		}
+#endif
+		//return NULL;
+	}
 }
 
 #include "dll.cpp"

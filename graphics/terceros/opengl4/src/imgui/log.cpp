@@ -1,6 +1,9 @@
 #include "log.h"
 
+
 	void LogOpenGL::escribirVirtual(std::string& s, utiles::Log::NIVEL nivel) {
+		//Esta función ha de ser bloqueante
+		bloqueo.lock();
 		std::time_t ahora = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 		char* tipo;
 		char* tiempo;
@@ -52,19 +55,64 @@
 		bool igual = false;
 		if (lineas.size() > 0) {
 			const char* cadena = std::get<0>(lineas[lineas.size() - 1]);
-			const char* cadena2 = strdup(s.c_str());
-			int comparacion = strcmp(cadena, cadena2);
-			igual = comparacion == 0;
+			//const char* cadena2 = strdup(s.c_str());
+			if (cadena ) {
+				int comparacion = strcmp(cadena, s.c_str());
+
+				igual = comparacion == 0;
+			}
 		}
+		int lenOS = os.str().length();
 		if (lineas.size() > 0 && igual) {
 			std::get<2>(lineas[lineas.size() - 1])++;
-			std::get<4>(lineas[lineas.size() - 1])=strdup(os.str().c_str());
+			std::string osS=os.str();
+			auto len = osS.length();
+			if (std::get<4>(lineas[lineas.size() - 1]) != 0) {
+				delete[]std::get<4>(lineas[lineas.size() - 1]);
+			}
+			std::get<4>(lineas[lineas.size() - 1]) = 0;
+			std::get<4>(lineas[lineas.size() - 1]) = new char[ len+ 1];
+			for (int i = 0; i < len; i++) {
+				std::get<4>(lineas[lineas.size() - 1])[i] = os.str()[i];
+			}
+			std::get<4>(lineas[lineas.size() - 1])[len] = '\0';
+			//std::get<4>(lineas[lineas.size() - 1])=strdup(os.str().c_str());
 		}else {
-			lineas.push_back({ strdup(s.c_str()), color, 1,strdup(tipo),strdup(os.str().c_str())});
+			if (s.length() > 0) {
+
+				//lineas.push_back({ strdup(s.c_str()), color, 1,strdup(tipo),strdup(os.str().c_str())});
+				lineas.push_back({ new char[s.length() + 1], color, 1,new char[strlen(tipo)+1],new char[os.str().length()+1]});
+				auto linea = lineas[lineas.size() - 1];
+				auto texto = std::get<0>(linea);
+				auto longitudLinea = s.length();
+				for (int i = 0; i < longitudLinea; i++) {
+					texto[i] = s[i];
+				}
+				texto[longitudLinea] = '\0';
+				texto = std::get<3>(linea);
+				longitudLinea = strlen(tipo);
+				for (int i = 0; i < longitudLinea; i++) {
+					texto[i] = tipo[i];
+				}
+				texto[longitudLinea] = '\0';
+				texto = std::get<4>(linea);
+				longitudLinea = os.str().length();
+				for (int i = 0; i < longitudLinea; i++) {
+					texto[i] = os.str()[i];
+				}
+				texto[longitudLinea] = '\0';
+			} else {
+
+			}
 		}
 		conScroll = true;
 		delete[]tipo;
-		if (lineas.size() > 1000) {
+		while (lineas.size() > 1000) {
+			//Borramos la primera línea
+			delete[] std::get<0>(lineas[0]);
+			delete[] std::get<3>(lineas[0]);
+			delete[] std::get<4>(lineas[0]);
 			lineas.erase(lineas.begin());
 		}
+		bloqueo.unlock();
 	}

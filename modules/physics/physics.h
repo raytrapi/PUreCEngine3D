@@ -17,7 +17,7 @@ namespace graphics {
 extern class Entity;
 extern class Collider;
 namespace physics {
-	extern class RigidBody;
+	extern class RigidBodyComponent;
 }
 namespace modules {
 	namespace engine {
@@ -45,11 +45,16 @@ namespace modules {
 			static float getMagnitude(float x, float y, float z);
 
 			//Se encarga de lanzar las físicas de todos los objetos //Launch the physics of all objects
-			
+			virtual void pause() {};
+			virtual void resume() {};
 			virtual void update() = 0;
-			virtual void appendRigidBody(physics::RigidBody*) {};
+			virtual void appendRigidBody(physics::RigidBodyComponent*) {};
 			virtual void appendCollider(Collider*) {};
 			virtual void changeCollider(Collider*) {};
+			virtual void changeRigidBody(physics::RigidBodyComponent*) {};
+			virtual void transformChanged(physics::RigidBodyComponent*) {};
+			static void TraceImpl(const char* inFMT, ...);
+			static bool AssertFailedImpl(const char* inExpression, const char* inMessage, const char* inFile, unsigned int inLine);
 			
 		};
 

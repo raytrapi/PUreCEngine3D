@@ -11,8 +11,8 @@ include_directories(
 file(GLOB CODIGO src/*.cpp src/*/*.cpp)
 add_library(audioAL SHARED ${CODIGO})
 
-set_property(TARGET audioAL PROPERTY CXX_STANDARD 20)
-target_link_libraries(audioAL utils modules audio OpenAL32)
+set_property(TARGET audioAL PROPERTY CXX_STANDARD 23)
+target_link_libraries(audioAL utils modules audio ${CONAN_LIBS})#OpenAL32)
 
 if(WIN32)
 	add_custom_command(

@@ -1,7 +1,7 @@
 #pragma once
 #ifndef _MOTORGRAFICO
 #define _MOTORGRAFICO
-#define EDITOR
+
 
 #include "../src/module.h"
 #include "../../components/modulos/shader/types.h"
@@ -10,6 +10,8 @@
 #include "../../utilidades/global/global.h"
 #include "../../utilidades/global/input.h"
 #include "../../utilidades/global/mouse.h"
+#include "../../components/modulos/renderables/resources/material.h"
+#include "../../components/modulos/renderables/resources/texture.h"
 #include "../physics/physics.h"
 #include "interface.h"
 //#include "../../components/src/entity.h"
@@ -29,7 +31,7 @@ extern class Entity;
 extern class LightComponent;
 namespace modules {
 	namespace graphics {
-		struct EXPORTAR_MODULO TextureImg {
+		/*struct EXPORTAR_MODULO TextureImg {
 			enum TYPE {
 				COLOR,
 				SCALAR,
@@ -86,7 +88,7 @@ namespace modules {
 				FILE
 			};
 			Material();
-			Material(const Material &);
+			Material(const Material&);
 			~Material();
 			void setTexture(Texture* t);
 			void setTexture(unsigned int idTexture);
@@ -118,7 +120,7 @@ namespace modules {
 			std::vector<TextureImg*> imgTextures;
 			std::vector<Texture*> textures;
 			
-		};
+		};/**/
 
 
 
@@ -129,8 +131,9 @@ namespace modules {
 			//TODO: Ver si aceleramos el pintado si procesamos nosotros la capa.
 			//byte* lienzo = null;
 			bool end = false;
-			std::map<std::string, Material*>materiales;
-			
+			//std::map<std::string, Material*>materiales;
+
+
 		protected:
 			void setEnd() { end = true; };
 			//std::vector<void *> entities;
@@ -153,6 +156,7 @@ namespace modules {
 			int stackLast = 0; //El último stack // the last stack
 			bool stackTemp = false;//Si el stack es temporal //if the stack is temporary
 			unsigned int textureColorBuffer;
+			unsigned int textureInterface;
 			unsigned int depthBuffer;
 			unsigned int stencilBuffer;
 			unsigned int widthFrameBuffer = 800;
@@ -164,6 +168,10 @@ namespace modules {
 			unsigned int rbo_id = 0;
 			unsigned int renderbuffer_id = 0;
 			bool withFrameBuffer=false;
+			static bool controlarRedimension;
+#ifdef EDITOR
+			Camera* camaraEditor = 0;
+#endif // EDITOR
 		public:
 			
 			Input *getInput() { return input; };
@@ -178,6 +186,14 @@ namespace modules {
 			enum TYPE_TEXTURE {
 				T_NONE,
 				T_IMG
+			};
+			enum TYPE_REPEAT {
+				CLAMP, 
+				REPEAT
+			};
+			enum TYPE_FILTERING {
+				LINEAR,
+				NEAREST
 			};
 			enum TYPE_OPERATION {
 				ALL,
@@ -233,7 +249,7 @@ namespace modules {
 				return idInstanciaLog;
 			}
 			void setFrameBuffer(bool set) { withFrameBuffer = set; }
-			unsigned int getImageFrame() { return textureColorBuffer; }
+			unsigned int getImageFrame() { return  textureColorBuffer; }//textureInterface; }
 			bool changeSizeWindow = false;
 			void setSize(unsigned int w, unsigned int h) {
 				changeSizeWindow = true;widthFrameBuffer = w;heightFrameBuffer = h; Screen::setDimension(w, h); }
@@ -271,11 +287,12 @@ namespace modules {
 			virtual const byte* loadShader(const char* path) { return 0; };
 			virtual unsigned int loadShader(const char* path, Graphics::Shader::TYPE_SHADER type) { return 0; };
 			virtual void reloadShader(const char* path, Graphics::Shader::TYPE_SHADER type, unsigned int idShader, unsigned int idProgram) { };
-			virtual unsigned int compileShader(std::vector<unsigned int>*) { return 0; };
+			virtual unsigned int compileShader(std::vector<unsigned int>*) { return 0; }; //TODO: Método de compilación solo con Bytes *
+	
 			virtual unsigned int compileShader(unsigned int ps) { return 0; };
 			virtual unsigned int compileShader(std::vector<unsigned int>*, void* entity) { return 0; };
 			virtual unsigned int compileShader(unsigned int ps, void* entity) { return 0; };
-
+			virtual void removeShader(unsigned int idProgram, std::vector<unsigned int>* ids) {};
 
 			void addOnFocus(void(*callback)(bool));
 			void addOnFocus(Tape * juego);
@@ -289,7 +306,8 @@ namespace modules {
 			virtual void resizeCamera() {};
 			bool isChangeCamera(Camera* camera, bool reset);
 			//virtual void* 
-			void loadTexture(std::string name, std::string path, TYPE_TEXTURE type = TYPE_TEXTURE::T_NONE);
+			virtual std::tuple<unsigned int, int, int, TextureImg::FORMAT_COLOR> loadTexture(std::string path, TYPE_TEXTURE type = TYPE_TEXTURE::T_NONE, TYPE_REPEAT repeat = TYPE_REPEAT::CLAMP)=0;
+			
 			/// <summary>
 			/// Add a texture in GPU 
 			/// Añade una textura a la tajeta gráfica
@@ -298,7 +316,7 @@ namespace modules {
 			/// <param name="length">number of floats</param>
 			/// <param name="idTexture">set the value of texture in the GPU</param>
 			/// <returns>true if the textura load in memory</returns>
-			virtual bool addTexture(float* image, unsigned int length, int width, int height, int& idTexture, TextureImg::FORMAT_COLOR typeColor= TextureImg::FORMAT_COLOR::RGBA, int repeat=0, int nearest=0)=0;
+			virtual bool addTexture(float* image, unsigned int length, int width, int height, unsigned int& idTexture, TextureImg::FORMAT_COLOR typeColor= TextureImg::FORMAT_COLOR::RGBA, TYPE_REPEAT repeat=REPEAT, TYPE_FILTERING nearest=NEAREST)=0;
 			std::tuple<double, double> getScreenSize() {
 
 				return { Screen::getWidth(), Screen::getHeight() };
@@ -309,9 +327,13 @@ namespace modules {
 			};
 			//template<class T>
 			//std::vector<T*>* getComponents();
-			virtual Camera* getActiveCamera() {return NULL;};
-
-
+#ifdef EDITOR
+			virtual Camera* getActiveCamera() {return camaraEditor;};
+			virtual Camera* getActiveEditorCamera() { return camaraEditor; };
+#else
+			virtual Camera* getActiveCamera() { return 0; };
+#endif //EDITOR
+			virtual void setMousePosition(float x, float y) {};
 
 
 			virtual void getFrameBuffer(unsigned int* id) { };
@@ -321,6 +343,11 @@ namespace modules {
 			unsigned int getTextureId() { return texture_id; }
 
 			virtual int getPixel_id(int x, int y, int channel=0) { return 0; };
+
+			virtual void generateRectangleInterface(float* data, unsigned int* vao, unsigned int* vbo, unsigned int* ebo) {};
+
+			void setControlSize(bool controlling) { controlarRedimension = controlling; };
+			
 		};
 
 		

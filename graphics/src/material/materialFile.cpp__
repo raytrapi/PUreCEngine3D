@@ -1,0 +1,40 @@
+#include "materialFile.h"
+#include "../../../utilidades/global/global.h"
+#include "../../../utilidades/project/UIDProject.h"
+std::expected<bool, int> MaterialFile::createFileMaterial(const char* path){
+	std::filesystem::path ruta(Global::getPathRoot() + path);
+	if (ruta.extension() != "pc3d") {
+		ruta += ".pc3d";
+	}
+	if (std::filesystem::exists(ruta)) {
+		//return std::unexpected(Error(-1, "El fichero ya existe"));
+		return std::unexpected(-1);
+	}
+	
+	std::ofstream fs(ruta.c_str(), std::ios::binary);
+	unsigned int longitud = strlen(UID_MATERIAL) + 1;
+	fs.write((char*)&longitud, sizeof(unsigned int));
+	fs.write(UID_MATERIAL, longitud);
+	
+
+	fs.close();
+
+	return true;
+	
+}
+
+
+bool MaterialFile::interfazImGUI(ImGuiContext* imgui) {
+
+	return true;
+};
+int MaterialFile::saveState(std::vector<unsigned char>* data, bool withID) { 
+	int longitud = 0;
+	if (withID) { 
+		Serializer::serialize(data, this); 
+	}; 
+	return longitud;
+};
+void MaterialFile::restoreState(std::vector<unsigned char>* data, bool withID) { 
+	
+};

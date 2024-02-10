@@ -16,6 +16,8 @@ namespace modules {
 			Global* global = NULL;
 			Graphic* graphic = NULL;
 		public:
+			Interface() {};
+			Interface(void* window) {};
 			virtual void render() = 0;
 			Module::MODULES_TYPE tipo() { return Module::MODULES_TYPE::INTERFACE; };
 			void setGlobal(Global* g) { global = g; };

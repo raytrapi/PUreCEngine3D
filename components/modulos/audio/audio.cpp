@@ -59,3 +59,9 @@ void Audio::setVolume(float volume) {
 void Audio::destroy() {
    //DBG("DESTRUYO");
 }
+int Audio::saveState_interno(std::vector<unsigned char>* data, bool withID) {
+   int longitud=Serializer::serialize(data, (int)TYPE_OBJECT_SERIALIZABLES::SERIALIZABLE_COMPONENTE_AUDIO) ;
+   return longitud;
+};
+void Audio::restoreState_interno(std::vector<unsigned char>* data, bool withID, int pos) {
+};

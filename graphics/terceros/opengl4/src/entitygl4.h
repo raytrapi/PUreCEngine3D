@@ -6,7 +6,7 @@
 #include <GLFW/glfw3.h>
 
 
-#include "../../src/renderable/object.h"
+#include "../../components/modulos/renderables/objects/object.h"
 #include <entity.h>
 #include <vector>
 #include <tuple>
@@ -17,9 +17,14 @@ struct EntityGL4 {
 	GLenum _mode;
 	GLuint _vao=0; //Array de vertices -> Apunta a un buffer
 	GLuint _vbo=0; //Buffer de vertices
+	GLuint _ebo=0; //Indice de vertices -> Indica como se lee el buffer
 	GLuint _vao_id = 0; //Array de vertices para Ids
 	GLuint _vbo_id = 0; //Buffer de vertices para Ids
-	GLuint _ebo=0; //Indice de vertices -> Indica como se lee el buffer
+	GLuint _ebo_id = 0; //Indice de vertices -> Indica como se lee el buffer
+	GLuint _vao_outline = 0; //Array de vertices para outline
+	GLuint _vbo_outline = 0; //Buffer de vertices para outline
+	GLuint _ebo_outline = 0; //Indice de vertices -> Indica como se lee el buffer
+	
 	std::vector<GLuint> _texts; //Texturas
 	std::vector<std::tuple<GLuint,int,int,void*, GLenum>> _fbos; //Buffer de frames
 	int _numeroVertices=0;
@@ -64,9 +69,14 @@ public:
 	*/
 	GLuint* getVBO() { return &_vbo; };
 
+	GLuint* getEBO() { return &_ebo; };
 	GLuint* getVAO_id() { return &_vao_id; };
 	GLuint* getVBO_id() { return &_vbo_id; };
-	GLuint* getEBO() { return &_ebo; };
+	GLuint* getEBO_id() { return &_ebo_id; };
+	
+	GLuint* getVAO_outline() { return &_vao_outline; };
+	GLuint* getVBO_outline() { return &_vbo_outline; };
+	GLuint* getEBO_outline() { return &_ebo_outline; };
 
 	std::vector<std::tuple<GLuint, int, int, void*, GLenum>>* getFBOs() { return &_fbos; };
 	std::vector<GLuint>* getTexts() { return &_texts; };
@@ -111,10 +121,41 @@ public:
 			glDeleteBuffers(1, &_ebo);
 			_ebo = 0;
 		}
-		glDeleteBuffers(1, &_vbo);
-		_vbo = 0;
-		glDeleteVertexArrays(1, &_vao);
-		_vao = 0;
+		if (_vbo != 0) {
+			glDeleteBuffers(1, &_vbo);
+			_vbo = 0;
+		}
+		if (_vao != 0) {
+			glDeleteVertexArrays(1, &_vao);
+			_vao = 0;
+		}
+
+		if (_ebo_id != 0) {
+			glDeleteBuffers(1, &_ebo_id);
+			_ebo_id = 0;
+		}
+		if (_vbo_id != 0) {
+			glDeleteBuffers(1, &_vbo_id);
+			_vbo_id = 0;
+		}
+		if (_vao_id != 0) {
+			glDeleteVertexArrays(1, &_vao_id);
+			_vao_id = 0;
+		}
+
+		if (_ebo_outline != 0) {
+			glDeleteBuffers(1, &_ebo_outline);
+			_ebo_outline = 0;
+		}
+		if (_vbo_outline != 0) {
+			glDeleteBuffers(1, &_vbo_outline);
+			_vbo_outline = 0;
+		}
+		if (_vao_outline != 0) {
+			glDeleteVertexArrays(1, &_vao_outline);
+			_vao_outline = 0;
+		}
+
 	}
 	static void checkCompileErrors(GLuint shader, std::string type) {
 		GLint success;
@@ -136,18 +177,18 @@ public:
 };
 
 struct LightGL4 {
-	float position[3] = { 0,0,0 };              // Posición de la luz en el espacio //1 más para compesar la structura
-	float ext1;
+	float position[4] = { 0,0,0 };              // Posición de la luz en el espacio //1 más para compesar la structura
+	//float ext1;
 	float color[3] = { 0,0,0 };                 // Color de la luz
-	float ext2;
+	//
 	float constantAttenuation=0;  // Atenuación constante de la luz
 	float linearAttenuation=0;    // Atenuación lineal de la luz
 	float quadraticAttenuation=0; // Atenuación cuadrática de la luz
 	// Para sombras:
 	int castsShadows=0;           // Indica si la luz emite sombras
-	float shadowMatrix[16] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };   // Matriz de proyección para sombras
+	//float ext2;
+	float shadowMatrix[17] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };   // Matriz de proyección para sombras
 	//sampler2D shadowMap;        // Textura de mapa de sombras
-
 	void setPosition(float x, float y, float z) { position[0] = x; position[1] = y; position[2] = z; };
 	void setColor(float r, float g, float b) { color[0] = r; color[1] = g; color[2] = b; };
 };

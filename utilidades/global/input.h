@@ -14,6 +14,7 @@
 extern class Input;
 class Tecla {
 	bool pulsada = false;
+	bool notificado = false;
 	bool sinEsperar = true;
 	float tiempoPulsada = 0;
 	float tiempoRepeticion = 0.1f;  //Segundos
@@ -23,35 +24,44 @@ class Tecla {
 	void setRepeat(float t) { tiempoRepeticion = t; };
 	void resetTime(){ tiempoEspera = 0.5f; tiempoRepeticion = 0.1f;}
 public:
-	bool estaPulsada(bool always = true) {
-		if (always) { 
-			return pulsada; 
-		} else if (pulsada){
-			if (tiempoPulsada == 0) {
-				tiempoPulsada += Time::deltaTime();
-				return true;
-			} else if ((!sinEsperar && tiempoPulsada >= tiempoRepeticion) || (sinEsperar && tiempoPulsada>=tiempoEspera)) {
-				//tiempoPulsada += Time::deltaTime();
-				if (sinEsperar) {
-					tiempoPulsada -= tiempoEspera;
-					sinEsperar = false;
+	bool estaPulsada(bool repeat = true) {
+		if(pulsada){
+			if (repeat) {
+				if (tiempoPulsada == 0) {
+					tiempoPulsada += Time::deltaTime();
+					return true;
+				} else if ((!sinEsperar && tiempoPulsada >= tiempoRepeticion) || (sinEsperar && tiempoPulsada >= tiempoEspera)) {
+					//tiempoPulsada += Time::deltaTime();
+					if (sinEsperar) {
+						tiempoPulsada -= tiempoEspera;
+						sinEsperar = false;
+					} else {
+						tiempoPulsada -= tiempoRepeticion;
+						//return false;
+					}
+					return true;
 				} else {
-					tiempoPulsada -= tiempoRepeticion;
-					//return false;
+					tiempoPulsada += Time::deltaTime();
+					return false;
 				}
-				return true;
 			} else {
-				tiempoPulsada += Time::deltaTime();
-				return false;
+				if (notificado) {
+					return false;
+				} else {
+					notificado = true;
+					return true;
+				}
 			}
 		} else { 
 			return false; 
 		} 
+
 	};
 	void pulsar() { 
 		pulsada = true;  };
 	void soltar() { 
-		pulsada = false; tiempoPulsada = 0; sinEsperar =true;};
+		pulsada = false; tiempoPulsada = 0; sinEsperar = true; notificado = false;
+	};
 };
 enum class EXPORTAR_UTILIDADES Key {
 	
@@ -91,7 +101,7 @@ public:
 	void setInstance(Input* i) { instancia = i; };/**/
 	bool isKeyDown(Key key);
 	bool isKeyUp(Key key);
-	bool isKeyPress(Key key, bool always=true);
+	bool isKeyPress(Key key, bool repeat=true);
 	void onKeyPress(Key key, std::function<void(Key)>);
 	void setDelayTime(Key key, float time);
 	void setRepeatTime(Key key, float time);
@@ -105,6 +115,7 @@ public:
 	}
 	/**Mouse**/
 	std::tuple<float, float, float> getMouse3DPosition(float xScreen=0, float yScreen=0, bool modeEditor = false);
+	std::tuple<int, int> getMousePosition();
 	static void setMousePosition(float x, float y, float width, float height, float xScreen=0, float yScreen=0);
 	//static void onPress(void (*f)(Key));
 };

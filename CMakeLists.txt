@@ -1,18 +1,19 @@
-﻿cmake_minimum_required(VERSION 3.0.0)
+﻿cmake_minimum_required(VERSION 3.5.0)
   
 project(2dMotorGame) 
 
 find_program(conan conan)
+
 execute_process(COMMAND ${conan} install -s build_type=${CMAKE_BUILD_TYPE} ${CMAKE_CURRENT_SOURCE_DIR} --build=missing)# --build=libpng --build=zlib --build=glfw --build=imgui --build=openal)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
- 
+#execute_process(COMMAND ${conan} install -s build_type=${CMAKE_BUILD_TYPE} ${CMAKE_CURRENT_SOURCE_DIR} -of ${CMAKE_CURRENT_BINARY_DIR} --build=missing)# --build=libpng --build=zlib --build=glfw --build=imgui --build=openal)
 
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)  
+  
 conan_basic_setup() 
+ 
+     
 
-
-
-#find_package(libpng REQUIRED)
 #cmake_dependent_option(USE_STATIC_MSVC_RUNTIME_LIBRARY "Use the static MSVC runtime library" ON "MSVC;NOT WINDOWS_STORE" OFF)
 if (("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows" OR "${CMAKE_SYSTEM_NAME}" STREQUAL "WindowsStore") AND NOT MINGW)
 	# Set runtime library
@@ -22,17 +23,18 @@ if (("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows" OR "${CMAKE_SYSTEM_NAME}" STREQUA
 		set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 	endif()
 endif() 
-#El supervisor servirá para generar la reflexión de las clases
+#El supervisor servirá para generar la reflexión de las clases 
 add_subdirectory("utilidades/supervisor") 
 
-option(JOLT_PHYSICS "Activamos las físicas de Jolt" OFF) 
+option(JOLT_PHYSICS "Activamos las físicas de Jolt" ON) 
 
-#add_subdirectory("vendors/openal-soft")
+#add_subdirectory("vendors/openal-soft") 
 add_subdirectory("vendors/freetype") 
 if(JOLT_PHYSICS) 
-    add_subdirectory("vendors/JoltPhysics/Build") 
+    #add_subdirectory("vendors/JoltPhysics/Build") 
     #set(PHYSICS_REPO_ROOT "vendors/JoltPhysics/")
     #include(vendors/JoltPhysics/Jolt/Jolt.cmake)
+    
 endif() 
 
 add_subdirectory("utilidades") 
@@ -62,33 +64,35 @@ endif()]]
 add_subdirectory("graphics")
 add_subdirectory("physics")
 
-include_directories(
+include_directories( 
    src
    modules/src
    utilidades/librerias
 	utilidades/log
-   utilidades/files
-   utilidades/timer
-   ../utilidades/supervisor/src
+   utilidades/files 
+   utilidades/timer  
+   utilidades/project
+   ../utilidades/supervisor/src 
+   utilidades
 ) 
 
 file(GLOB CODIGO src/*.cpp utilidades/librerias/compile.cpp src/proyectos/*.cpp)# graphics/src/renderable/renderable.h 
-#file(GLOB MOTOR src/Motor/*/*.cpp src/Motor/*.cpp)
+#file(GLOB MOTOR src/Motor/*/*.cpp src/Motor/*.cpp) 
 
 #file(GLOB MOTORGL src/terceros/*/*.cpp) 
-
+ 
 if(WIN32)
 	#file(GLOB CODIGOWIN src/windows/*/*.cpp src/windows/*.cpp)
 	add_executable(2dMotorGame WIN32 ${CODIGO} )#${CODIGOWIN})
-
+     
 else()
 	add_executable(2dMotorGame ${CODIGO})
 endif()
 
 
-set_property(TARGET 2dMotorGame PROPERTY CXX_STANDARD 20)
+set_property(TARGET 2dMotorGame PROPERTY CXX_STANDARD 23)
 
-target_link_libraries( 2dMotorGame utils motor_grafico  components modules ) 
+target_link_libraries( 2dMotorGame utils motor_grafico  components modules globals) 
 
 
 #add_subdirectory("ejemplos")
@@ -115,3 +119,8 @@ add_custom_command(
 #make_directory(${CMAKE_CURRENT_BINARY_DIR}/bin/resources)
 
 file(COPY ${CMAKE_HOME_DIRECTORY}/resources DESTINATION  ${CMAKE_CURRENT_BINARY_DIR}/bin)
+
+
+
+message("Copy inlcude imgui from ${CONAN_IMGUI_ROOT} to ${CMAKE_HOME_DIRECTORY}")
+file(COPY ${CONAN_IMGUI_ROOT}/include DESTINATION  ${CMAKE_HOME_DIRECTORY}/vendors/imgui)

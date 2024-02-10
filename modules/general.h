@@ -5,4 +5,4 @@
 	//Input* modules::graphics::Graphic::input = NULL;
 	//Mouse* modules::graphics::Graphic::mouse = NULL;
 	//std::vector<std::tuple<Key, std::function<void(Key)>, bool>>  Input::controlTeclasPulsadas;
-#endif //__GENERAL_MODULE
+#endif //__GENERAL_MODULE 

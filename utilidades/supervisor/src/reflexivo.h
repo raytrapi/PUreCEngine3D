@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
 #include <vector>
-
 #include <iostream>
 
 #define PUBLIC();
@@ -11,14 +10,14 @@ enum TIPO_PARAMETRO{
 };
 
 
-struct Parametro{
+struct  Parametro{
         TIPO_PARAMETRO tipo;
         int magnitud;
         std::string nombre;
         std::vector<Parametro> parametros;
         void* variable;
-        Parametro(TIPO_PARAMETRO t, void* v, std::vector<std::string> partes);
-        Parametro(TIPO_PARAMETRO t, void* v, std::string nombre,int m);
+        __declspec(dllimport) Parametro(TIPO_PARAMETRO t, void* v, std::vector<std::string> partes);
+        __declspec(dllimport) Parametro(TIPO_PARAMETRO t, void* v, std::string nombre,int m);
         std::string serializar();
         template <class T>
         static int buscarVector(std::vector<T>, T);

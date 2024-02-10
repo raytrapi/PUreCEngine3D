@@ -129,12 +129,15 @@ void  Input::checkKeysPress() {
 std::tuple<float, float, float> Input::getMouse3DPosition(float xScreen, float yScreen, bool enEditor) {
    float x = xMouse - xScreen;
    float y = yMouse - yScreen;
-   if (x < 0 || x > Screen::ancho || y < 0 || y > Screen::alto) {
-      x = 0;
-      y = 0;
-   }
+   //if (x < 0 || x > Screen::ancho || y < 0 || y > Screen::alto) {
+   //   x = 0;
+   //   y = 0;
+   //}
    
    return { x, y,0 };
+}
+std::tuple<int, int> Input::getMousePosition() {
+    return { xMouse, yMouse };
 }
 void Input::setMousePosition(float x, float y, float width, float height, float xScreen, float yScreen) {
    xMouse = x;

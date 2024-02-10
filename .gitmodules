@@ -1,0 +1,3 @@
+[submodule "vendors/imgui-node-editor"]
+	path = vendors/imgui-node-editor
+	url = https://github.com/thedmd/imgui-node-editor

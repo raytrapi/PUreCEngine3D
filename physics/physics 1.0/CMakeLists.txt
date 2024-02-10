@@ -9,7 +9,7 @@ include_directories(
 file(GLOB CODIGO src/*.cpp)
 
 add_library(physics_1_0 SHARED ${CODIGO} )
-set_property(TARGET physics_1_0 PROPERTY CXX_STANDARD 20)
+set_property(TARGET physics_1_0 PROPERTY CXX_STANDARD 23)
 target_link_libraries( physics_1_0 modules components)
 set_target_properties(physics_1_0 PROPERTIES
 	COMPILE_DEFINITIONS EXPORTAR_PHYSICS

@@ -8,10 +8,11 @@ uniform sampler2D textura;
 out vec4 fragColor;
 void main(){
 	 vec4 color=texture(textura, texCoord);//vec4(1.0f, 0.0f, 0.0f, 1.0f);
-	 if (color.a < 0.001) {
+	 /*if (color.a < 0.001) {
        discard;
-    }
+    }/**/
     fragColor = color;
+    fragColor=vec4(1.0,1.0,1.0,1.0);
     /*if (texCoord.x > position.x && texCoord.x < position.x + size.x &&
         texCoord.y > position.y && texCoord.y < position.y + size.y) {
         fragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);

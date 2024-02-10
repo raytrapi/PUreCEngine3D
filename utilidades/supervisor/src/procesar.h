@@ -13,7 +13,7 @@ namespace fs = filesystem;
 
 class Procesar{
         static std::string reemplazar(const char, const char,std::string);
-        static void procesarCabecera(string origen, string destino);
+        static std::tuple<bool, std::string, std::string, bool> procesarCabecera(string origen, string destino);
         static string trim(string);
         template <class T>
         static bool enVector(vector<T>, T);

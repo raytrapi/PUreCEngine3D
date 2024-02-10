@@ -26,6 +26,7 @@ namespace utiles {
 	}
 	
 	void Log::escribir(std::string& s, utiles::Log::NIVEL nivel) {
+
 		if (instancias.size()>0) {
 			instancias[idInstanciaActual]->escribirVirtual(s, nivel);
 			return;

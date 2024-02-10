@@ -23,6 +23,7 @@ protected:
 	void addParameter(Parametro p) {
 		parametros.push_back(p);
 	};
+	virtual void cargarPropiedades() { std::cout << "cargamos propiedades basicas" << std::endl; };
 public:
 	enum TYPE_OPERATION {
 		ALL,
@@ -67,7 +68,7 @@ public:
 	}
 	modules::graphics::Graphic* getGraphic() { return motorGrafico; }
 	void setGraphic(modules::graphics::Graphic* g) { motorGrafico = g; }
-
+	Camera* getActiveCamera();
 
 	/*Esta parte sirve solo para el editor*/
 
@@ -123,6 +124,16 @@ inline std::vector<Propiedad> CodeBase::getProperties(){
 inline void CodeBase::setProperty(void* variable, const char* nombre){
 	propiedades.push_back({ nombre,variable });
 }
+
+#define PUBLIC_IMPL(contador) \ 
+//void get##contador() {	\
+	//};
+#define PUBLIC() 
+#define EDITABLE()\
+	protected:\
+	void loadParameters() override;
+
+
 
 #endif // !__CODEBASE
 

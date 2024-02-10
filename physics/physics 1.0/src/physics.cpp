@@ -2,11 +2,11 @@
 #include "../../utilidades/timer/timer.h"
 #include <math.h>
 #include "../../components/modulos/collider/collider.h"
-#include <physics/rigidBody.h>
+#include <physics/rigidBodyComponent.h>
 
 void Physics10::update(){
 	//Obtenemos todos los componentes RigidBody //Get all RigidBody components
-	std::vector<physics::RigidBody*> cuerpos = entidades->getAllComponents<physics::RigidBody>();
+	std::vector<physics::RigidBodyComponent*> cuerpos = entidades->getAllComponents<physics::RigidBodyComponent>();
 	//int estaticos = 0;
 	//int dinamicos = 0;
 	for (auto cuerpo : cuerpos) {
@@ -63,7 +63,7 @@ void Physics10::update(){
 					velocidadY = 0;
 					cuerpo->setVelocity(velocidadX, 0, velocidadZ);
 					for (auto exito : colisiones) {
-						y = transform->position()->y - exito.sY;
+						y = std::get<1>(transform->getPosition()) - exito.sY;
 					}
 				}
 

@@ -117,9 +117,11 @@ void Collider::cargarEntidad() {
 	cY = 0;
 	cZ = 0;
 	if (entidad) {
+		//Colocamos el centro de la colisión en la posición de la entidad
+		//std::tie(cX, cY, cZ) = entidad->transform()->getPosition();
 		RenderableComponent* renderizables = entidad->getComponent<RenderableComponent>();
 		if (renderizables != NULL) {
-			setFaces(renderizables->getFaces());
+			//setFaces(renderizables->getFaces());
 		}
 	}
 }
@@ -136,15 +138,28 @@ void Collider::iniciarFisicas() {
 		DBG("NOOOO Tengo físicas");
 	}/**/
 }
-Collider::Collider(Entity* entity, modules::graphics::Graphic* g, Component* p) {
+Collider::Collider(Entity* entity, modules::graphics::Graphic* g, TYPE t, Component* p) {
 	this->entidad = entity;
 	graphic = g;
 	padre = p;
+	tipo = t;
 	fisicas = g->getPhysics();
 	cargarEntidad();
-	iniciarFisicas();
-}
+	addShaders();
 
+	setName("Collider");
+}
+void Collider::addShaders() {
+#ifdef EDITOR
+	//Cargamos la shaders
+	if (graphic != NULL) {
+		shaderV = graphic->loadShader("shaders/editor/collision_vertex.glsl", Graphics::Shader::TYPE_SHADER::VERTEX);
+		shaderF = graphic->loadShader("shaders/editor/collision_fragment.glsl", Graphics::Shader::TYPE_SHADER::FRAGMENT);
+		std::vector<unsigned int> shaders = { shaderV,shaderF };
+		shaderP = graphic->compileShader(&shaders);
+	}
+#endif // EDITOR
+}
 void Collider::setVertices(std::vector<float*>* vertices) {
 	cX = cY = cZ = 0;
 	longitud = 0;
@@ -304,7 +319,14 @@ bool Collider::isCollisionRay(float xOrigin, float yOrigin, float zOrigin, float
 	
 	return true;/**/
 }
-
+void Collider::setPosition(float x, float y, float z, bool phisicsChanged) {
+	cX = x;
+	cY = y;
+	cZ = z;
+	if (phisicsChanged) {
+		changePhysics();
+	}
+}
 void Collider::changePhysics() {
 	if (fisicas != NULL) {
 		fisicas->changeCollider(this);

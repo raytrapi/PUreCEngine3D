@@ -21,6 +21,7 @@ LightComponent::LightComponent(Entity* entity, modules::graphics::Graphic* g, Co
 
 void LightComponent::updateGizmo() {
 	auto [px, py, pz] = entidad->transform()->getPosition();
+
 	auto camara = graphic->getActiveCamera();
 	if (camara) {
 		auto [pcx, pcy, pcz] = camara->getPosition();
@@ -85,7 +86,7 @@ void LightComponent::calcularVistaProyeccion() {
 
 	//Vista
 	std::tie(this->eye[0], this->eye[1], this->eye[2]) = entidad->transform()->getPosition();
-	auto [rx, ry, rz] = entidad->transformada->getRotator();
+	auto [rx, ry, rz] = entidad->transformada->getRotation();
 	//auto [fx, fy, fz, upX, upY, upZ] = Transform::calculateForwardVector2(rx, ry, rz, 0.0f, -1.0, 0.0f, 0.0f, 0.0f, 1.0f);
 	auto [fx, fy, fz, upX, upY, upZ] = Transform::calculateForwardVector2(rx, ry, rz, 0.0f, 0.0, 1.0f, 0.0f, 1.0f, 0.0f);
 	
@@ -167,3 +168,17 @@ const float* LightComponent::getViewProjectMatrix(int view) {
 const float* LightComponent::getProjectMatrix() {
 	return proyeccion;
 }
+
+
+std::string LightComponent::serializar() {
+	std::string objetoSerializado = "";
+	std::string resultado = GenericFile::serializate("componente", "{\r\n" + GenericFile::serializate("tipo", TYPE_OBJECT_SERIALIZABLES::SERIALIZABLE_COMPONENTE_LUZ) + "}\r\n", false, false);
+	return resultado;
+
+};
+int LightComponent::saveState_interno(std::vector<unsigned char>* data, bool withID) {
+	int longitud = Serializer::serialize(data, (int)TYPE_OBJECT_SERIALIZABLES::SERIALIZABLE_COMPONENTE_LUZ);
+	return longitud;
+};
+void LightComponent::restoreState_interno(std::vector<unsigned char>* data, bool withID, int pos) {
+};
